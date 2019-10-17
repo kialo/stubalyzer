@@ -1,0 +1,7 @@
+mypy==0.740
+
+black
+flake8
+pip-tools
+pytest
+isort
