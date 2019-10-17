@@ -1,11 +1,13 @@
 Stub Analyzer
 =============
 
+
 Development
 -----------
 
 The following section contains instructions on how to set up and use
 the development environment for this project.
+
 
 Setup
 +++++
@@ -26,6 +28,7 @@ and install the projects dependencies.
 The setup script also creates a ``.venv`` file so the environment
 activates automatically if you use auto-activation with virtualenv.
 
+
 Tests
 +++++
 
@@ -34,6 +37,17 @@ Tests are run using pytest:
 .. code-block:: shell-session
 
    $ pytest
+
+
+Type Checking
++++++++++++++
+
+Type checking is done with Mypy:
+
+.. code-block:: shell-session
+
+   $ mypy stub_analyzer
+
 
 Code Formatting
 +++++++++++++++
