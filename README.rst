@@ -4,6 +4,9 @@ Stub Analyzer
 Development
 +++++++++++
 
+The following section contains instructions on how to set up and use
+the development environment for this project.
+
 Setup
 -----
 
@@ -20,9 +23,17 @@ For a development setup, run the following shell script:
 
 This will create a virtual environment called ``stub-analyzer``
 and install the projects dependencies.
-The setup script also creates a .venv file so the environment
+The setup script also creates a ``.venv`` file so the environment
 activates automatically if you use auto-activation with virtualenv.
 
+Tests
+-----
+
+Tests are run using pytest:
+
+.. code-block:: shell-session
+
+   $ pytest
 
 Code Formatting
 ---------------
@@ -45,7 +56,7 @@ The following will format all files in the project:
 Linting
 -------
 
-Linting is done by just flake8 in the root directory:
+Linting is done using ``flake8``, in the root directory run:
 
 .. code-block:: shell-session
 
