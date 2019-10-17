@@ -1,6 +1,6 @@
-# Always prefer setuptools over distutils
 from os import path
 
+# Always prefer setuptools over distutils
 from setuptools import find_packages, setup
 
 VERSION = "0.1.0"
@@ -13,9 +13,6 @@ here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
-
-# Arguments marked as "Required" below must be included for upload to PyPI.
-# Fields marked as "Optional" may be commented out.
 
 setup(
     # This is the name of your project. The first time you publish this
@@ -50,7 +47,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        # TODO: Check if we support all of these
+        # TODO: Check if we support 3.5 & 3.6
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
@@ -61,22 +58,7 @@ setup(
     #
     # Note that this is a string of words separated by whitespace, not a list.
     keywords="mypy analysis stubgen stubs",
-    # You can just specify package directories manually here if your project is
-    # simple. Or you can use find_packages().
-    #
-    # Alternatively, if you just want to distribute a single Python file, use
-    # the `py_modules` argument instead as follows, which will expect a file
-    # called `my_module.py` to exist:
-    #
-    #   py_modules=["my_module"],
-    #
-    # packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
     packages=find_packages(exclude=["*.tests", "*.tests.*"]),
-    # Specify which Python versions you support. In contrast to the
-    # 'Programming Language' classifiers above, 'pip install' will check this
-    # and refuse to install the project if the version does not match. If you
-    # do not support Python 2, you can simplify this to '>=3.5' or similar, see
-    # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
     # TODO: Check if we support 3.5 & 3.6
     python_requires=">=3.5",
     # This field lists other packages that your project depends on to run.
