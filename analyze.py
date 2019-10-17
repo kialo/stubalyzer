@@ -1,13 +1,15 @@
 import os
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 from mypy.build import BuildResult, State, build
 from mypy.fscache import FileSystemCache
 from mypy.main import process_options
 
 
-def _mypy_analyze(mypy_conf_path: str, root_path: str, stubs_path: str) -> BuildResult:
+def _mypy_analyze(
+    mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
+) -> BuildResult:
     """
     Parses and analyzes the types of the code in root_path.
     :param mypy_conf_path: path to a mypy.ini
@@ -20,7 +22,8 @@ def _mypy_analyze(mypy_conf_path: str, root_path: str, stubs_path: str) -> Build
     args = ["--config-file", mypy_conf_path, root_path]
     fscache = FileSystemCache()
     sources, options = process_options(args, fscache=fscache)
-    options = options.apply_changes({"mypy_path": [stubs_path]})
+    if stubs_path is not None:
+        options = options.apply_changes({"mypy_path": [stubs_path]})
     return build(sources, options, None, None, fscache)
 
 
@@ -30,29 +33,25 @@ def get_stubbed_modules(graph: Dict[str, State]) -> List[State]:
     :param graph: the result of _
     :return:
     """
-    external_modules = [
-        module for name, module in graph.items() if not name.startswith("kialo")
-    ]
     stubbed_modules = [
-        m for m in external_modules if m.tree and m.path and m.path.endswith(".pyi")
+        m for _, m in graph.items() if m.tree and m.path and m.path.endswith(".pyi")
     ]
     return stubbed_modules
 
 
-def _analyze_kialo() -> BuildResult:
-    BACKEND_DIR = Path(os.environ["KIALO_ROOT"]) / "backend"
-    BACKEND_KIALO_DIR = BACKEND_DIR / "kialo"
-    STUBS_DIR = BACKEND_DIR / "stubs"
-    MYPY_CONFIG_PATH = BACKEND_DIR / "mypy.ini"
+def _analyze_stubs() -> Tuple[BuildResult, BuildResult]:
+    BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+    # CODE_DIR = BASE_DIR / "test_code"
+    MYPY_CONFIG_PATH = BASE_DIR / "mypy.ini"
 
-    print(f"Analyzing '{BACKEND_DIR}'...")
-    return _mypy_analyze(str(MYPY_CONFIG_PATH), str(BACKEND_KIALO_DIR), str(STUBS_DIR))
+    return (
+        _mypy_analyze(str(MYPY_CONFIG_PATH), str(BASE_DIR / "stubs-handwritten")),
+        _mypy_analyze(str(MYPY_CONFIG_PATH), str(BASE_DIR / "stubs-generated")),
+    )
 
 
-if __name__ == "__main__":
-    # goes through all python stubs (.pyi files) and lists their exported symbols with type annotation
-    graph = _analyze_kialo().graph
-    for module in get_stubbed_modules(graph):
+def _print_graph_data(build_result: BuildResult) -> None:
+    for module in get_stubbed_modules(build_result.graph):
         print(module.path)
 
         if module.tree:
@@ -64,3 +63,18 @@ if __name__ == "__main__":
                 symbol = module.tree.names[symbol_name]
                 if symbol.module_public:
                     print(f"\t{symbol.fullname} : {symbol.type}")
+
+
+if __name__ == "__main__":
+    # goes through all python stubs (.pyi files) and lists their exported symbols with type annotation
+    hand, gen = _analyze_stubs()
+
+    _print_graph_data(hand)
+
+    print()
+    print()
+    print("------------------------------------")
+    print()
+    print()
+
+    _print_graph_data(gen)
