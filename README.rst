@@ -2,13 +2,13 @@ Stub Analyzer
 =============
 
 Development
-+++++++++++
+-----------
 
 The following section contains instructions on how to set up and use
 the development environment for this project.
 
 Setup
------
++++++
 
 Requirements for development:
 
@@ -27,7 +27,7 @@ The setup script also creates a ``.venv`` file so the environment
 activates automatically if you use auto-activation with virtualenv.
 
 Tests
------
++++++
 
 Tests are run using pytest:
 
@@ -36,7 +36,7 @@ Tests are run using pytest:
    $ pytest
 
 Code Formatting
----------------
++++++++++++++++
 
 To set up the pre-commit hook to automatically format files,
 create the following link:
@@ -54,7 +54,7 @@ The following will format all files in the project:
 
 
 Linting
--------
++++++++
 
 Linting is done using ``flake8``, in the root directory run:
 
@@ -64,7 +64,7 @@ Linting is done using ``flake8``, in the root directory run:
 
 
 Dependency Management
----------------------
++++++++++++++++++++++
 
 If you need new dependencies, add them in ``requirements.in`` and ``setup.py``,
 then run the ``pip-compile`` command specified at the top of ``requirements.txt``.
