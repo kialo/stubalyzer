@@ -5,7 +5,6 @@
 #
 # The behaviour can be configured using environment variables:
 # SILENT: disable printing of executed commands command
-# CHECK_FORMAT: Fail if any changes were made
 
 set -eu
 function enable_xtrace {
@@ -15,5 +14,15 @@ enable_xtrace
 
 cd $(dirname $0)/..
 
-isort "$@"
-black "$@"
+
+if [ $# -eq 0 ]
+then
+    isort_params="--recursive stub_analyzer setup.py"
+    black_params="stub_analyzer setup.py"
+else
+    isort_params="$@"
+    black_params="$@"
+fi
+
+isort $isort_params
+black $black_params
