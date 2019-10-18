@@ -32,7 +32,6 @@ setup(
     long_description_content_type="text/x-rst",
     url=f"https://github.com/kialo/{PACKAGE_NAME}",
     author="Kialo GmbH",
-    # author_email='',  # Optional, maybe dev@kialo.com but I don't think that exists?
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[
         # How mature is this project? Common values are
