@@ -66,7 +66,8 @@ def _print_graph_data(build_result: BuildResult) -> None:
 
 
 if __name__ == "__main__":
-    # goes through all python stubs (.pyi files) and lists their exported symbols with type annotation
+    # goes through all python stubs (.pyi files)
+    # and lists their exported symbols with type annotation
     hand, gen = _analyze_stubs()
 
     _print_graph_data(hand)

@@ -1,3 +1,4 @@
+# Note: 0.740 stubgen breaks on passlib
 mypy==0.740
 
 black

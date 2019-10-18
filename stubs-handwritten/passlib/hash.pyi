@@ -1,6 +1,10 @@
+from typing import Optional
+
 class bcrypt:
     @classmethod
-    def using(cls, rounds: int) -> "bcrypt": ...
+    def using(
+        cls, *, relaxed: bool = False, rounds: Optional[int] = None
+    ) -> "bcrypt": ...
     @classmethod
     def identify(cls, encoded_reference_hash: bytes) -> str: ...
     @classmethod
@@ -10,10 +14,11 @@ class bcrypt:
     @classmethod
     def hash(cls, text: str) -> str: ...
 
-
 class md5_crypt:
     @classmethod
-    def using(cls, rounds: int) -> "md5_crypt": ...
+    def using(
+        cls, relaxed: bool = False, rounds: Optional[int] = None
+    ) -> "md5_crypt": ...
     @classmethod
     def identify(cls, encoded_reference_hash: bytes) -> str: ...
     @classmethod

@@ -12,8 +12,8 @@ The following section contains instructions on how to set up and use
 the development environment for this project.
 
 
-Setup
-+++++
+Development Setup
++++++++++++++++++
 
 Requirements for development:
 
