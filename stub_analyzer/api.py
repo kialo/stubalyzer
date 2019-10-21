@@ -2,7 +2,7 @@
 API for analyzing Python stubs using mypy.
 """
 from os.path import abspath
-from typing import Generator, Iterable, Optional, Set, Union
+from typing import Generator, Optional, Set, Union
 
 from mypy.build import BuildResult, State, build
 from mypy.fscache import FileSystemCache
