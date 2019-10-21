@@ -31,7 +31,7 @@ Excludes MypyFiles (the modules themselves), imported names and Mypy placeholder
 
 
 def _mypy_analyze(
-        mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
+    mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
 ) -> BuildResult:
     """
     Parses and analyzes the types of the code in root_path.
@@ -56,7 +56,9 @@ def should_include_module(module: State) -> bool:
         return False
     if not module.path.endswith(".pyi"):  # we only care about stubs
         return False
-    if re.search(r"(typeshed|mypy|builtins)", module.path):
+    if re.search(r"/(typeshed|mypy)/", module.path):
+        return False
+    if module.path.endswith("builtins.pyi"):
         return False
 
     return True
@@ -71,7 +73,7 @@ def get_stubbed_modules(graph: Dict[str, State]) -> Set[State]:
 
 
 def collect_types(
-        symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
+    symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Collects all relevant type definitions of the symbols in the given node.
@@ -106,8 +108,8 @@ def collect_types(
             if class_member.node:
                 yield from collect_types(class_member.node, collected_types)
     elif isinstance(
-            symbol_node,
-            (Decorator, FuncDef, OverloadedFuncDef, Var, TypeAlias, TypeVarExpr),
+        symbol_node,
+        (Decorator, FuncDef, OverloadedFuncDef, Var, TypeAlias, TypeVarExpr),
     ):
         # the symbol represents a function definition, variable, type alias or generic TypeVar
         yield symbol_node
@@ -116,7 +118,7 @@ def collect_types(
 
 
 def get_stub_types(
-        stubs_path: str, mypy_conf_path: str
+    stubs_path: str, mypy_conf_path: str
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Analyzes the stub files in stubs_path and returns module and class definitions of stubs as symbol nodes.
@@ -125,7 +127,7 @@ def get_stub_types(
     This excludes modules that are already in typeshed, builtin or from mypy, because no stubs for them need to
     be analyzed.
     :param stubs_path: where all the stub files are located
-    :param mypy_conf_path:
+    :param mypy_conf_path: path to mypy.ini
     """
     build_result = _mypy_analyze(mypy_conf_path, stubs_path)
     stubbed_modules = get_stubbed_modules(build_result.graph)
