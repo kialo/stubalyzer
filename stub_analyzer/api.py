@@ -128,14 +128,3 @@ def get_stub_types(
     for module in stubbed_modules:
         if module.tree:
             yield from collect_types(module.tree)
-
-
-def _print_graph_data(stub_types: Iterable[RelevantSymbolNode]) -> None:
-    for symbol in stub_types:
-        if hasattr(symbol, "type"):
-            print(f"{symbol.fullname()}: {symbol.type}")
-        else:
-            type_name = (
-                "Class" if isinstance(symbol, TypeInfo) else type(symbol).__name__
-            )
-            print(f"{symbol.fullname()} ({type_name})")
