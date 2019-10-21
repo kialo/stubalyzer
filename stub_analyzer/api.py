@@ -1,3 +1,6 @@
+"""
+API for analyzing Python stubs using mypy.
+"""
 import re
 from typing import Dict, Generator, Iterable, Optional, Set, Union
 
@@ -28,7 +31,7 @@ Excludes MypyFiles (the modules themselves), imported names and Mypy placeholder
 
 
 def _mypy_analyze(
-    mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
+        mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
 ) -> BuildResult:
     """
     Parses and analyzes the types of the code in root_path.
@@ -68,7 +71,7 @@ def get_stubbed_modules(graph: Dict[str, State]) -> Set[State]:
 
 
 def collect_types(
-    symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
+        symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Collects all relevant type definitions of the symbols in the given node.
@@ -103,8 +106,8 @@ def collect_types(
             if class_member.node:
                 yield from collect_types(class_member.node, collected_types)
     elif isinstance(
-        symbol_node,
-        (Decorator, FuncDef, OverloadedFuncDef, Var, TypeAlias, TypeVarExpr),
+            symbol_node,
+            (Decorator, FuncDef, OverloadedFuncDef, Var, TypeAlias, TypeVarExpr),
     ):
         # the symbol represents a function definition, variable, type alias or generic TypeVar
         yield symbol_node
@@ -113,7 +116,7 @@ def collect_types(
 
 
 def get_stub_types(
-    stubs_path: str, mypy_conf_path: str
+        stubs_path: str, mypy_conf_path: str
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Analyzes the stub files in stubs_path and returns module and class definitions of stubs as symbol nodes.

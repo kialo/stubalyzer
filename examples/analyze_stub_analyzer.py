@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 
-from analyze import _print_graph_data, get_stub_types
-
 # goes through all python stubs (.pyi files) and lists their exported symbols with type annotation
-base_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+from stub_analyzer.api import get_stub_types, _print_graph_data
+
+base_dir = Path(os.path.dirname(os.path.abspath(__file__))) / '..'
 mypy_conf = base_dir / "mypy.ini"
 hand_written = get_stub_types(
     f"{base_dir}/stubs-handwritten", mypy_conf_path=str(mypy_conf)
