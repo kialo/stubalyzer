@@ -1,8 +1,8 @@
 """
 API for analyzing Python stubs using mypy.
 """
-import re
-from typing import Dict, Generator, Iterable, Optional, Set, Union
+from os.path import abspath
+from typing import Generator, Iterable, Optional, Set, Union
 
 from mypy.build import BuildResult, State, build
 from mypy.fscache import FileSystemCache
@@ -41,7 +41,7 @@ def _mypy_analyze(
     :return: Mypy's analysis result
     """
     # The call to `build.build` is inspired by `mypy/mypy/main.py::main`
-    # `build` is not a documented public API, and using it requires reading mypy source.
+    # `build` is not a documented public API
     args = ["--config-file", mypy_conf_path, root_path]
     fscache = FileSystemCache()
     sources, options = process_options(args, fscache=fscache)
@@ -50,24 +50,8 @@ def _mypy_analyze(
     return build(sources, options, None, None, fscache)
 
 
-def should_include_module(module: State) -> bool:
-    """ Return true for third-party modules with stubs that are not in typeshed, builtin or from mypy. """
-    if not module.path:
-        return False
-    if not module.path.endswith(".pyi"):  # we only care about stubs
-        return False
-    if re.search(r"(typeshed|mypy|builtins)", module.path):
-        return False
-
-    return True
-
-
-def get_stubbed_modules(graph: Dict[str, State]) -> Set[State]:
-    """
-    Returns mypy's State for each stubbed module that is not already in typeshed, builtin or from mypy.
-    :param graph: the result of mypy's build
-    """
-    return {m for m in graph.values() if m.tree and should_include_module(m)}
+def is_stubbed_module(module: State) -> bool:
+    return module.path is not None and module.path.endswith(".pyi")
 
 
 def collect_types(
@@ -116,19 +100,30 @@ def collect_types(
 
 
 def get_stub_types(
-    stubs_path: str, mypy_conf_path: str
+    stubs_path: str, mypy_conf_path: str, root_path: Optional[str] = None
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Analyzes the stub files in stubs_path and returns module and class definitions of stubs as symbol nodes.
     Only relevant symbol nodes (e.g. for variables, functions, classes, methods) are returned. They contain the
     type annotation information.
-    This excludes modules that are already in typeshed, builtin or from mypy, because no stubs for them need to
-    be analyzed.
     :param stubs_path: where all the stub files are located
-    :param mypy_conf_path:
+    :param mypy_conf_path: path to mypy.ini
+    :param root_path: path to the code directory where the type analysis is started
     """
-    build_result = _mypy_analyze(mypy_conf_path, stubs_path)
-    stubbed_modules = get_stubbed_modules(build_result.graph)
+    stubs_path = abspath(stubs_path)
+
+    if root_path:
+        build_result = _mypy_analyze(mypy_conf_path, root_path, stubs_path)
+    else:
+        build_result = _mypy_analyze(mypy_conf_path, stubs_path)
+
+    stubbed_modules = {
+        module
+        for module in build_result.graph.values()
+        if module.path
+        and is_stubbed_module(module)
+        and module.path.startswith(stubs_path)
+    }
 
     for module in stubbed_modules:
         if module.tree:
