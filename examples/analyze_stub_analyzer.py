@@ -1,10 +1,14 @@
 import os
 from pathlib import Path
+from typing import Dict, Generator, Iterable, List, Optional
 
-# goes through all python stubs (.pyi files) and lists their exported symbols with type annotation
-from typing import Iterable, List
-
-from stub_analyzer.api import RelevantSymbolNode, compare_types, get_stub_types
+from mypy.nodes import TypeInfo
+from stub_analyzer.api import (
+    ComparisonResult,
+    RelevantSymbolNode,
+    compare_types,
+    get_stub_types,
+)
 
 base_dir = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
 mypy_conf = base_dir / "mypy.ini"
@@ -26,18 +30,22 @@ def _print_graph_data(stub_types: Iterable[RelevantSymbolNode]) -> None:
 # print("Hand-written Stubs:\n")
 # _print_graph_data(hand_written)
 
-gen_map = {symbol.fullname(): symbol for symbol in generated}
+gen_map: Dict[str, RelevantSymbolNode] = {
+    symbol.fullname(): symbol for symbol in generated
+}
 
 
-def resolve_generated_symbol(symbol, gen_map):
+def resolve_generated_symbol(
+    symbol: RelevantSymbolNode, gen_map: Dict[str, RelevantSymbolNode]
+) -> Optional[RelevantSymbolNode]:
     """Resolve the given symbol in the generated stubs.
-    
+
     Maybe move this to api.py?"""
     generated_symbol = gen_map.get(symbol.fullname())
     if generated_symbol:
         return generated_symbol
 
-    klass = symbol.info
+    klass = getattr(symbol, "info", None)
     if not klass:
         return None
 
@@ -45,11 +53,17 @@ def resolve_generated_symbol(symbol, gen_map):
     if not klass_node:
         return None
 
-    res = klass_node.get(symbol.name())
-    return gen_map.get(res.fullname)
+    if isinstance(klass_node, TypeInfo):
+        res = klass_node.get(symbol.name())
+        if res and res.fullname:
+            return gen_map.get(res.fullname)
+
+    return None
 
 
-def compare(hand_written, generated):
+def compare(
+    hand_written: List[RelevantSymbolNode], generated: List[RelevantSymbolNode]
+) -> Generator[ComparisonResult, None, None]:
     """Compare hand written to generated stubs."""
     gen_map = {symbol.fullname(): symbol for symbol in generated}
 
