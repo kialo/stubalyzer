@@ -5,7 +5,7 @@ from typing import Dict, cast
 from mypy.nodes import Decorator, SymbolNode, TypeAlias, TypeInfo
 from mypy.types import AnyType, CallableType, Instance, UnboundType, UnionType
 
-from stub_analyzer.api import get_stub_types
+from .collect import get_stub_types
 
 
 def get_stub_types_dict(stub_folder: str) -> Dict[str, SymbolNode]:
@@ -105,13 +105,6 @@ class TestGetStubTypesWithGeneratedStubs:
         assert "passlib.hash.md5_crypt" in self.symbols
         assert "passlib.ifc.PasswordHash.truncate_size" in self.symbols
         assert "freezegun.api.call_stack_inspection_limit" in self.symbols
-
-        # the following members are not listed because their definitions are defined in a base class
-        assert "passlib.hash.bcrypt.using" not in self.symbols
-        assert "passlib.hash.bcrypt.identify" not in self.symbols
-        assert "passlib.hash.bcrypt.verify" not in self.symbols
-        assert "passlib.hash.bcrypt.encrypt" not in self.symbols
-        assert "passlib.hash.bcrypt.hash" not in self.symbols
 
         # some things that are not part of the automatically generated stubs
         assert "freezegun.api.FreezeTimeInputType" not in self.symbols

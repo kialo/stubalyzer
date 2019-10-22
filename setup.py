@@ -81,7 +81,10 @@ setup(
     # `pip` to create the appropriate form of executable for the target
     # platform.
     entry_points={  # Optional
-        "console_scripts": ["stub-analyzer=stub_analyzer.stub_analyzer:main"]
+        "console_scripts": [
+            "stub-analyzer=stub_analyzer.stub_analyzer:main",
+            "compare-stubs=stub_analyzer.compare_stubs:main",
+        ]
     },
     # List additional URLs that are relevant to your project as a dict.
     project_urls={

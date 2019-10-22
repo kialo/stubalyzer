@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, Generator, Iterable, List
 
 from mypy.nodes import TypeInfo
-from stub_analyzer.api import (
+from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
     compare_symbols,
