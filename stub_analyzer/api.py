@@ -286,7 +286,6 @@ def _compare_type_var_expr(a: TypeVarExpr, b: TypeVarExpr) -> ComparisonResult:
 
 def compare_symbols(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonResult:
     """Check if symbol node a is compatible with b."""
-    print(f"Comparing {a.fullname()}")
 
     # TODO: Check if this is always the case, i.e. could there be
     # cases where a and b don't have the same class but still match?
@@ -303,12 +302,3 @@ def compare_symbols(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonR
         return _compare_type_var_expr(a, b)
 
     return _compare_mypy_types(a, b, getattr(a, "type"), getattr(b, "type"))
-
-
-def resolve_generated_symbol(
-    symbol: RelevantSymbolNode, gen_map: Dict[str, RelevantSymbolNode]
-) -> Optional[RelevantSymbolNode]:
-    """Resolve the given symbol in the generated stubs.
-
-    TODO: Inline"""
-    return gen_map.get(symbol.fullname())

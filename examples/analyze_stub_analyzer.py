@@ -2,10 +2,11 @@ import os
 from pathlib import Path
 from typing import Dict, Generator, Iterable, List
 
+from mypy.nodes import TypeInfo
 from stub_analyzer.api import (
     ComparisonResult,
     RelevantSymbolNode,
-    compare_types,
+    compare_symbols,
     get_stub_types,
 )
 
@@ -44,8 +45,29 @@ def compare(
         generated_symbol = gen_map.get(symbol.fullname())
         if not generated_symbol:
             print(f"Could not resolve symbol {symbol.fullname()} in generated stubs.")
+            klass = getattr(symbol, "info", None)
+            if not klass:
+                continue
+            # print(f"Found symbol on class: {klass}")
+            klass_node = gen_map.get(klass.fullname())
+            if not klass_node:
+                continue
+
+            # print(f"Found class in generated types: {klass_node}")
+            if not isinstance(klass_node, TypeInfo):
+                continue
+
+            res = klass_node.get(symbol.name())
+            if not (res and res.fullname):
+                continue
+
+            # print(f"Found method on class: {res}")
+            res = gen_map.get(res.fullname)
+            if res:
+                print("Found generated method:")
+                print(repr(res.type))
         else:
-            yield compare_types(symbol, generated_symbol)
+            yield compare_symbols(symbol, generated_symbol)
 
 
 comp_res = list(compare(hand_written, generated))
