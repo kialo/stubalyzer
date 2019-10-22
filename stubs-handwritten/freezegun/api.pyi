@@ -3,14 +3,14 @@ from types import GeneratorType
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar, Union
 
 try:
-    from maya import MayaDT  # type: ignore
+    from maya import MayaDT as _MayaDT  # type: ignore
 except ImportError:
-    MayaDT = None
+    _MayaDT = None
 
-FreezeTimeInputType = Union[
-    str, datetime.date, datetime.timedelta, Callable, GeneratorType, MayaDT
+_FreezeTimeInputType = Union[
+    str, datetime.date, datetime.timedelta, Callable, GeneratorType, _MayaDT
 ]
-FreezeTimeInputInternalType = Union[str, datetime.date, datetime.timedelta]
+_FreezeTimeInputInternalType = Union[str, datetime.date, datetime.timedelta]
 
 class TickingDateTimeFactory:
     time_to_freeze: datetime.datetime
@@ -25,16 +25,16 @@ class FrozenDateTimeFactory:
     def __init__(self, time_to_freeze: datetime.datetime) -> None: ...
     def __call__(self) -> datetime.datetime: ...
     def tick(self, delta: datetime.timedelta = ...) -> None: ...
-    def move_to(self, target_datetime: FreezeTimeInputInternalType) -> None: ...
+    def move_to(self, target_datetime: _FreezeTimeInputInternalType) -> None: ...
 
 class StepTickTimeFactory:
     time_to_freeze: datetime.datetime
     step_width: int
     def __init__(self, time_to_freeze: datetime.datetime, step_width: int) -> None: ...
     def __call__(self) -> datetime.datetime: ...
-    def tick(self, delta: Optional[datetime.timedelta]) -> None: ...
+    def tick(self, delta: Optional[datetime.timedelta] = None) -> None: ...
     def update_step_width(self, step_width: int) -> None: ...
-    def move_to(self, target_datetime: FreezeTimeInputInternalType) -> None: ...
+    def move_to(self, target_datetime: _FreezeTimeInputInternalType) -> None: ...
 
 FactoryType = Union[StepTickTimeFactory, TickingDateTimeFactory, FrozenDateTimeFactory]
 CallableT = TypeVar("CallableT", bound=Callable)
@@ -52,7 +52,7 @@ class _freeze_time:
     reals: Optional[Dict]
     def __init__(
         self,
-        time_to_freeze_str: Optional[FreezeTimeInputInternalType],
+        time_to_freeze_str: Optional[_FreezeTimeInputInternalType],
         tz_offset: Union[int, datetime.timedelta],
         ignore: List[str],
         tick: bool,
@@ -69,7 +69,7 @@ class _freeze_time:
     def decorate_callable(self, func: CallableT) -> CallableT: ...
 
 def freeze_time(
-    time_to_freeze: Optional[FreezeTimeInputType] = ...,
+    time_to_freeze: Optional[_FreezeTimeInputType] = ...,
     tz_offset: Union[int, datetime.timedelta] = ...,
     ignore: Optional[List[str]] = ...,
     tick: bool = ...,
