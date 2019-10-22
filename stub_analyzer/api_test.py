@@ -4,6 +4,7 @@ from typing import Dict, cast
 
 from mypy.nodes import Decorator, SymbolNode, TypeAlias, TypeInfo
 from mypy.types import AnyType, CallableType, Instance, UnboundType, UnionType
+
 from stub_analyzer.api import get_stub_types
 
 
