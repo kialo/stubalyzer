@@ -2,7 +2,7 @@
 API for analyzing Python stubs using mypy.
 """
 from os.path import abspath
-from typing import Any, Dict, Generator, NamedTuple, Optional, Set, Union, cast
+from typing import Any, Dict, Generator, NamedTuple, Optional, Set, Union
 
 from mypy.build import BuildResult, State, build
 from mypy.fscache import FileSystemCache
@@ -24,7 +24,7 @@ from mypy.nodes import (
     Var,
 )
 from mypy.subtypes import is_subtype
-from mypy.types import CallableType, Type
+from mypy.types import Type as TypeNode
 
 RelevantSymbolNode = Union[
     Decorator, FuncDef, OverloadedFuncDef, Var, TypeInfo, TypeVarExpr, TypeAlias
@@ -204,28 +204,24 @@ class ComparisonResult(NamedTuple):
         )
 
 
-def _mypy_types_match(a: Type, b: Type) -> bool:
+def _mypy_types_match(a: TypeNode, b: TypeNode) -> bool:
     return is_overlapping_types(a, b) or is_subtype(a, b)
-
-
-def is_classmethod_decorator(node: RelevantSymbolNode) -> bool:
-    return isinstance(node, Decorator) and (
-        node.func.is_class or node.var.is_classmethod
-    )
 
 
 def _compare_mypy_types(
     a: RelevantSymbolNode,
     b: RelevantSymbolNode,
-    a_type: Optional[Type],
-    b_type: Optional[Type],
+    a_type: Optional[TypeNode],
+    b_type: Optional[TypeNode],
 ) -> ComparisonResult:
-    if a_type is None:
-        if b_type is None:
-            return ComparisonResult.create_match(type_a=a, type_b=b)
-
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
     if b_type is None:
+        # Mypy does not have enought type information
+        # so we accept that our stub is correct
+        return ComparisonResult.create_match(
+            type_a=a, type_b=b, message="Generated type is None"
+        )
+
+    if a_type is None:
         return ComparisonResult.create_mismatch(type_a=a, type_b=b)
 
     if _mypy_types_match(a_type, b_type):
@@ -242,48 +238,31 @@ def _compare_mypy_types(
             },
         )
 
-    if is_classmethod_decorator(a) and is_classmethod_decorator(b):
-        a_type = cast(CallableType, a_type)
-        b_type = cast(CallableType, b_type)
-        a_modified_type = a_type.copy_modified(
-            arg_types=a_type.arg_types[1:],
-            arg_kinds=a_type.arg_kinds[1:],
-            arg_names=a_type.arg_names[1:],
-        )
-        b_modified_type = b_type.copy_modified(
-            arg_types=b_type.arg_types[1:],
-            arg_kinds=b_type.arg_kinds[1:],
-            arg_names=b_type.arg_names[1:],
-        )
-        if _mypy_types_match(a_modified_type, b_modified_type):
-            return ComparisonResult.create_match(
-                type_a=a,
-                type_b=b,
-                message=(
-                    f"Types of {fullname(a)} and {fullname(b)} match"
-                    f" after removing 'cls' argument."
-                ),
-                data={
-                    "a_modified_type": a_modified_type,
-                    "b_modified_type": b_modified_type,
-                },
-            )
-
     return ComparisonResult.create_mismatch(type_a=a, type_b=b)
 
 
 def _compare_type_infos(a: TypeInfo, b: TypeInfo) -> ComparisonResult:
-    if fullname(a) == fullname(b):
+    """Compare TypeInfo nodes, which are class definitions.
+
+    Currently only does a comparison on the fullname, since we only
+    care that the class is defined at the same location under the same name.
+    """
+    if a.fullname() == b.fullname():
         return ComparisonResult.create_match(type_a=a, type_b=b)
     else:
         return ComparisonResult.create_mismatch(type_a=a, type_b=b)
 
 
 def _compare_type_aliases(a: TypeAlias, b: TypeAlias) -> ComparisonResult:
+    """Compare TypeAlias nodes.
+
+    TypeAlias nodes contain the referenced type as the target.
+    """
     return _compare_mypy_types(a, b, a.target, b.target)
 
 
 def _format_type_var(x: TypeVarExpr) -> str:
+    """Format a TypeVarExpr as it would be written in code."""
     variance = ""
     if x.variance == COVARIANT:
         variance = ", covariant=True"
@@ -298,74 +277,30 @@ def _format_type_var(x: TypeVarExpr) -> str:
 
 
 def _compare_type_var_expr(a: TypeVarExpr, b: TypeVarExpr) -> ComparisonResult:
-    # 1. Compare upper bounds like this
-    # upper_bound_res = _compare_mypy_types(a, b, a.upper_bound, b.upper_bound)
-    # 2. Somehow compare "values" list?
-
-    return ComparisonResult.create_mismatch(
-        type_a=a,
-        type_b=b,
-        message=(
-            f"Don't know what to do with type variables yet"
-            f" {_format_type_var(a)}, {_format_type_var(b)}"
-        ),
+    raise NotImplementedError(
+        "Comparison of type variables (TypeVarExpr) is not implemented"
+        f"\n{_format_type_var(a)}"
+        f"\n{_format_type_var(b)}"
     )
 
 
-def _handle_type_info(
-    a: RelevantSymbolNode, b: RelevantSymbolNode
-) -> Optional[ComparisonResult]:
-    if isinstance(a, TypeInfo):
-        if isinstance(b, TypeInfo):
-            return _compare_type_infos(a, b)
+def compare_symbols(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonResult:
+    """Check if symbol node a is compatible with b."""
+    print(f"Comparing {a.fullname()}")
+
+    # TODO: Check if this is always the case, i.e. could there be
+    # cases where a and b don't have the same class but still match?
+    if type(a) != type(b):
         return ComparisonResult.create_mismatch(type_a=a, type_b=b)
 
-    if isinstance(b, TypeInfo):
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
+    if isinstance(a, TypeInfo) and isinstance(b, TypeInfo):
+        return _compare_type_infos(a, b)
 
-    return None
+    if isinstance(a, TypeAlias) and isinstance(b, TypeAlias):
+        return _compare_type_aliases(a, b)
 
-
-def _handle_type_alias(
-    a: RelevantSymbolNode, b: RelevantSymbolNode
-) -> Optional[ComparisonResult]:
-    if isinstance(a, TypeAlias):
-        if isinstance(b, TypeAlias):
-            return _compare_type_aliases(a, b)
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
-
-    if isinstance(b, TypeAlias):
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
-
-    return None
-
-
-def _handle_type_var_expr(
-    a: RelevantSymbolNode, b: RelevantSymbolNode
-) -> Optional[ComparisonResult]:
-    if isinstance(a, TypeVarExpr):
-        if isinstance(b, TypeVarExpr):
-            return _compare_type_var_expr(a, b)
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
-
-    if isinstance(b, TypeVarExpr):
-        return ComparisonResult.create_mismatch(type_a=a, type_b=b)
-
-    return None
-
-
-def compare_types(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonResult:
-    res = _handle_type_info(a, b)
-    if res:
-        return res
-
-    res = _handle_type_alias(a, b)
-    if res:
-        return res
-
-    res = _handle_type_var_expr(a, b)
-    if res:
-        return res
+    if isinstance(a, TypeVarExpr) and isinstance(b, TypeVarExpr):
+        return _compare_type_var_expr(a, b)
 
     return _compare_mypy_types(a, b, getattr(a, "type"), getattr(b, "type"))
 
@@ -373,22 +308,7 @@ def compare_types(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonRes
 def resolve_generated_symbol(
     symbol: RelevantSymbolNode, gen_map: Dict[str, RelevantSymbolNode]
 ) -> Optional[RelevantSymbolNode]:
-    """Resolve the given symbol in the generated stubs."""
-    generated_symbol = gen_map.get(symbol.fullname())
-    if generated_symbol:
-        return generated_symbol
+    """Resolve the given symbol in the generated stubs.
 
-    klass = getattr(symbol, "info", None)
-    if not klass:
-        return None
-
-    klass_node = gen_map.get(klass.fullname())
-    if not klass_node:
-        return None
-
-    if isinstance(klass_node, TypeInfo):
-        res = klass_node.get(symbol.name())
-        if res and res.fullname:
-            return gen_map.get(res.fullname)
-
-    return None
+    TODO: Inline"""
+    return gen_map.get(symbol.fullname())

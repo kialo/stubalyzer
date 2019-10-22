@@ -7,7 +7,6 @@ from stub_analyzer.api import (
     RelevantSymbolNode,
     compare_types,
     get_stub_types,
-    resolve_generated_symbol,
 )
 
 base_dir = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
@@ -42,14 +41,11 @@ def compare(
     gen_map = {symbol.fullname(): symbol for symbol in generated}
 
     for symbol in hand_written:
-        if symbol.fullname().startswith("passlib"):
-            generated_symbol = resolve_generated_symbol(symbol, gen_map)
-            if not generated_symbol:
-                print(
-                    f"Could not resolve symbol {symbol.fullname()} in generated stubs."
-                )
-            else:
-                yield compare_types(symbol, generated_symbol)
+        generated_symbol = gen_map.get(symbol.fullname())
+        if not generated_symbol:
+            print(f"Could not resolve symbol {symbol.fullname()} in generated stubs.")
+        else:
+            yield compare_types(symbol, generated_symbol)
 
 
 comp_res = list(compare(hand_written, generated))
