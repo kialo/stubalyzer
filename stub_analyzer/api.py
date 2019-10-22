@@ -29,7 +29,6 @@ from mypy.types import Type as TypeNode
 RelevantSymbolNode = Union[
     Decorator, FuncDef, OverloadedFuncDef, Var, TypeInfo, TypeVarExpr, TypeAlias
 ]
-
 """
 SymbolNodes that are interesting for stub files.
 Excludes MypyFiles (the modules themselves), imported names and Mypy placeholders
@@ -140,14 +139,6 @@ def get_stub_types(
             yield from collect_types(module.tree)
 
 
-def fullname(x: Any) -> Optional[str]:
-    attr = getattr(x, "fullname", None)
-    if callable(attr):
-        return str(attr())
-    else:
-        return str(attr)
-
-
 class ComparisonResult(NamedTuple):
     match: bool
     type_a: RelevantSymbolNode
@@ -158,7 +149,7 @@ class ComparisonResult(NamedTuple):
     @classmethod
     def create_not_found(
         cls,
-        type_a,
+        type_a: RelevantSymbolNode,
         message: Optional[str] = None,
         data: Optional[Dict[str, Any]] = None,
     ) -> "ComparisonResult":
@@ -167,7 +158,7 @@ class ComparisonResult(NamedTuple):
             type_a=type_a,
             type_b=None,
             message=(
-                message or (f"Symbol {fullname(type_a)} not found in generated stubs.")
+                message or (f"Symbol {type_a.fullname()} not found in generated stubs.")
             ),
             data=data,
         )
@@ -187,9 +178,9 @@ class ComparisonResult(NamedTuple):
             message=(
                 message
                 or (
-                    f"Types of {fullname(type_a)} ({type(type_a)},"
+                    f"Types of {type_a.fullname()} ({type(type_a)},"
                     f" {getattr(type_a, 'type', None)})"
-                    f" and {fullname(type_b)} ({type(type_b)},"
+                    f" and {type_b.fullname()} ({type(type_b)},"
                     f" {getattr(type_b, 'type', None)}) do not match."
                 )
             ),
@@ -211,9 +202,9 @@ class ComparisonResult(NamedTuple):
             message=(
                 message
                 or (
-                    f"Types of {fullname(type_a)} ({type(type_a)},"
+                    f"Types of {type_a.fullname()} ({type(type_a)},"
                     " {getattr(type_a, 'type', None)})"
-                    f" and {fullname(type_b)} ({type(type_b)},"
+                    f" and {type_b.fullname()} ({type(type_b)},"
                     " {getattr(type_b, 'type', None)}) match."
                 )
             ),
@@ -246,9 +237,9 @@ def _compare_mypy_types(
             type_a=a,
             type_b=b,
             data={
-                "a_name": fullname(a),
+                "a_name": a.fullname(),
                 "a_type": a_type,
-                "b_name": fullname(b),
+                "b_name": b.fullname(),
                 "b_type": b_type,
                 "overlap": is_overlapping_types(a_type, b_type),
                 "subtype": is_subtype(a_type, b_type),

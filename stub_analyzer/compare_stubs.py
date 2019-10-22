@@ -5,7 +5,7 @@ from typing import Generator, List
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 
-from api import ComparisonResult, RelevantSymbolNode, compare_symbols, get_stub_types
+from .api import ComparisonResult, RelevantSymbolNode, compare_symbols, get_stub_types
 
 
 def parse_command_line() -> Namespace:
