@@ -234,9 +234,9 @@ def _compare_mypy_types(
             type_b=b,
             data={
                 "a_name": fullname(a),
-                "a_type": "a_type",
+                "a_type": a_type,
                 "b_name": fullname(b),
-                "b_type": "b_type",
+                "b_type": b_type,
                 "overlap": is_overlapping_types(a_type, b_type),
                 "subtype": is_subtype(a_type, b_type),
             },
@@ -368,3 +368,27 @@ def compare_types(a: RelevantSymbolNode, b: RelevantSymbolNode) -> ComparisonRes
         return res
 
     return _compare_mypy_types(a, b, getattr(a, "type"), getattr(b, "type"))
+
+
+def resolve_generated_symbol(
+    symbol: RelevantSymbolNode, gen_map: Dict[str, RelevantSymbolNode]
+) -> Optional[RelevantSymbolNode]:
+    """Resolve the given symbol in the generated stubs."""
+    generated_symbol = gen_map.get(symbol.fullname())
+    if generated_symbol:
+        return generated_symbol
+
+    klass = getattr(symbol, "info", None)
+    if not klass:
+        return None
+
+    klass_node = gen_map.get(klass.fullname())
+    if not klass_node:
+        return None
+
+    if isinstance(klass_node, TypeInfo):
+        res = klass_node.get(symbol.name())
+        if res and res.fullname:
+            return gen_map.get(res.fullname)
+
+    return None
