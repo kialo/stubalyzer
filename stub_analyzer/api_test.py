@@ -4,7 +4,6 @@ from typing import Dict, cast
 
 from mypy.nodes import Decorator, SymbolNode, TypeAlias, TypeInfo
 from mypy.types import AnyType, CallableType, Instance, UnboundType, UnionType
-
 from stub_analyzer.api import get_stub_types
 
 
@@ -29,34 +28,33 @@ class TestGetStubTypesWithHandwrittenStubs:
     def test_lists_handwritten(self) -> None:
         """ Ensures that the expected hand-written stubs are there; non-exhaustive """
         assert "passlib.hash.bcrypt" in self.symbols
-        assert "passlib.hash.bcrypt.using" in self.symbols
-        assert "passlib.hash.bcrypt.identify" in self.symbols
-        assert "passlib.hash.bcrypt.verify" in self.symbols
-        assert "passlib.hash.bcrypt.encrypt" in self.symbols
-        assert "passlib.hash.bcrypt.hash" in self.symbols
-
         assert "passlib.hash.md5_crypt" in self.symbols
-        assert "passlib.hash.md5_crypt.using" in self.symbols
-        assert "passlib.hash.md5_crypt.identify" in self.symbols
-        assert "passlib.hash.md5_crypt.verify" in self.symbols
-        assert "passlib.hash.md5_crypt.encrypt" in self.symbols
-        assert "passlib.hash.md5_crypt.hash" in self.symbols
 
-        assert "freezegun.api.FreezeTimeInputType" in self.symbols
+        assert "passlib.utils.handlers.MinimalHandler.using" in self.symbols
+        assert "passlib.utils.handlers.TruncateMixin.using" in self.symbols
+        assert "passlib.utils.handlers.GenericHandler.identify" in self.symbols
+        assert "passlib.utils.handlers.GenericHandler.hash" in self.symbols
+        assert "passlib.ifc.PasswordHash.encrypt" in self.symbols
+
+        assert "freezegun.api._FreezeTimeInputType" in self.symbols
         assert "freezegun.api.freeze_time" in self.symbols
-        assert "freezegun.api.TickingDateTimeFactory.time_to_freeze"
-        assert "freezegun.api.TickingDateTimeFactory.start"
-        assert "freezegun.api.TickingDateTimeFactory.__init__"
-        assert "freezegun.api.TickingDateTimeFactory.__call__"
-        assert "freezegun.api.CallableT"
+        assert "freezegun.api.TickingDateTimeFactory.time_to_freeze" in self.symbols
+        assert "freezegun.api.TickingDateTimeFactory.start" in self.symbols
+        assert "freezegun.api.TickingDateTimeFactory.__init__" in self.symbols
+        assert "freezegun.api.TickingDateTimeFactory.__call__" in self.symbols
+        assert "freezegun.api._CallableT" in self.symbols
 
     def test_method_stub(self) -> None:
-        hash_method = cast(Decorator, self.symbols["passlib.hash.bcrypt.hash"])
+        hash_method = cast(
+            Decorator, self.symbols["passlib.utils.handlers.GenericHandler.hash"]
+        )
         assert isinstance(hash_method, Decorator)
-        assert hash_method.func.fullname() == "passlib.hash.bcrypt.hash"
+        assert (
+            hash_method.func.fullname() == "passlib.utils.handlers.GenericHandler.hash"
+        )
 
         # function arguments
-        assert hash_method.func.arg_names == ["cls", "text"]
+        assert hash_method.func.arg_names == ["cls", "secret"]
         assert hash_method.func.arguments[0].type_annotation is None
 
         text_param = cast(UnboundType, hash_method.func.arguments[1].type_annotation)
@@ -69,9 +67,9 @@ class TestGetStubTypesWithHandwrittenStubs:
         assert hash_method.func.type.ret_type.type.name() == "str"
 
     def test_type_alias(self) -> None:
-        type_alias = cast(TypeAlias, self.symbols["freezegun.api.FreezeTimeInputType"])
+        type_alias = cast(TypeAlias, self.symbols["freezegun.api._FreezeTimeInputType"])
         assert isinstance(type_alias, TypeAlias)
-        assert type_alias.name() == "FreezeTimeInputType"
+        assert type_alias.name() == "_FreezeTimeInputType"
         assert isinstance(type_alias.target, UnionType)
 
         assert str(type_alias.target.items[0]) == "builtins.str"
@@ -85,7 +83,10 @@ class TestGetStubTypesWithHandwrittenStubs:
         bcrypt = self.symbols.get("passlib.hash.bcrypt")
         assert bcrypt
         assert isinstance(bcrypt, TypeInfo)
-        assert {b.type.fullname() for b in bcrypt.bases} == {"builtins.object"}
+        assert {b.type.fullname() for b in bcrypt.bases} == {
+            "passlib.utils.handlers.GenericHandler",
+            "passlib.utils.handlers.TruncateMixin",
+        }
 
 
 class TestGetStubTypesWithGeneratedStubs:
