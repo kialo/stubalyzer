@@ -8,9 +8,9 @@ from typing import Any
 class NamespacedClient:
     client: Any = ...
 
-    def __init__(self, client) -> None:
+    def __init__(self, client: Any) -> None:
         ...
 
     @property
-    def transport(self):
+    def transport(self) -> Any:
         ...
