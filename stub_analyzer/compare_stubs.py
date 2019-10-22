@@ -1,16 +1,11 @@
+import re
 import sys
 from argparse import ArgumentParser, Namespace
 from typing import Generator, List
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 
-from api import (
-    ComparisonResult,
-    RelevantSymbolNode,
-    compare_types,
-    get_stub_types,
-    resolve_generated_symbol,
-)
+from api import ComparisonResult, RelevantSymbolNode, compare_symbols, get_stub_types
 
 
 def parse_command_line() -> Namespace:
@@ -35,13 +30,17 @@ def compare(
     gen_map = {symbol.fullname(): symbol for symbol in generated}
 
     for symbol in hand_written:
-        generated_symbol = resolve_generated_symbol(symbol, gen_map)
-        if not generated_symbol:
-            if isinstance(symbol, (TypeAlias, TypeVarExpr, Var)):
-                continue
-            print(f"Could not resolve symbol {symbol.fullname()} in generated stubs.")
+        name = symbol.fullname()
+        if name in gen_map:
+            yield compare_symbols(symbol, gen_map[name])
+        elif isinstance(symbol, (TypeAlias, TypeVarExpr, Var)) and re.match(
+            r"_[^_].*", name.split(".")[-1]
+        ):
+            # Ignore symbols that begin with (exactly) one _,
+            # since we assume they are private
+            continue
         else:
-            yield compare_types(symbol, generated_symbol)
+            yield ComparisonResult.create_not_found(symbol)
 
 
 def main() -> None:

@@ -149,11 +149,28 @@ def fullname(x: Any) -> Optional[str]:
 
 
 class ComparisonResult(NamedTuple):
-    type_a: RelevantSymbolNode
-    type_b: RelevantSymbolNode
     match: bool
+    type_a: RelevantSymbolNode
+    type_b: Optional[RelevantSymbolNode]
     message: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
+
+    @classmethod
+    def create_not_found(
+        cls,
+        type_a,
+        message: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> "ComparisonResult":
+        return cls(
+            match=False,
+            type_a=type_a,
+            type_b=None,
+            message=(
+                message or (f"Symbol {fullname(type_a)} not found in generated stubs.")
+            ),
+            data=data,
+        )
 
     @classmethod
     def create_mismatch(
@@ -164,9 +181,9 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]] = None,
     ) -> "ComparisonResult":
         return cls(
+            match=False,
             type_a=type_a,
             type_b=type_b,
-            match=False,
             message=(
                 message
                 or (
@@ -188,9 +205,9 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]] = None,
     ) -> "ComparisonResult":
         return cls(
+            match=True,
             type_a=type_a,
             type_b=type_b,
-            match=True,
             message=(
                 message
                 or (
