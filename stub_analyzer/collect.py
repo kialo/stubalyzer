@@ -1,6 +1,7 @@
 """
 API for analyzing Python stubs using mypy.
 """
+import os
 from os.path import abspath
 from typing import Generator, Optional, Set
 
@@ -42,6 +43,15 @@ def _mypy_analyze(
     sources, options = process_options(args, fscache=fscache)
     if stubs_path is not None:
         options = options.apply_changes({"mypy_path": [stubs_path]})
+
+    # disable cache
+    options.apply_changes(
+        {
+            "incremental": False,
+            "cache_dir": ("nul" if os.name == "nul" else "/dev/null"),
+        }
+    )
+
     return build(sources, options, None, None, fscache)
 
 
