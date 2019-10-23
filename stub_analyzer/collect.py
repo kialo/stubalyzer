@@ -53,6 +53,7 @@ def collect_types(
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
     Collects all relevant type definitions of the symbols in the given node.
+
     :param symbol_node: any symbol node, e.g. MypyFile (BuildResult.graph.tree)
     :param collected_types: used to avoid collecting duplicates
     """

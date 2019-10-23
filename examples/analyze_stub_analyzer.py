@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List
+from typing import Dict, Generator, List
 
 from mypy.nodes import TypeInfo
 from stub_analyzer import (
@@ -21,15 +21,6 @@ generated: List[RelevantSymbolNode] = list(
 )
 
 
-def _print_graph_data(stub_types: Iterable[RelevantSymbolNode]) -> None:
-    for symbol in stub_types:
-        type_name = str(symbol.type) if hasattr(symbol, "type") else type(symbol)
-        print(f"{symbol.fullname()}: {type_name}")
-
-
-# print("Hand-written Stubs:\n")
-# _print_graph_data(hand_written)
-
 gen_map: Dict[str, RelevantSymbolNode] = {
     symbol.fullname(): symbol for symbol in generated
 }
@@ -48,12 +39,10 @@ def compare(
             klass = getattr(symbol, "info", None)
             if not klass:
                 continue
-            # print(f"Found symbol on class: {klass}")
             klass_node = gen_map.get(klass.fullname())
             if not klass_node:
                 continue
 
-            # print(f"Found class in generated types: {klass_node}")
             if not isinstance(klass_node, TypeInfo):
                 continue
 
@@ -61,11 +50,10 @@ def compare(
             if not (res and res.fullname):
                 continue
 
-            # print(f"Found method on class: {res}")
-            res = gen_map.get(res.fullname)
-            if res:
+            gen_res = gen_map.get(res.fullname)
+            if gen_res:
                 print("Found generated method:")
-                print(repr(res.type))
+                print(repr(getattr(gen_res, "type", None)))
         else:
             yield compare_symbols(symbol, generated_symbol)
 
@@ -73,6 +61,9 @@ def compare(
 comp_res = list(compare(hand_written, generated))
 
 for res in comp_res:
-    if not res.match:
-        print()
-        print(res.message)
+    print(res.message)
+    print(type(res).__name__ + "(")
+    for key, val in res._asdict().items():
+        print(f"    {key}={repr(val)}")
+    print(")")
+    print("-----------------------------")
