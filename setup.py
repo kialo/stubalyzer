@@ -83,7 +83,7 @@ setup(
     entry_points={  # Optional
         "console_scripts": [
             "stub-analyzer=stub_analyzer.stub_analyzer:main",
-            "compare-stubs=stub_analyzer.compare_stubs:main",
+            "analyze=analyze:main",
         ]
     },
     # List additional URLs that are relevant to your project as a dict.

@@ -5,19 +5,23 @@ from typing import Generator, List
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 
-from .collect import get_stub_types
-from .compare import ComparisonResult, compare_symbols
-from .types import RelevantSymbolNode
+from stub_analyzer import (
+    ComparisonResult,
+    RelevantSymbolNode,
+    compare_symbols,
+    get_stub_types,
+)
 
 
 def parse_command_line() -> Namespace:
     parser = ArgumentParser(
-        description="Compare a handwritten mypy stubs against a reference stubs"
+        description="Analyze a set of (handcrafted) mypy stubs "
+        + "by comparing them to (generated) reference stubs"
     )
     parser.add_argument("-c", "--config", required=True, help="Mypy config file")
     parser.add_argument(
         "stubs_handwritten",
-        help="Directory of handwritten stubs that need to be checked",
+        help="Directory of handwritten stubs that need to be analyzed",
     )
     parser.add_argument(
         "stubs_reference", help="Directory of reference stubs to compare against"
