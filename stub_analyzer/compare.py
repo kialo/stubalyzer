@@ -15,6 +15,11 @@ from .types import RelevantSymbolNode
 
 
 def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
+    """
+    Get the type of the given symbol as a human readable string.
+
+    :param symbol: symbol for which to get the type
+    """
     if isinstance(symbol, TypeAlias):
         return repr(symbol.target)
     if isinstance(symbol, TypeVarExpr):
@@ -26,6 +31,20 @@ def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
 
 
 class ComparisonResult(NamedTuple):
+    """
+    Result of comparing to symbol nodes and their types.
+
+    :attr match: if the match was successful
+    :attr symbol: symbol that was checked
+    :attr reference: reference symbol that was checked against
+    :attr symbol_name: full name of the symbol that was checked
+    :attr symbol_type: type of the symbol that was checked
+    :attr reference_name: full name of the reference symbol
+    :attr reference_type: type of the reference symbol
+    :attr data: optional additional data
+    :attr message_val: optional message
+    """
+
     match: bool
     symbol: RelevantSymbolNode
     reference: Optional[RelevantSymbolNode]
@@ -38,6 +57,7 @@ class ComparisonResult(NamedTuple):
 
     @property
     def message(self) -> str:
+        """Human readable result of the comparison."""
         if self.message_val:
             return self.message_val
 
@@ -67,6 +87,15 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]],
         message: Optional[str],
     ) -> ComparisonResult:
+        """
+        Create a comparison result.
+
+        :param match: if the match was successful
+        :param symbol: symbol that was checked
+        :param reference: reference symbol that was checked against
+        :param data: optional additional data
+        :param message: optional message
+        """
         return cls(
             match=match,
             symbol=symbol,
@@ -86,6 +115,14 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]] = None,
         message: Optional[str] = None,
     ) -> ComparisonResult:
+        """
+        Create an unsuccessful comparison result
+        where there was no reference symbol found.
+
+        :param symbol: symbol we wanted to check
+        :param data: optional additional data
+        :param message: optional message
+        """
         return cls._create(
             match=False,
             symbol=symbol,
@@ -104,6 +141,14 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]] = None,
         message: Optional[str] = None,
     ) -> ComparisonResult:
+        """
+        Create an unsuccessful comparison result.
+
+        :param symbol: symbol that was checked
+        :param reference: reference symbol that was checked against
+        :param data: optional additional data
+        :param message: optional message
+        """
         return cls._create(
             match=False, symbol=symbol, reference=reference, data=data, message=message
         )
@@ -116,13 +161,29 @@ class ComparisonResult(NamedTuple):
         data: Optional[Dict[str, Any]] = None,
         message: Optional[str] = None,
     ) -> ComparisonResult:
+        """
+        Create a successful comparison result.
+
+        :param symbol: symbol that was checked
+        :param reference: reference symbol that was checked against
+        :param data: optional additional data
+        :param message: optional message
+        """
         return cls._create(
             match=True, symbol=symbol, reference=reference, data=data, message=message
         )
 
 
-def _mypy_types_match(symbol: TypeNode, reference: TypeNode) -> bool:
-    return is_overlapping_types(symbol, reference) or is_subtype(symbol, reference)
+def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
+    """
+    Check if the given symbol type matches the the reference type.
+
+    :param symbol_type: symbol type to check
+    :param reference_type: reference type to check against
+    """
+    return is_overlapping_types(symbol_type, reference_type) or is_subtype(
+        symbol_type, reference_type
+    )
 
 
 def compare_mypy_types(
@@ -137,9 +198,14 @@ def compare_mypy_types(
 
     Returns a successful comparison if:
 
-    - the reference type is none (this means mypy doesn't have enough information)
+    - the reference type is None (this means mypy doesn't have enough information)
     - the symbol type is a subtype of the reference type
     - the symbol type overlaps with the reference type
+
+    :param symbol:
+    :param reference:
+    :param symbol_type:
+    :param reference_type:
     """
     if reference_type is None:
         # Mypy does not have enought type information
@@ -196,7 +262,11 @@ def _compare_type_aliases(symbol: TypeAlias, reference: TypeAlias) -> Comparison
 
 
 def _format_type_var(symbol: TypeVarExpr) -> str:
-    """Format a TypeVarExpr as it would be written in code."""
+    """
+    Format a TypeVarExpr as it would be written in code.
+
+    :param symbol: TypeVarExpr to format
+    """
 
     variance = ""
     if symbol.variance == COVARIANT:
@@ -214,6 +284,15 @@ def _format_type_var(symbol: TypeVarExpr) -> str:
 def _compare_type_var_expr(
     symbol: TypeVarExpr, reference: TypeVarExpr
 ) -> ComparisonResult:
+    """
+    Check if a TypeVarExpr symbol matches the reference.
+
+    Currently not implemented as we do not expect TypeVar's in stubgen stubs.
+
+    :param symbol: type var symbol to validate
+    :param reference: type var symbol to validate against
+    :raises NotImplementedError: always
+    """
     raise NotImplementedError(
         "Comparison of type variables (TypeVarExpr) is not implemented, encountered:"
         f"\n - {_format_type_var(symbol)}"
@@ -242,7 +321,6 @@ def compare_symbols(
     :param symbol: symbol node to validate
     :param reference: symbol node to validate against
     """
-
     # TODO: Check if this is always the case, i.e. could there be
     # cases where `symbol` and `reference` don't have the same class but still match?
     if type(symbol) != type(reference):

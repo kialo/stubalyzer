@@ -28,11 +28,12 @@ def _mypy_analyze(
     mypy_conf_path: str, root_path: str, stubs_path: Optional[str] = None
 ) -> BuildResult:
     """
-    Parses and analyzes the types of the code in root_path.
+    Parse and analyze the types of the code in root_path.
+
     :param mypy_conf_path: path to a mypy.ini
     :param root_path: path to the code directory where the type analysis is started
     :param stubs_path: path to the directory of stubs for mypy to use
-    :return: Mypy's analysis result
+    :returns: Mypy's analysis result
     """
     # The call to `build.build` is inspired by `mypy/mypy/main.py::main`
     # `build` is not a documented public API
@@ -45,6 +46,11 @@ def _mypy_analyze(
 
 
 def is_stubbed_module(module: State) -> bool:
+    """
+    Check if a module's types were loaded from a stub.
+
+    :param module: The module to check
+    """
     return module.path is not None and module.path.endswith(".pyi")
 
 
@@ -52,7 +58,7 @@ def collect_types(
     symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
-    Collects all relevant type definitions of the symbols in the given node.
+    Collect all relevant type definitions of the symbols in the given node.
 
     :param symbol_node: any symbol node, e.g. MypyFile (BuildResult.graph.tree)
     :param collected_types: used to avoid collecting duplicates
@@ -99,8 +105,9 @@ def get_stub_types(
     stubs_path: str, mypy_conf_path: str, root_path: Optional[str] = None
 ) -> Generator[RelevantSymbolNode, None, None]:
     """
-    Analyzes the stub files in stubs_path and returns module
+    Analyze the stub files in stubs_path and return module
     and class definitions of stubs as symbol nodes.
+
     Only relevant symbol nodes (e.g. for variables, functions, classes, methods)
     are returned.
     They contain the type annotation information.

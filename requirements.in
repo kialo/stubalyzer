@@ -3,7 +3,8 @@ mypy==0.740
 
 black
 flake8
+flake8-rst-docstrings
+ipython
+isort
 pip-tools
 pytest
-isort
-ipython

@@ -66,7 +66,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["mypy", "ipython"],
+    install_requires=["mypy"],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -75,7 +75,17 @@ setup(
     #
     # Similar to `install_requires` above, these must be valid existing
     # projects.
-    extras_require={"dev": ["pytest", "pip-tools", "black"]},
+    extras_require={
+        "dev": [
+            "black",
+            "flake8-rst-docstrings",
+            "flake8",
+            "ipython",
+            "isort",
+            "pip-tools",
+            "pytest",
+        ]
+    },
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
