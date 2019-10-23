@@ -85,3 +85,29 @@ Dependency Management
 
 If you need new dependencies, add them in ``requirements.in`` and ``setup.py``,
 then run the ``pip-compile`` command specified at the top of ``requirements.txt``.
+
+
+Documentation
++++++++++++++
+
+The documentation is written using Sphinx.
+
+First install the requirements:
+
+.. code-block:: shell-session
+
+    $ pip install -r docs/requirements.txt
+
+Then build the documentation using:
+
+.. code-block:: shell-session
+
+    $ cd doc; make html
+
+The output will be in ``docs/_build/html/index.html``.
+
+You can update the API documentation using the following:
+
+.. code-block:: shell-session
+
+    $ sphinx-apidoc -o docs/api -e -f stub_analyzer '*_test.py'

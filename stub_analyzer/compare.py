@@ -32,28 +32,35 @@ def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
 
 class ComparisonResult(NamedTuple):
     """
-    Result of comparing to symbol nodes and their types.
-
-    :attr match: if the match was successful
-    :attr symbol: symbol that was checked
-    :attr reference: reference symbol that was checked against
-    :attr symbol_name: full name of the symbol that was checked
-    :attr symbol_type: type of the symbol that was checked
-    :attr reference_name: full name of the reference symbol
-    :attr reference_type: type of the reference symbol
-    :attr data: optional additional data
-    :attr message_val: optional message
+    Result of comparing two symbol nodes and their types.
     """
 
     match: bool
+    """If the match was successful"""
+
     symbol: RelevantSymbolNode
+    """Symbol that was checked"""
+
     reference: Optional[RelevantSymbolNode]
+    """Reference symbol that was checked against"""
+
     symbol_name: str
+    """Full name of the symbol that was checked"""
+
     symbol_type: str
+    """Type of the symbol that was checked"""
+
     reference_name: Optional[str]
+    """Full name of the reference symbol"""
+
     reference_type: Optional[str]
+    """Type of the reference symbol"""
+
     data: Optional[Dict[str, Any]] = None
+    """Optional additional data"""
+
     message_val: Optional[str] = None
+    """Optional message"""
 
     @property
     def message(self) -> str:
@@ -198,14 +205,14 @@ def compare_mypy_types(
 
     Returns a successful comparison if:
 
-    - the reference type is None (this means mypy doesn't have enough information)
-    - the symbol type is a subtype of the reference type
-    - the symbol type overlaps with the reference type
+    -  the reference type is None (this means mypy doesn't have enough information)
+    -  the symbol type is a subtype of the reference type
+    -  the symbol type overlaps with the reference type
 
-    :param symbol:
-    :param reference:
-    :param symbol_type:
-    :param reference_type:
+    :param symbol: symbol node to validate
+    :param reference: symbol node to validate against
+    :param symbol_type: type of the symbol to validate
+    :param reference_type: type of the symbol to validate against
     """
     if reference_type is None:
         # Mypy does not have enought type information
@@ -308,15 +315,15 @@ def compare_symbols(
 
     Will return a successful comparison if any of the following holds:
 
-    - the symbols describe the same class
+    -  the symbols describe the same class
 
-    - the symbols are type aliases that resolve to the same type
+    -  the symbols are type aliases that resolve to the same type
 
-    - ``symbol`` is a valid subtype of ``reference``
-        (see :py:func:`mypy.subtypes.is_subtype`)
+    -  ``symbol`` is a valid subtype of ``reference``
+       (see :py:func:`mypy.subtypes.is_subtype`)
 
-    - ``symbol`` and ``reference`` somehow overlap
-        (see :py:func:`mypy.meet.is_overlapping_types`)
+    -  ``symbol`` and ``reference`` somehow overlap
+       (see :py:func:`mypy.meet.is_overlapping_types`)
 
     :param symbol: symbol node to validate
     :param reference: symbol node to validate against
