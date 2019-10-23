@@ -80,12 +80,7 @@ setup(
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
     # platform.
-    entry_points={  # Optional
-        "console_scripts": [
-            "stub-analyzer=stub_analyzer.stub_analyzer:main",
-            "analyze=analyze:main",
-        ]
-    },
+    entry_points={"console_scripts": ["analyze-stubs=analyze:main"]},  # Optional
     # List additional URLs that are relevant to your project as a dict.
     project_urls={
         "Bug Reports": f"https://github.com/kialo/{PACKAGE_NAME}/issues",
