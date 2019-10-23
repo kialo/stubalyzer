@@ -57,7 +57,8 @@ setup(
     #
     # Note that this is a string of words separated by whitespace, not a list.
     keywords="mypy analysis stubgen stubs",
-    packages=find_packages(exclude=["*.tests", "*.tests.*"]),
+    packages=["stub_analyzer"],
+    py_modules=["analyze"],
     # TODO: Check if we support 3.5 & 3.6
     python_requires=">=3.5",
     # This field lists other packages that your project depends on to run.
