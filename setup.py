@@ -58,7 +58,6 @@ setup(
     # Note that this is a string of words separated by whitespace, not a list.
     keywords="mypy analysis stubgen stubs",
     packages=["stub_analyzer"],
-    py_modules=["analyze"],
     # TODO: Check if we support 3.5 & 3.6
     python_requires=">=3.5",
     # This field lists other packages that your project depends on to run.
@@ -81,7 +80,9 @@ setup(
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
     # platform.
-    entry_points={"console_scripts": ["analyze-stubs=analyze:main"]},  # Optional
+    entry_points={
+        "console_scripts": ["analyze-stubs=stub_analyzer.analyze:main"]
+    },  # Optional
     # List additional URLs that are relevant to your project as a dict.
     project_urls={
         "Bug Reports": f"https://github.com/kialo/{PACKAGE_NAME}/issues",
