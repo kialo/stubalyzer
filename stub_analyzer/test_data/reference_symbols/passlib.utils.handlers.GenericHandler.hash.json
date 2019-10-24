@@ -1,0 +1,125 @@
+{
+    ".class": "Decorator",
+    "func": {
+        ".class": "FuncDef",
+        "name": "hash",
+        "fullname": "passlib.utils.handlers.GenericHandler.hash",
+        "arg_names": [
+            "cls",
+            "secret",
+            "kwds"
+        ],
+        "arg_kinds": [
+            0,
+            0,
+            4
+        ],
+        "type": {
+            ".class": "CallableType",
+            "arg_types": [
+                {
+                    ".class": "TypeType",
+                    "item": "passlib.utils.handlers.GenericHandler"
+                },
+                {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                }
+            ],
+            "arg_kinds": [
+                0,
+                0,
+                4
+            ],
+            "arg_names": [
+                "cls",
+                "secret",
+                "kwds"
+            ],
+            "ret_type": {
+                ".class": "AnyType",
+                "type_of_any": 2,
+                "source_any": null,
+                "missing_import_name": null
+            },
+            "fallback": "builtins.function",
+            "name": "hash of GenericHandler",
+            "variables": [],
+            "is_ellipsis_args": false,
+            "implicit": false,
+            "bound_args": [],
+            "def_extras": {
+                "first_arg": "cls"
+            }
+        },
+        "flags": [
+            "is_class",
+            "is_decorated"
+        ]
+    },
+    "var": {
+        ".class": "Var",
+        "name": "hash",
+        "fullname": null,
+        "type": {
+            ".class": "CallableType",
+            "arg_types": [
+                {
+                    ".class": "TypeType",
+                    "item": "passlib.utils.handlers.GenericHandler"
+                },
+                {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                }
+            ],
+            "arg_kinds": [
+                0,
+                0,
+                4
+            ],
+            "arg_names": [
+                "cls",
+                "secret",
+                "kwds"
+            ],
+            "ret_type": {
+                ".class": "AnyType",
+                "type_of_any": 2,
+                "source_any": null,
+                "missing_import_name": null
+            },
+            "fallback": "builtins.function",
+            "name": "hash of GenericHandler",
+            "variables": [],
+            "is_ellipsis_args": false,
+            "implicit": false,
+            "bound_args": [],
+            "def_extras": {
+                "first_arg": "cls"
+            }
+        },
+        "flags": [
+            "is_initialized_in_class",
+            "is_classmethod",
+            "is_ready"
+        ]
+    },
+    "is_overload": false
+}

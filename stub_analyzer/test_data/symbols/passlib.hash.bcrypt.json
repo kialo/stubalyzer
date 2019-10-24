@@ -2,7 +2,9 @@
     ".class": "TypeInfo",
     "module_name": "passlib.hash",
     "fullname": "passlib.hash.bcrypt",
-    "names": { ".class": "SymbolTable" },
+    "names": {
+        ".class": "SymbolTable"
+    },
     "defn": {
         ".class": "ClassDef",
         "name": "bcrypt",
