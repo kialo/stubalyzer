@@ -7,9 +7,9 @@ from __future__ import annotations
 from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
-from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr
+from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr, FuncDef, SYMBOL_FUNCBASE_TYPES, OverloadedFuncDef
 from mypy.subtypes import is_subtype
-from mypy.types import Type as TypeNode
+from mypy.types import Type as TypeNode, CallableType, Overloaded
 
 from .types import RelevantSymbolNode
 
@@ -193,6 +193,20 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
     )
 
 
+def _callable_types_match(
+        a: CallableType,
+        b: CallableType,
+) -> bool:
+    return len(a.definition.arguments) <= len(b.definition.arguments) and _mypy_types_match(a, b)
+
+
+def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:
+    if len(a.items()) != len(b.items()):
+        return False
+
+    return all([_callable_types_match(_a, _b) for _a, _b in zip(a.items(), b.items())])
+
+
 def compare_mypy_types(
     symbol: RelevantSymbolNode,
     reference: RelevantSymbolNode,
@@ -215,8 +229,8 @@ def compare_mypy_types(
     :param reference_type: type of the symbol to validate against
     """
     if reference_type is None:
-        # Mypy does not have enought type information
-        # so we accept that our stub is correct
+        # MyPy does not have enough type information
+        # hence we accept that our stub is correct
         return ComparisonResult.create_match(
             symbol=symbol, reference=reference, message="Generated type is None"
         )
@@ -224,18 +238,39 @@ def compare_mypy_types(
     if symbol_type is None:
         return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
+    match = ComparisonResult.create_match(
+        symbol=symbol,
+        reference=reference,
+        data={
+            "a_name": symbol.fullname(),
+            "a_type": symbol_type,
+            "b_name": reference.fullname(),
+            "b_type": reference_type,
+            "overlap": is_overlapping_types(symbol_type, reference_type),
+            "subtype": is_subtype(symbol_type, reference_type),
+        },
+    )
+
+    mismatch = ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
+
+
+    if isinstance(symbol_type, CallableType) and isinstance(reference_type, CallableType):
+        if _callable_types_match(symbol_type, reference_type):
+            return match
+        return mismatch
+
+    if isinstance(symbol_type, Overloaded) and isinstance(reference_type, Overloaded):
+        if _overloaded_types_match(symbol_type, reference_type):
+            return match
+        return mismatch
+
     if _mypy_types_match(symbol_type, reference_type):
-        return ComparisonResult.create_match(
-            symbol=symbol,
-            reference=reference,
-            data={
-                "overlap": is_overlapping_types(symbol_type, reference_type),
-                "subtype": is_subtype(symbol_type, reference_type),
-            },
-        )
+        return match
 
-    return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
+    if _mypy_types_match(symbol_type, reference_type):
+        return match
 
+    return mismatch
 
 def _type_infos_are_same_class(
     symbol: TypeInfo, reference: TypeInfo
