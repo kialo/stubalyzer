@@ -4,10 +4,12 @@ Compare mypy types.
 
 from __future__ import annotations
 
-from typing import Any, Dict, NamedTuple, Optional
+from typing import Any, Dict, NamedTuple, Optional, List
+from warnings import warn
 
 from mypy.meet import is_overlapping_types
-from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr
+
+from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr, Argument, FuncDef
 from mypy.subtypes import is_subtype
 from mypy.types import CallableType, Overloaded
 from mypy.types import Type as TypeNode
@@ -194,10 +196,23 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
     )
 
 
-def _callable_types_match(a: CallableType, b: CallableType) -> bool:
-    return len(a.definition.arguments) <= len(
-        b.definition.arguments
-    ) and _mypy_types_match(a, b)
+def _callable_types_match(
+        typ: CallableType,
+        type_reference: CallableType,
+) -> bool:
+
+    type_argument_list: List[Argument]  = []
+    type_reference_argument_list: List[Argument] = []
+
+    if not isinstance(typ.definition, FuncDef):
+        warn(f"CallableType {typ.name} does not have a definition", Warning)
+    elif not isinstance(type_reference.definition, FuncDef):
+        warn(f"CallableType {type_reference.name} does not have a definition", Warning)
+    else:
+        type_argument_list = typ.definition.arguments
+        type_reference_argument_list = type_reference.definition.arguments
+
+    return len(type_argument_list) <= len(type_reference_argument_list) and _mypy_types_match(typ, type_reference)
 
 
 def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:

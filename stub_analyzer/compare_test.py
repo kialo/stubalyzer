@@ -1,8 +1,9 @@
 from mypy.nodes import Var
 from mypy.types import NoneType
 
-from .compare import ComparisonResult, compare_symbols
 from .type_data import TypeData
+from .compare import ComparisonResult, compare_mypy_types, compare_symbols
+from testing.util import mypy_node_factory
 
 
 class TestComparisonResult:
@@ -81,3 +82,33 @@ class TestCompareSymbols:
         result = compare_symbols(bcrypt_symbol, md5_reference)
 
         assert result.match is False
+
+    def test_func_def_mismatches_when_handwritten_stub_has_additional_optional_args(self) -> None:
+        func_def, func_def_reference = mypy_node_factory.get_additional_optional_args_node()
+        result = compare_mypy_types(func_def, func_def_reference, func_def.type, func_def_reference.type)
+        assert not result.match
+
+    def test_func_def_mismatches_when_handwritten_stub_has_additional_args(self) -> None:
+        func_def, func_def_reference = mypy_node_factory.get_additional_args_node()
+        result = compare_mypy_types(func_def, func_def_reference, func_def.type, func_def_reference.type)
+        assert not result.match
+
+    def test_overloaded_func_def_mismatches_when_any_handwritten_stub_has_additional_args(self) -> None:
+        overloaded_def, overloaded_reference = mypy_node_factory.get_overloaded_additional_args_node()
+        result = compare_mypy_types(
+            overloaded_def,
+            overloaded_reference,
+            overloaded_def.type,
+            overloaded_reference.type,
+        )
+        assert not result.match
+
+    def test_overloaded_func_def_mismatches_when_any_handwritten_stub_has_additional_optional_args(self) -> None:
+        overloaded_def, overloaded_reference = mypy_node_factory.get_overloaded_additional_optional_args_node()
+        result = compare_mypy_types(
+            overloaded_def,
+            overloaded_reference,
+            overloaded_def.type,
+            overloaded_reference.type,
+        )
+        assert not result.match
