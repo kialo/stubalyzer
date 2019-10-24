@@ -7,9 +7,10 @@ from __future__ import annotations
 from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
-from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr, FuncDef, SYMBOL_FUNCBASE_TYPES, OverloadedFuncDef
+from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr
 from mypy.subtypes import is_subtype
-from mypy.types import Type as TypeNode, CallableType, Overloaded
+from mypy.types import CallableType, Overloaded
+from mypy.types import Type as TypeNode
 
 from .types import RelevantSymbolNode
 
@@ -193,11 +194,10 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
     )
 
 
-def _callable_types_match(
-        a: CallableType,
-        b: CallableType,
-) -> bool:
-    return len(a.definition.arguments) <= len(b.definition.arguments) and _mypy_types_match(a, b)
+def _callable_types_match(a: CallableType, b: CallableType) -> bool:
+    return len(a.definition.arguments) <= len(
+        b.definition.arguments
+    ) and _mypy_types_match(a, b)
 
 
 def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:
@@ -253,8 +253,9 @@ def compare_mypy_types(
 
     mismatch = ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
-
-    if isinstance(symbol_type, CallableType) and isinstance(reference_type, CallableType):
+    if isinstance(symbol_type, CallableType) and isinstance(
+        reference_type, CallableType
+    ):
         if _callable_types_match(symbol_type, reference_type):
             return match
         return mismatch
@@ -267,10 +268,8 @@ def compare_mypy_types(
     if _mypy_types_match(symbol_type, reference_type):
         return match
 
-    if _mypy_types_match(symbol_type, reference_type):
-        return match
-
     return mismatch
+
 
 def _type_infos_are_same_class(
     symbol: TypeInfo, reference: TypeInfo
