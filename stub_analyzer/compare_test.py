@@ -1,7 +1,8 @@
 from mypy.nodes import Var
 from mypy.types import NoneType
 
-from .compare import ComparisonResult, compare_mypy_types
+from .compare import ComparisonResult, compare_symbols
+from .type_data import TypeData
 
 
 class TestComparisonResult:
@@ -38,11 +39,45 @@ class TestComparisonResult:
         assert result.data is data
 
 
-class TestCompareMypyTypes:
+class TestCompareSymbols:
     def test_right_type_is_none_succeeds(self) -> None:
-        none_type = NoneType()  # the type of "None"
-        own = Var("x", none_type)
+        own = Var("x", NoneType())  # the type of "None"
         other = Var("x", None)  # actually missing
-        result = compare_mypy_types(own, other, none_type, None)
+        result = compare_symbols(own, other)
         assert result.match is True
         assert result.message == "Generated type is None"
+
+    def test_both_types_are_none_succeeds(self) -> None:
+        own = Var("x", None)
+        other = Var("x", None)
+        result = compare_symbols(own, other)
+        assert result.match is True
+
+    def test_left_is_none_fails(self) -> None:
+        own = Var("x", None)  # actually missing
+        other = Var("x", NoneType())  # the type of "None"
+        result = compare_symbols(own, other)
+        assert result.match is False
+
+    def test_both_types_are_none_type_succeeds(self) -> None:
+        own = Var("x", NoneType())
+        other = Var("x", NoneType())
+        result = compare_symbols(own, other)
+        assert result.match is True
+
+    def test_type_infos_with_same_name_match(self, type_data: TypeData) -> None:
+        bcrypt_symbol, bcrypt_reference = type_data.get_symbol_and_reference(
+            "passlib.hash.bcrypt"
+        )
+        result = compare_symbols(bcrypt_symbol, bcrypt_reference)
+
+        assert result.match is True
+
+    def test_type_infos_with_different_names_mismatch(
+        self, type_data: TypeData
+    ) -> None:
+        bcrypt_symbol = type_data.get_symbol("passlib.hash.bcrypt")
+        md5_reference = type_data.get_reference_symbol("passlib.hash.md5_crypt")
+        result = compare_symbols(bcrypt_symbol, md5_reference)
+
+        assert result.match is False

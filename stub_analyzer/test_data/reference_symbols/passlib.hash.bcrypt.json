@@ -1,0 +1,55 @@
+{
+    ".class": "TypeInfo",
+    "module_name": "passlib.hash",
+    "fullname": "passlib.hash.bcrypt",
+    "names": {
+        ".class": "SymbolTable",
+        "_BackendMixin__backend": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_BackendMixin__backend",
+                "fullname": "passlib.hash.bcrypt._BackendMixin__backend",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": ["is_initialized_in_class", "is_ready"]
+            }
+        }
+    },
+    "defn": {
+        ".class": "ClassDef",
+        "name": "bcrypt",
+        "fullname": "passlib.hash.bcrypt",
+        "type_vars": []
+    },
+    "abstract_attributes": [],
+    "type_vars": [],
+    "bases": ["passlib.handlers.bcrypt._BcryptBackend"],
+    "mro": [
+        "passlib.hash.bcrypt",
+        "passlib.handlers.bcrypt._BcryptBackend",
+        "passlib.handlers.bcrypt._BcryptCommon",
+        "passlib.utils.handlers.SubclassBackendMixin",
+        "passlib.utils.handlers.BackendMixin",
+        "passlib.utils.handlers.TruncateMixin",
+        "passlib.utils.handlers.HasManyIdents",
+        "passlib.utils.handlers.HasRounds",
+        "passlib.utils.handlers.HasSalt",
+        "passlib.utils.handlers.GenericHandler",
+        "passlib.utils.handlers.MinimalHandler",
+        "passlib.ifc.PasswordHash",
+        "builtins.object"
+    ],
+    "_promote": null,
+    "declared_metaclass": null,
+    "metaclass_type": null,
+    "tuple_type": null,
+    "typeddict_type": null,
+    "flags": [],
+    "metadata": {}
+}

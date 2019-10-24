@@ -1,0 +1,524 @@
+{
+    ".class": "TypeInfo",
+    "module_name": "passlib.hash",
+    "fullname": "passlib.hash.md5_crypt",
+    "names": {
+        ".class": "SymbolTable",
+        "_abc_cache": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_abc_cache",
+                "fullname": "passlib.hash.md5_crypt._abc_cache",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_abc_negative_cache": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_abc_negative_cache",
+                "fullname": "passlib.hash.md5_crypt._abc_negative_cache",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_abc_negative_cache_version": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_abc_negative_cache_version",
+                "fullname": "passlib.hash.md5_crypt._abc_negative_cache_version",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_abc_registry": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_abc_registry",
+                "fullname": "passlib.hash.md5_crypt._abc_registry",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_calc_checksum_builtin": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_calc_checksum_builtin",
+                "fullname": "passlib.hash.md5_crypt._calc_checksum_builtin",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_calc_checksum_os_crypt": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_calc_checksum_os_crypt",
+                "fullname": "passlib.hash.md5_crypt._calc_checksum_os_crypt",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_pending_backend": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_pending_backend",
+                "fullname": "passlib.hash.md5_crypt._pending_backend",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_pending_dry_run": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "_pending_dry_run",
+                "fullname": "passlib.hash.md5_crypt._pending_dry_run",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "backends": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "backends",
+                "fullname": "passlib.hash.md5_crypt.backends",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "ident": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "ident",
+                "fullname": "passlib.hash.md5_crypt.ident",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "name": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "name",
+                "fullname": "passlib.hash.md5_crypt.name",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "__abstractmethods__": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Var",
+                "name": "__abstractmethods__",
+                "fullname": "passlib.hash.md5_crypt.__abstractmethods__",
+                "type": {
+                    ".class": "AnyType",
+                    "type_of_any": 2,
+                    "source_any": null,
+                    "missing_import_name": null
+                },
+                "flags": [
+                    "is_initialized_in_class",
+                    "is_ready"
+                ]
+            }
+        },
+        "_load_backend_builtin": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Decorator",
+                "func": {
+                    ".class": "FuncDef",
+                    "name": "_load_backend_builtin",
+                    "fullname": "passlib.hash.md5_crypt._load_backend_builtin",
+                    "arg_names": [
+                        "cls",
+                        "args",
+                        "kwargs"
+                    ],
+                    "arg_kinds": [
+                        0,
+                        2,
+                        4
+                    ],
+                    "type": {
+                        ".class": "CallableType",
+                        "arg_types": [
+                            {
+                                ".class": "TypeType",
+                                "item": "passlib.hash.md5_crypt"
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            }
+                        ],
+                        "arg_kinds": [
+                            0,
+                            2,
+                            4
+                        ],
+                        "arg_names": [
+                            "cls",
+                            "args",
+                            "kwargs"
+                        ],
+                        "ret_type": {
+                            ".class": "AnyType",
+                            "type_of_any": 2,
+                            "source_any": null,
+                            "missing_import_name": null
+                        },
+                        "fallback": "builtins.function",
+                        "name": "_load_backend_builtin of md5_crypt",
+                        "variables": [],
+                        "is_ellipsis_args": false,
+                        "implicit": false,
+                        "bound_args": [],
+                        "def_extras": {
+                            "first_arg": "cls"
+                        }
+                    },
+                    "flags": [
+                        "is_class",
+                        "is_decorated"
+                    ]
+                },
+                "var": {
+                    ".class": "Var",
+                    "name": "_load_backend_builtin",
+                    "fullname": null,
+                    "type": {
+                        ".class": "CallableType",
+                        "arg_types": [
+                            {
+                                ".class": "TypeType",
+                                "item": "passlib.hash.md5_crypt"
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            }
+                        ],
+                        "arg_kinds": [
+                            0,
+                            2,
+                            4
+                        ],
+                        "arg_names": [
+                            "cls",
+                            "args",
+                            "kwargs"
+                        ],
+                        "ret_type": {
+                            ".class": "AnyType",
+                            "type_of_any": 2,
+                            "source_any": null,
+                            "missing_import_name": null
+                        },
+                        "fallback": "builtins.function",
+                        "name": "_load_backend_builtin of md5_crypt",
+                        "variables": [],
+                        "is_ellipsis_args": false,
+                        "implicit": false,
+                        "bound_args": [],
+                        "def_extras": {
+                            "first_arg": "cls"
+                        }
+                    },
+                    "flags": [
+                        "is_initialized_in_class",
+                        "is_classmethod",
+                        "is_ready"
+                    ]
+                },
+                "is_overload": false
+            }
+        },
+        "_load_backend_os_crypt": {
+            ".class": "SymbolTableNode",
+            "kind": "Mdef",
+            "node": {
+                ".class": "Decorator",
+                "func": {
+                    ".class": "FuncDef",
+                    "name": "_load_backend_os_crypt",
+                    "fullname": "passlib.hash.md5_crypt._load_backend_os_crypt",
+                    "arg_names": [
+                        "cls",
+                        "args",
+                        "kwargs"
+                    ],
+                    "arg_kinds": [
+                        0,
+                        2,
+                        4
+                    ],
+                    "type": {
+                        ".class": "CallableType",
+                        "arg_types": [
+                            {
+                                ".class": "TypeType",
+                                "item": "passlib.hash.md5_crypt"
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            }
+                        ],
+                        "arg_kinds": [
+                            0,
+                            2,
+                            4
+                        ],
+                        "arg_names": [
+                            "cls",
+                            "args",
+                            "kwargs"
+                        ],
+                        "ret_type": {
+                            ".class": "AnyType",
+                            "type_of_any": 2,
+                            "source_any": null,
+                            "missing_import_name": null
+                        },
+                        "fallback": "builtins.function",
+                        "name": "_load_backend_os_crypt of md5_crypt",
+                        "variables": [],
+                        "is_ellipsis_args": false,
+                        "implicit": false,
+                        "bound_args": [],
+                        "def_extras": {
+                            "first_arg": "cls"
+                        }
+                    },
+                    "flags": [
+                        "is_class",
+                        "is_decorated"
+                    ]
+                },
+                "var": {
+                    ".class": "Var",
+                    "name": "_load_backend_os_crypt",
+                    "fullname": null,
+                    "type": {
+                        ".class": "CallableType",
+                        "arg_types": [
+                            {
+                                ".class": "TypeType",
+                                "item": "passlib.hash.md5_crypt"
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            },
+                            {
+                                ".class": "AnyType",
+                                "type_of_any": 2,
+                                "source_any": null,
+                                "missing_import_name": null
+                            }
+                        ],
+                        "arg_kinds": [
+                            0,
+                            2,
+                            4
+                        ],
+                        "arg_names": [
+                            "cls",
+                            "args",
+                            "kwargs"
+                        ],
+                        "ret_type": {
+                            ".class": "AnyType",
+                            "type_of_any": 2,
+                            "source_any": null,
+                            "missing_import_name": null
+                        },
+                        "fallback": "builtins.function",
+                        "name": "_load_backend_os_crypt of md5_crypt",
+                        "variables": [],
+                        "is_ellipsis_args": false,
+                        "implicit": false,
+                        "bound_args": [],
+                        "def_extras": {
+                            "first_arg": "cls"
+                        }
+                    },
+                    "flags": [
+                        "is_initialized_in_class",
+                        "is_classmethod",
+                        "is_ready"
+                    ]
+                },
+                "is_overload": false
+            }
+        }
+    },
+    "defn": {
+        ".class": "ClassDef",
+        "name": "md5_crypt",
+        "fullname": "passlib.hash.md5_crypt",
+        "type_vars": []
+    },
+    "abstract_attributes": [],
+    "type_vars": [],
+    "bases": [
+        "passlib.utils.handlers.HasManyBackends",
+        "passlib.handlers.md5_crypt._MD5_Common"
+    ],
+    "mro": [
+        "passlib.hash.md5_crypt",
+        "passlib.utils.handlers.HasManyBackends",
+        "passlib.utils.handlers.BackendMixin",
+        "passlib.handlers.md5_crypt._MD5_Common",
+        "passlib.utils.handlers.HasSalt",
+        "passlib.utils.handlers.GenericHandler",
+        "passlib.utils.handlers.MinimalHandler",
+        "passlib.ifc.PasswordHash",
+        "builtins.object"
+    ],
+    "_promote": null,
+    "declared_metaclass": null,
+    "metaclass_type": null,
+    "tuple_type": null,
+    "typeddict_type": null,
+    "flags": [],
+    "metadata": {}
+}
