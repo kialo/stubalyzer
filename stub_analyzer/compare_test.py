@@ -144,7 +144,7 @@ class TestCompareMethods:
 
         assert result.match_result is MatchResult.MISMATCH
 
-    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    @pytest.mark.xfail(reason="Not yet supported", strict=True)  # type: ignore
     def test_argument_names_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
         meth, meth_ref = mypy_nodes.get_argument_names_wrong()
         result = compare_symbols(meth, meth_ref)
@@ -155,13 +155,13 @@ class TestCompareMethods:
         result = compare_symbols(meth, meth_ref)
         assert result.match_result is MatchResult.MISMATCH
 
-    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    @pytest.mark.xfail(reason="Not yet supported", strict=True)  # type: ignore
     def test_argument_types_less_specific(self, mypy_nodes: MypyNodeFactory) -> None:
         meth, meth_ref = mypy_nodes.get_argument_types_less_specific()
         result = compare_symbols(meth, meth_ref)
         assert result.match_result is MatchResult.MISMATCH
 
-    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    @pytest.mark.xfail(reason="Not yet supported", strict=True)  # type: ignore
     def test_return_type_less_specific(self, mypy_nodes: MypyNodeFactory) -> None:
         meth, meth_ref = mypy_nodes.get_return_type_less_specific()
         result = compare_symbols(meth, meth_ref)
