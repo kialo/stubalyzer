@@ -14,7 +14,7 @@ import os
 import sys
 from pathlib import Path
 
-module_path = Path(os.path.abspath(os.path.dirname(__file__))) / ".." / "stub_analyzer"
+module_path = Path(os.path.abspath(os.path.dirname(__file__))) / ".."
 sys.path.insert(0, str(module_path))
 
 
