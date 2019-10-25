@@ -10,9 +10,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, '/Users/simon/work/stub-analyzer/stub_analyzer')
+import os
+import sys
+from pathlib import Path
+
+module_path = Path(os.path.abspath(os.path.dirname(__file__))) / ".." / "stub_analyzer"
+sys.path.insert(0, str(module_path))
 
 
 # -- Project information -----------------------------------------------------
@@ -56,7 +59,7 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
