@@ -8,7 +8,6 @@ from typing import Dict, Generator, List, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
-
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
