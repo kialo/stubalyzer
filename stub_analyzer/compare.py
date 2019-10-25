@@ -261,17 +261,38 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
     )
 
 
-def _callable_types_match(typ: CallableType, type_reference: CallableType) -> bool:
-    return len(typ.arg_kinds) <= len(type_reference.arg_kinds) and _mypy_types_match(
-        typ, type_reference
-    )
+def _callable_types_match(
+    callable: CallableType, reference_callable: CallableType
+) -> bool:
+    """
+    Check if the given callable matches the reference.
+
+    :param callable: callable to check
+    :param reference_callable: callable to check against
+    """
+    return len(callable.arg_kinds) <= len(
+        reference_callable.arg_kinds
+    ) and _mypy_types_match(callable, reference_callable)
 
 
-def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:
-    if len(a.items()) != len(b.items()):
+def _overloaded_types_match(
+    overloaded: Overloaded, reference_overloaded: Overloaded
+) -> bool:
+    """
+    Check if the given overloaded type matches the reference.
+
+    :param overloaded: overloaded type to check
+    :param reference_overloaded: overloaded type to check against
+    """
+    if len(overloaded.items()) != len(reference_overloaded.items()):
         return False
 
-    return all([_callable_types_match(_a, _b) for _a, _b in zip(a.items(), b.items())])
+    return all(
+        [
+            _callable_types_match(ovl, ref)
+            for ovl, ref in zip(overloaded.items(), reference_overloaded.items())
+        ]
+    )
 
 
 def compare_mypy_types(
