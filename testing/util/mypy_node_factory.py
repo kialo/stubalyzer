@@ -35,24 +35,13 @@ class MypyNodeFactory:
         }
 
     def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
-        handwritten_symbol_node = (
-            self._handwritten_stubs_map[node_name]
-            if node_name in self._handwritten_stubs_map.keys()
-            else None
+        return (
+            cast(T, self._handwritten_stubs_map[node_name]),
+            cast(T, self._generated_stubs_map[node_name]),
         )
-        generated_symbol_node = (
-            self._generated_stubs_map[node_name]
-            if node_name in self._generated_stubs_map.keys()
-            else None
-        )
-        return (cast(T, handwritten_symbol_node), cast(T, generated_symbol_node))
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
-        return self.get(node_name, FuncDef)
-
-    def get_missing_function_node(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "functions.missing_function"
         return self.get(node_name, FuncDef)
 
     def get_additional_args_node(self) -> Tuple[FuncDef, FuncDef]:
