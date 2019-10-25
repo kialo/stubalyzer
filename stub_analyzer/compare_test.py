@@ -1,5 +1,6 @@
 from mypy.nodes import Var
 from mypy.types import NoneType
+
 from testing.util import mypy_node_factory
 
 from .compare import ComparisonResult, MatchResult, compare_mypy_types, compare_symbols
@@ -92,7 +93,7 @@ class TestCompareSymbols:
         result = compare_mypy_types(
             func_def, func_def_reference, func_def.type, func_def_reference.type
         )
-        assert result.match is MatchResult.MISMATCH
+        assert result.matchResult is MatchResult.MISMATCH
 
     def test_func_def_mismatches_when_handwritten_stub_has_additional_args(
         self
@@ -101,7 +102,7 @@ class TestCompareSymbols:
         result = compare_mypy_types(
             func_def, func_def_reference, func_def.type, func_def_reference.type
         )
-        assert result.match is MatchResult.MISMATCH
+        assert result.matchResult is MatchResult.MISMATCH
 
     def test_overload_mismatches_if_any_handwritten_stub_has_additional_args(
         self
@@ -115,7 +116,7 @@ class TestCompareSymbols:
             overloaded_def.type,
             overloaded_reference.type,
         )
-        assert result.match is MatchResult.MISMATCH
+        assert result.matchResult is MatchResult.MISMATCH
 
     def test_overload_mismatch_if_any_handwritten_stub_has_additional_optional_args(
         self
@@ -129,4 +130,4 @@ class TestCompareSymbols:
             overloaded_def.type,
             overloaded_reference.type,
         )
-        assert result.match is MatchResult.MISMATCH
+        assert result.matchResult is MatchResult.MISMATCH
