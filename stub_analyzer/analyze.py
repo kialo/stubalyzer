@@ -103,17 +103,17 @@ def evaluate_compare_result(
 ) -> bool:
     symbol = compare_result.symbol_name
     matchResult = compare_result.matchResult
-    err = False
+    success = True
     expected_mismatch = mismatches.get(symbol)
 
     if expected_mismatch is None:
         if matchResult is not MatchResult.MATCH:
-            err = True
+            success = False
             print(f"\n{compare_result.message}")
     else:
         mismatches_left.remove(symbol)
         if matchResult is MatchResult.MATCH:
-            err = True
+            success = False
             print(
                 "\n",
                 MATCH_FOUND_ERROR.format(
@@ -121,7 +121,7 @@ def evaluate_compare_result(
                 ),
             )
         elif matchResult is not expected_mismatch:
-            err = True
+            success = False
             print(
                 "\n",
                 WRONG_MISMATCH_ERROR.format(
@@ -130,7 +130,7 @@ def evaluate_compare_result(
                     received=matchResult.value,
                 ),
             )
-    return err
+    return success
 
 
 def generate_stub_types(base_stubs_path: str) -> Iterable[RelevantSymbolNode]:
@@ -159,7 +159,7 @@ def analyze_stubs(
         TODO: add/reference example of a expected_mismatches.json here
     :return: True if the stubs in base_stubs_path are considered correct
     """
-    err = False
+    success = True
     failed_count = 0
     total_count = 0
     stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
@@ -174,18 +174,19 @@ def analyze_stubs(
         )
     except (JSONDecodeError, SchemaError) as ex:
         print(ex, "\n", CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
-        err = True
+        success = False
 
-    if not err:
+    if success:
         for res in compare(stub_types_base, stub_types_reference):
             total_count += 1
-            err = evaluate_compare_result(res, mismatches, unused_mismatches)
-            if err:
+            success = evaluate_compare_result(res, mismatches, unused_mismatches)
+            if not success:
                 failed_count += 1
-                print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
+                if expected_mismatches_path:
+                    print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
         if unused_mismatches:
-            err = True
+            success = False
             print(
                 "\n",
                 UNUSED_DEFINITION_ERROR.format(symbols=", ".join(unused_mismatches)),
@@ -193,7 +194,7 @@ def analyze_stubs(
             print(CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
 
     print(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
-    return not err
+    return success
 
 
 def main() -> None:
