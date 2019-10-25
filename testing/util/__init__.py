@@ -1,1 +1,1 @@
-from .mypy_node_factory import mypy_node_factory
+from .mypy_node_factory import MypyNodeFactory, mypy_node_factory
