@@ -4,10 +4,11 @@ from argparse import ArgumentParser, Namespace
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Set, Tuple
+from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
+
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
@@ -56,7 +57,7 @@ def parse_command_line() -> Namespace:
 
 
 def compare(
-    hand_written: List[RelevantSymbolNode], generated: List[RelevantSymbolNode]
+    hand_written: Iterable[RelevantSymbolNode], generated: Iterable[RelevantSymbolNode]
 ) -> Generator[ComparisonResult, None, None]:
     """Compare hand written to generated stubs."""
     gen_map = {symbol.fullname(): symbol for symbol in generated}
@@ -75,7 +76,9 @@ def compare(
             yield ComparisonResult.create_not_found(symbol)
 
 
-def setup_expected_mismatches(file_path: str) -> Tuple[Dict[str, MatchResult], str]:
+def setup_expected_mismatches(
+    file_path: Optional[str] = None
+) -> Tuple[Dict[str, MatchResult], str]:
     if not file_path:
         return dict(), set()
 
@@ -128,17 +131,38 @@ def evaluate_compare_result(
     return err
 
 
+def generate_stub_types(base_stubs_path: str) -> Iterable[RelevantSymbolNode]:
+    raise NotImplementedError("I'm working on it")
+
+
 def analyze_stubs(
     mypy_conf_path: str,
     base_stubs_path: str,
-    reference_stubs_path: str,
+    reference_stubs_path: Optional[str] = None,
     expected_mismatches_path: Optional[str] = None,
 ) -> bool:
+    """
+    Tries to determine if the (presumably) handwritten stubs in base_stubs_path are correct; i.e. if they match the
+    API of the modules that they are stubbing. For this they are compared to reference stubs, which by default are
+    generated with mypy's stubgen tool.
+    For each type mismatch (e.g. different function signature, missing class member) a message will be printed
+    to stdout. The function will return False if any mismatches are found, unless they have been declared as expected.
+    :param mypy_conf_path: path to mypy.ini
+    :param base_stubs_path: path to the directory that contains the stubs to analyze
+    :param reference_stubs_path: Path to the directory that contains the reference stubs.
+                                 If not provided mypy's stubgen tool will be used to generate the reference stubs.
+    :param expected_mismatches_path: path to a JSON file that specifies expected type mismatches
+                                     TODO: add/reference example of a expected_mismatches.json here
+    :return: True if the stubs in base_stubs_path are considered correct
+    """
     err = False
     failed_count = 0
     total_count = 0
     stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
-    stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
+    if reference_stubs_path:
+        stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
+    else:
+        stub_types_reference = generate_stub_types(base_stubs_path)
 
     try:
         mismatches, unused_mismatches = setup_expected_mismatches(
