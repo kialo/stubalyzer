@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
-from typing import Dict, Generator, List, Tuple, cast
+from typing import Dict, Generator, Iterable, Tuple, cast
 
 from mypy.nodes import SymbolNode
+
 from stub_analyzer import (
     ComparisonResult,
+    MatchResult,
     RelevantSymbolNode,
     compare_symbols,
     get_stub_types,
@@ -14,23 +16,24 @@ from stub_analyzer import (
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
 
 
-def collect_stub_types() -> Tuple[List[RelevantSymbolNode], List[RelevantSymbolNode]]:
+def collect_stub_types() -> Tuple[
+    Iterable[RelevantSymbolNode], Iterable[RelevantSymbolNode]
+]:
     mypy_conf = BASE_DIR / "mypy.ini"
 
-    hand_written: List[RelevantSymbolNode] = list(
+    hand_written: Iterable[RelevantSymbolNode] = list(
         get_stub_types(f"{BASE_DIR}/stubs-handwritten", mypy_conf_path=str(mypy_conf))
     )
-    generated: List[RelevantSymbolNode] = list(
+    generated: Iterable[RelevantSymbolNode] = list(
         get_stub_types(f"{BASE_DIR}/stubs-generated", mypy_conf_path=str(mypy_conf))
     )
 
     return hand_written, generated
 
 
-def compare(
-    hand_written: List[RelevantSymbolNode], generated: List[RelevantSymbolNode]
-) -> Generator[ComparisonResult, None, None]:
+def compare() -> Generator[ComparisonResult, None, None]:
     """Compare hand written to generated stubs."""
+    hand_written, generated = collect_stub_types()
     gen_map: Dict[str, SymbolNode] = {symbol.fullname(): symbol for symbol in generated}
 
     for symbol in hand_written:
@@ -48,11 +51,10 @@ def compare(
 
 
 def compare_main() -> None:
-    hand_written, generated = collect_stub_types()
-    comp_res = list(compare(hand_written, generated))
+    comp_res = compare()
 
     for res in comp_res:
-        if not res.match:
+        if res.matchResult is not MatchResult.MATCH:
             print(res.message)
         # print(type(res).__name__ + "(")
         # for key, val in res._asdict().items():
