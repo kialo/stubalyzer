@@ -22,7 +22,7 @@ from mypy.nodes import (
     Var,
 )
 
-from .types import RelevantSymbolNode
+from .mypy_types import RelevantSymbolNode
 
 
 def _mypy_analyze(
