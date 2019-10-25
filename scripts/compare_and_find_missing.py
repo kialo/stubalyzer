@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, Generator, Iterable, Tuple, cast
 
 from mypy.nodes import SymbolNode
-
 from stub_analyzer import (
     ComparisonResult,
     MatchResult,

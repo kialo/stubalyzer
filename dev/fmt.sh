@@ -17,8 +17,8 @@ cd $(dirname $0)/..
 
 if [ $# -eq 0 ]
 then
-    isort_params="--recursive stub_analyzer setup.py"
-    black_params="stub_analyzer setup.py"
+    isort_params="--recursive stub_analyzer testing scripts setup.py"
+    black_params="stub_analyzer testing scripts setup.py"
 else
     isort_params="$@"
     black_params="$@"
