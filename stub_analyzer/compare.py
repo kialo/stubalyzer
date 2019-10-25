@@ -32,12 +32,19 @@ class MatchResult(Enum):
 
     @classmethod
     def declare_mismatch(cls, matchResultString: str) -> "MatchResult":
-        if matchResultString == MatchResult.MATCH.value:
+        err = matchResultString == MatchResult.MATCH.value
+
+        try:
+            result = MatchResult(matchResultString)
+        except ValueError:
+            err = True
+
+        if err:
             raise ValueError(
-                f"'{MatchResult.MATCH.value}' is not a valid mismatch type."
+                f"'{matchResultString}' is not a valid mismatch type."
                 f"(Use {', '.join([m.value for m in MatchResult])})"
             )
-        return MatchResult(matchResultString)
+        return result
 
 
 def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:

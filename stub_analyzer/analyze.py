@@ -4,7 +4,7 @@ from argparse import ArgumentParser, Namespace
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
+from typing import Dict, Generator, Iterable, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
@@ -50,8 +50,8 @@ def parse_command_line() -> Namespace:
         "stubs_reference",
         required=False,
         default=None,
-        help="Directory of reference stubs to compare against. If not specified stubgen will be used"
-        "to generate the reference stubs.",
+        help="Directory of reference stubs to compare against."
+        "If not specified stubgen will be used to generate the reference stubs.",
     )
     return parser.parse_args()
 
@@ -78,7 +78,7 @@ def compare(
 
 def setup_expected_mismatches(
     file_path: Optional[str] = None
-) -> Tuple[Dict[str, MatchResult], str]:
+) -> Tuple[Dict[str, MatchResult], Set[str]]:
     if not file_path:
         return dict(), set()
 
@@ -98,20 +98,20 @@ def evaluate_compare_result(
     compare_result: ComparisonResult,
     mismatches: Dict[str, MatchResult],
     mismatches_left: Set[str],
-) -> int:
+) -> bool:
     symbol = compare_result.symbol_name
     matchResult = compare_result.matchResult
-    err = 0
+    err = False
     expected_mismatch = mismatches.get(symbol)
 
     if expected_mismatch is None:
         if matchResult is not MatchResult.MATCH:
-            err = 1
+            err = True
             print(f"\n{compare_result.message}")
     else:
         mismatches_left.remove(symbol)
         if matchResult is MatchResult.MATCH:
-            err = 1
+            err = True
             print(
                 "\n",
                 MATCH_FOUND_ERROR.format(
@@ -119,7 +119,7 @@ def evaluate_compare_result(
                 ),
             )
         elif matchResult is not expected_mismatch:
-            err = 1
+            err = True
             print(
                 "\n",
                 WRONG_MISMATCH_ERROR.format(
@@ -142,17 +142,19 @@ def analyze_stubs(
     expected_mismatches_path: Optional[str] = None,
 ) -> bool:
     """
-    Tries to determine if the (presumably) handwritten stubs in base_stubs_path are correct; i.e. if they match the
-    API of the modules that they are stubbing. For this they are compared to reference stubs, which by default are
-    generated with mypy's stubgen tool.
-    For each type mismatch (e.g. different function signature, missing class member) a message will be printed
-    to stdout. The function will return False if any mismatches are found, unless they have been declared as expected.
+    Determines if the (presumably) handwritten stubs in base_stubs_path are correct;
+    i.e. if they match the API of the modules that they are stubbing.
+    For this they are compared to reference stubs, which by default are generated
+    with mypy's stubgen tool. For each type mismatch (e.g. different function signature,
+    missing class member) a message will be printed to stdout. The function will return
+    False if any mismatches are found, unless they have been declared as expected.
+
     :param mypy_conf_path: path to mypy.ini
     :param base_stubs_path: path to the directory that contains the stubs to analyze
-    :param reference_stubs_path: Path to the directory that contains the reference stubs.
-                                 If not provided mypy's stubgen tool will be used to generate the reference stubs.
-    :param expected_mismatches_path: path to a JSON file that specifies expected type mismatches
-                                     TODO: add/reference example of a expected_mismatches.json here
+    :param reference_stubs_path: Path to the folder that contains the reference stubs.
+        If not provided mypy's stubgen tool will be used to generate them.
+    :param expected_mismatches_path: Path to JSON file that defines expected mismatches
+        TODO: add/reference example of a expected_mismatches.json here
     :return: True if the stubs in base_stubs_path are considered correct
     """
     err = False
@@ -172,11 +174,11 @@ def analyze_stubs(
         print(ex, "\n", CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
         err = True
 
-    if err == 0:
+    if not err:
         for res in compare(stub_types_base, stub_types_reference):
             total_count += 1
             err = evaluate_compare_result(res, mismatches, unused_mismatches)
-            if err != 0:
+            if err:
                 failed_count += 1
                 print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 

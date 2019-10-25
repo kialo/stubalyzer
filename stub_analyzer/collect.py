@@ -3,7 +3,7 @@ API for analyzing Python stubs using mypy.
 """
 import os
 from os.path import abspath
-from typing import Generator, Optional, Set
+from typing import Iterable, Optional, Set
 
 from mypy.build import BuildResult, State, build
 from mypy.fscache import FileSystemCache
@@ -66,7 +66,7 @@ def is_stubbed_module(module: State) -> bool:
 
 def collect_types(
     symbol_node: SymbolNode, collected_types: Optional[Set[str]] = None
-) -> Generator[RelevantSymbolNode, None, None]:
+) -> Iterable[RelevantSymbolNode]:
     """
     Collect all relevant type definitions of the symbols in the given node.
 
@@ -113,7 +113,7 @@ def collect_types(
 
 def get_stub_types(
     stubs_path: str, mypy_conf_path: str, root_path: Optional[str] = None
-) -> Generator[RelevantSymbolNode, None, None]:
+) -> Iterable[RelevantSymbolNode]:
     """
     Analyze the stub files in stubs_path and return module
     and class definitions of stubs as symbol nodes.
