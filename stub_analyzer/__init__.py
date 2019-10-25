@@ -4,10 +4,10 @@ from .lookup import lookup_symbol
 from .types import RelevantSymbolNode
 
 __all__ = [
-    "get_stub_types",
-    "ComparisonResult",
-    "MatchResult",
     "compare_symbols",
+    "ComparisonResult",
+    "get_stub_types",
     "lookup_symbol",
+    "MatchResult",
     "RelevantSymbolNode",
 ]
