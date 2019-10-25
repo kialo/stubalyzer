@@ -3,7 +3,8 @@ from typing import Any
 class SuperWithMethod:
     def super_method(self, foo: int) -> str: ...
 
-class SubclassWithMethod(SuperWithMethod): ...
+class SubclassWithMethod(SuperWithMethod):
+    def sub_method(self, bar: str) -> int: ...
 
 class SuperWithClassmethod:
     @classmethod

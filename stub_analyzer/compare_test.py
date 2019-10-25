@@ -1,10 +1,8 @@
 from mypy.nodes import Var
 from mypy.types import NoneType
+from testing.util import MypyNodeFactory
 
-from testing.util import mypy_node_factory
-
-from .compare import ComparisonResult, MatchResult, compare_mypy_types, compare_symbols
-from .type_data import TypeData
+from .compare import ComparisonResult, MatchResult, compare_symbols
 
 
 class TestComparisonResult:
@@ -67,67 +65,49 @@ class TestCompareSymbols:
         result = compare_symbols(own, other)
         assert result.matchResult is MatchResult.MATCH
 
-    def test_type_infos_with_same_name_match(self, type_data: TypeData) -> None:
-        bcrypt_symbol, bcrypt_reference = type_data.get_symbol_and_reference(
-            "passlib.hash.bcrypt"
-        )
-        result = compare_symbols(bcrypt_symbol, bcrypt_reference)
+    def test_type_infos_with_same_name_match(self, mypy_nodes: MypyNodeFactory) -> None:
+        cls, cls_reference = mypy_nodes.get_class_with_method()
+        result = compare_symbols(cls, cls_reference)
 
         assert result.matchResult is MatchResult.MATCH
 
     def test_type_infos_with_different_names_mismatch(
-        self, type_data: TypeData
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        bcrypt_symbol = type_data.get_symbol("passlib.hash.bcrypt")
-        md5_reference = type_data.get_reference_symbol("passlib.hash.md5_crypt")
-        result = compare_symbols(bcrypt_symbol, md5_reference)
+        supercls, _ = mypy_nodes.get_class_with_method()
+        sublcls, _ = mypy_nodes.get_subclass_with_method()
+        result = compare_symbols(supercls, sublcls)
 
         assert result.matchResult is MatchResult.MISMATCH
 
     def test_func_def_mismatches_when_handwritten_stub_has_additional_optional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        func_def, func_def_reference = (
-            mypy_node_factory.get_additional_optional_args_node()
-        )
-        result = compare_mypy_types(
-            func_def, func_def_reference, func_def.type, func_def_reference.type
-        )
+        func_def, func_def_reference = mypy_nodes.get_additional_optional_args_node()
+        result = compare_symbols(func_def, func_def_reference)
         assert result.matchResult is MatchResult.MISMATCH
 
     def test_func_def_mismatches_when_handwritten_stub_has_additional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        func_def, func_def_reference = mypy_node_factory.get_additional_args_node()
-        result = compare_mypy_types(
-            func_def, func_def_reference, func_def.type, func_def_reference.type
-        )
+        func_def, func_def_reference = mypy_nodes.get_additional_args_node()
+        result = compare_symbols(func_def, func_def_reference)
         assert result.matchResult is MatchResult.MISMATCH
 
     def test_overload_mismatches_if_any_handwritten_stub_has_additional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
         overloaded_def, overloaded_reference = (
-            mypy_node_factory.get_overloaded_additional_args_node()
+            mypy_nodes.get_overloaded_additional_args_node()
         )
-        result = compare_mypy_types(
-            overloaded_def,
-            overloaded_reference,
-            overloaded_def.type,
-            overloaded_reference.type,
-        )
+        result = compare_symbols(overloaded_def, overloaded_reference)
         assert result.matchResult is MatchResult.MISMATCH
 
     def test_overload_mismatch_if_any_handwritten_stub_has_additional_optional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
         overloaded_def, overloaded_reference = (
-            mypy_node_factory.get_overloaded_additional_optional_args_node()
+            mypy_nodes.get_overloaded_additional_optional_args_node()
         )
-        result = compare_mypy_types(
-            overloaded_def,
-            overloaded_reference,
-            overloaded_def.type,
-            overloaded_reference.type,
-        )
+        result = compare_symbols(overloaded_def, overloaded_reference)
         assert result.matchResult is MatchResult.MISMATCH
