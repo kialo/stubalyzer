@@ -175,11 +175,12 @@ class ComparisonResult(NamedTuple):
         )
 
     @classmethod
-    def create_symbol_not_found(cls,
-                                reference: RelevantSymbolNode,
-                                data: Optional[Dict[str, Any]] = None,
-                                message: Optional[str] = None,
-                                ) -> ComparisonResult:
+    def create_symbol_not_found(
+        cls,
+        reference: RelevantSymbolNode,
+        data: Optional[Dict[str, Any]] = None,
+        message: Optional[str] = None,
+    ) -> ComparisonResult:
         """
         Create an unsuccessful comparison result
         when there is no matching symbol found.
@@ -188,13 +189,14 @@ class ComparisonResult(NamedTuple):
         :param data: optional additional data
         :param message: optional message
         """
-        return cls._create(
-            matchResult=MatchResult.NOT_FOUND,
+        return cls.create(
+            match_result=MatchResult.NOT_FOUND,
             symbol=None,
             reference=reference,
             data=data,
             message=(
-                    message or (f"Symbol {reference.fullname()} not found in handwritten stubs.")
+                message
+                or (f"Symbol {reference.fullname()} not found in handwritten stubs.")
             ),
         )
 
@@ -482,9 +484,7 @@ def compare_symbols(
     :param reference: symbol node to validate against
     """
     if symbol is None:
-        return ComparisonResult.create_symbol_not_found(
-            reference=reference
-        )
+        return ComparisonResult.create_symbol_not_found(reference=reference)
     # TODO: Check if this is always the case, i.e. could there be
     # cases where `symbol` and `reference` don't have the same class but still match?
     if type(symbol) != type(reference):
