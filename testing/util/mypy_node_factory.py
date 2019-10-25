@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Mapping, Tuple, Type, TypeVar, cast
 
-from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo
+from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
 
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
@@ -33,6 +33,12 @@ class MypyNodeFactory:
         self._generated_stubs_map: Mapping[str, RelevantSymbolNode] = {
             symbol.fullname(): symbol for symbol in generated_stubs
         }
+
+    def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
+        return (
+            cast(T, self._handwritten_stubs_map[node_name]),
+            cast(T, self._generated_stubs_map[node_name]),
+        )
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
@@ -80,11 +86,61 @@ class MypyNodeFactory:
         node_name = "classes.SubclassWithMethod"
         return self.get(node_name, TypeInfo)
 
-    def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
-        return (
-            cast(T, self._handwritten_stubs_map[node_name]),
-            cast(T, self._generated_stubs_map[node_name]),
-        )
+    def get_method(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.SuperWithMethod.a_method"
+        return self.get(node_name, FuncDef)
+
+    def get_classmethod(self) -> Tuple[Decorator, Decorator]:
+        node_name = "classes.SuperWithClassmethod.a_classmethod"
+        return self.get(node_name, Decorator)
+
+    def get_overridden_method(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.OverridingMethod.overwritten"
+        return self.get(node_name, FuncDef)
+
+    def get_overridden_classmethod(self) -> Tuple[Decorator, Decorator]:
+        node_name = "classes.OverridingClassmethod.overwritten"
+        return self.get(node_name, Decorator)
+
+    def get_argument_order_wrong(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.argument_order_wrong"
+        return self.get(node_name, FuncDef)
+
+    def get_argument_names_wrong(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.argument_names_wrong"
+        return self.get(node_name, FuncDef)
+
+    def get_argument_types_wrong(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.argument_types_wrong"
+        return self.get(node_name, FuncDef)
+
+    def get_argument_types_less_specific(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.argument_types_less_specific"
+        return self.get(node_name, FuncDef)
+
+    def get_return_type_less_specific(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.return_type_less_specific"
+        return self.get(node_name, FuncDef)
+
+    def get_return_type_wrong(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.return_type_wrong"
+        return self.get(node_name, FuncDef)
+
+    def get_any_var(self) -> Var:
+        node_name = "vars.any_var"
+        return cast(Var, self._handwritten_stubs_map[node_name])
+
+    def get_int_var(self) -> Var:
+        node_name = "vars.int_var"
+        return cast(Var, self._handwritten_stubs_map[node_name])
+
+    def get_bool_var(self) -> Var:
+        node_name = "vars.bool_var"
+        return cast(Var, self._handwritten_stubs_map[node_name])
+
+    def get_str_var(self) -> Var:
+        node_name = "vars.str_var"
+        return cast(Var, self._handwritten_stubs_map[node_name])
 
 
 mypy_node_factory = MypyNodeFactory()

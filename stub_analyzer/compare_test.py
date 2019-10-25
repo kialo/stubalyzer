@@ -1,6 +1,7 @@
+import pytest  # type: ignore
+
 from mypy.nodes import Var
 from mypy.types import NoneType
-
 from testing.util import MypyNodeFactory, mypy_node_factory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
@@ -40,7 +41,7 @@ class TestComparisonResult:
         assert result.data is data
 
 
-class TestCompareSymbols:
+class TestCompareNone:
     def test_right_type_is_none_succeeds(self) -> None:
         own = Var("x", NoneType())  # the type of "None"
         other = Var("x", None)  # actually missing
@@ -66,6 +67,8 @@ class TestCompareSymbols:
         result = compare_symbols(own, other)
         assert result.match_result is MatchResult.MATCH
 
+
+class TestCompareTypeInfos:
     def test_type_infos_with_same_name_match(self, mypy_nodes: MypyNodeFactory) -> None:
         cls, cls_reference = mypy_nodes.get_class_with_method()
         result = compare_symbols(cls, cls_reference)
@@ -81,6 +84,86 @@ class TestCompareSymbols:
 
         assert result.match_result is MatchResult.MISMATCH
 
+
+class TestComparePrimitiveVars:
+    def test_int_and_bool_match(self, mypy_nodes: MypyNodeFactory) -> None:
+        int_var = mypy_nodes.get_int_var()
+        bool_var = mypy_nodes.get_bool_var()
+
+        result_a = compare_symbols(int_var, bool_var)
+        result_b = compare_symbols(bool_var, int_var)
+
+        assert result_a.match_result is MatchResult.MATCH
+        assert result_b.match_result is MatchResult.MATCH
+
+    def test_str_and_int_dont_match(self, mypy_nodes: MypyNodeFactory) -> None:
+        int_var = mypy_nodes.get_int_var()
+        str_var = mypy_nodes.get_str_var()
+
+        result_a = compare_symbols(int_var, str_var)
+        result_b = compare_symbols(str_var, int_var)
+
+        assert result_a.match_result is MatchResult.MISMATCH
+        assert result_b.match_result is MatchResult.MISMATCH
+
+
+class TestCompareMethods:
+    def test_compare_method(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_method()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MATCH
+
+    def test_compare_classmethod(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_classmethod()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MATCH
+
+    def test_compare_overridden_method(self, mypy_nodes: MypyNodeFactory) -> None:
+        override, override_meth = mypy_nodes.get_overridden_method()
+        result = compare_symbols(override, override_meth)
+        assert result.match_result is MatchResult.MATCH
+
+    def test_compare_overridden_classmethod(self, mypy_nodes: MypyNodeFactory) -> None:
+        override, override_meth = mypy_nodes.get_overridden_classmethod()
+        result = compare_symbols(override, override_meth)
+        assert result.match_result is MatchResult.MATCH
+
+    def test_argument_order_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_argument_order_wrong()
+        result = compare_symbols(meth, meth_ref)
+
+        assert result.match_result is MatchResult.MISMATCH
+
+    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    def test_argument_names_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_argument_names_wrong()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MISMATCH
+
+    def test_argument_types_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_argument_types_wrong()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MISMATCH
+
+    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    def test_argument_types_less_specific(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_argument_types_less_specific()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MISMATCH
+
+    @pytest.mark.xfail(reason="Not yet supported")  # type: ignore
+    def test_return_type_less_specific(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_return_type_less_specific()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MISMATCH
+
+    def test_return_type_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_return_type_wrong()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MISMATCH
+
+
+class TestCompareFunctions:
     def test_func_def_mismatches_when_handwritten_stub_has_additional_optional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
