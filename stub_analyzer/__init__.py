@@ -1,7 +1,7 @@
 from .collect import get_stub_types
 from .compare import ComparisonResult, MatchResult, compare_symbols
 from .lookup import lookup_symbol
-from .mypy_types import RelevantSymbolNode
+from .types import RelevantSymbolNode
 
 __all__ = [
     "compare_symbols",

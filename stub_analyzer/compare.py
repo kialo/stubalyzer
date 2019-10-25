@@ -21,7 +21,7 @@ from mypy.subtypes import is_subtype
 from mypy.types import CallableType, Overloaded
 from mypy.types import Type as TypeNode
 
-from .mypy_types import RelevantSymbolNode
+from .types import RelevantSymbolNode
 
 
 class MatchResult(Enum):
