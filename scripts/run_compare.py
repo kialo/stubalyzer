@@ -8,7 +8,6 @@ BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
 
 
 if __name__ == "__main__":
-    mypy_conf = BASE_DIR / "mypy.ini"
     success = analyze_stubs(
         f"{BASE_DIR}/mypy.ini",
         f"{BASE_DIR}/stubs-handwritten",
