@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from schema import SchemaError
 
-from .analyze import evaluate_compare_result, setup_expected_mismatches
+from .analyze import analyze_stubs, evaluate_compare_result, setup_expected_mismatches
 from .compare import MatchResult
 
 
@@ -134,3 +134,90 @@ class TestEvaluateCompareResult:
 
         self.assert_err('Expected "3" to be "mismatch" but it was "not_found".', capsys)
         assert mismatches_left == set(["1", "2", "4"])
+
+
+class TestAnalyzeStubs:
+    @staticmethod
+    def assert_stdout(expected: str, capsys: Any) -> None:
+        out, _ = capsys.readouterr()
+        assert out.strip() == expected
+
+    @staticmethod
+    def assert_out(expected_std: str, expected_err: str, capsys: Any) -> None:
+        std, err = capsys.readouterr()
+        assert std.strip() == expected_std
+        assert err.strip() == expected_err
+
+    @staticmethod
+    def assert_err_contains_line(line: str, capsys: Any) -> None:
+        _, err = capsys.readouterr()
+        assert line in [err_line.strip() for err_line in err.strip().split("\n")]
+
+    @patch("stub_analyzer.analyze.evaluate_compare_result", return_value=True)
+    @patch("stub_analyzer.analyze.compare", return_value=range(10))
+    @patch("stub_analyzer.analyze.generate_stub_types")
+    def test_everything_ok(
+        self, generate_mock: Mock, compare_mock: Mock, result_mock: Mock, capsys: Any
+    ) -> None:
+        assert analyze_stubs("mypy_conf_path", "base_stubs_path")
+        self.assert_out("Comparing failed on 0 of 10 stubs.", "", capsys)
+
+    @patch(
+        "stub_analyzer.analyze.setup_expected_mismatches",
+        side_effect=JSONDecodeError("Boom", '{"a": 2}', 4),
+    )
+    def test_json_error(self, setup_mock: Mock, capsys: Any) -> None:
+        assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
+        self.assert_err_contains_line("Boom: line 1 column 5 (char 4)", capsys)
+
+    @patch(
+        "stub_analyzer.analyze.setup_expected_mismatches",
+        side_effect=SchemaError("Boom"),
+    )
+    def test_schema_error(self, setup_mock: Mock, capsys: Any) -> None:
+        assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
+        self.assert_err_contains_line("Boom", capsys)
+
+    @patch("stub_analyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
+    @patch(
+        "stub_analyzer.analyze.evaluate_compare_result",
+        side_effect=[False] * 3 + [True] * 7,
+    )
+    @patch("stub_analyzer.analyze.compare", return_value=range(10))
+    @patch("stub_analyzer.analyze.generate_stub_types")
+    def test_some_results_fail_ok(
+        self,
+        generate_mock: Mock,
+        compare_mock: Mock,
+        result_mock: Mock,
+        setup_mock: Mock,
+        capsys: Any,
+    ) -> None:
+        assert not analyze_stubs(
+            "mypy_conf_path",
+            "base_stubs_path",
+            expected_mismatches_path="a/proper/mismatch_path",
+        )
+        self.assert_out(
+            "Comparing failed on 3 of 10 stubs.",
+            "\n".join(['Check "a/proper/mismatch_path" to fix.'] * 3),
+            capsys,
+        )
+
+    @patch(
+        "stub_analyzer.analyze.setup_expected_mismatches",
+        return_value=({}, ["lib.1", "lib.2"]),
+    )
+    @patch("stub_analyzer.analyze.compare", return_value=[])
+    @patch("stub_analyzer.analyze.generate_stub_types")
+    def test_unused_mismatches(
+        self, generate_mock: Mock, compare_mock: Mock, setup_mock: Mock, capsys: Any
+    ) -> None:
+        assert not analyze_stubs(
+            "mypy_conf_path",
+            "base_stubs_path",
+            expected_mismatches_path="a/proper/mismatch_path",
+        )
+        self.assert_err_contains_line(
+            'Expected "lib.1, lib.2" to fail, but it was not even processed.', capsys
+        )

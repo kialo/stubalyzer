@@ -202,11 +202,6 @@ def analyze_stubs(
     success = True
     failed_count = 0
     total_count = 0
-    stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
-    if reference_stubs_path:
-        stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
-    else:
-        stub_types_reference = generate_stub_types(base_stubs_path, mypy_conf_path)
 
     try:
         mismatches, unused_mismatches = setup_expected_mismatches(
@@ -219,15 +214,24 @@ def analyze_stubs(
         success = False
 
     if success:
+        stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
+        if reference_stubs_path:
+            stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
+        else:
+            stub_types_reference = generate_stub_types(base_stubs_path, mypy_conf_path)
+
         for res in compare(stub_types_base, stub_types_reference):
             total_count += 1
-            success = evaluate_compare_result(res, mismatches, unused_mismatches)
-            if not success:
+            compare_success = evaluate_compare_result(
+                res, mismatches, unused_mismatches
+            )
+            if not compare_success:
                 failed_count += 1
                 if expected_mismatches_path:
                     write_error(
                         CHECK_FILE_ERROR.format(file_path=expected_mismatches_path)
                     )
+        success = failed_count == 0
 
         if unused_mismatches:
             success = False
@@ -237,7 +241,7 @@ def analyze_stubs(
             )
             write_error(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
-    write_error(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
+    print("\n", SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
     return success
 
 
