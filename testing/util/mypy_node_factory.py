@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Mapping, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
+
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 T = TypeVar("T")
@@ -34,14 +35,17 @@ class MypyNodeFactory:
         }
 
     def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
-        handwritten_symbol_node = self._handwritten_stubs_map[node_name] \
-            if node_name in self._handwritten_stubs_map.keys() else None
-        generated_symbol_node = self._generated_stubs_map[node_name] \
-            if node_name in self._generated_stubs_map.keys() else None
-        return (
-            cast(T, handwritten_symbol_node),
-            cast(T, generated_symbol_node),
+        handwritten_symbol_node = (
+            self._handwritten_stubs_map[node_name]
+            if node_name in self._handwritten_stubs_map.keys()
+            else None
         )
+        generated_symbol_node = (
+            self._generated_stubs_map[node_name]
+            if node_name in self._generated_stubs_map.keys()
+            else None
+        )
+        return (cast(T, handwritten_symbol_node), cast(T, generated_symbol_node))
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
@@ -84,21 +88,21 @@ class MypyNodeFactory:
     ) -> Tuple[Decorator, Decorator]:
         node_name = "functions.decorated_with_additional_optional_args"
         return self.get(node_name, Decorator)
-        
-    def get_class_with_method(self) -> Tuple[TypeInfo, TypeInfo]:
-        node_name = "classes.SuperWithMethod"
+
+    def get_class(self) -> Tuple[TypeInfo, TypeInfo]:
+        node_name = "classes.AClass"
         return self.get(node_name, TypeInfo)
 
-    def get_subclass_with_method(self) -> Tuple[TypeInfo, TypeInfo]:
-        node_name = "classes.SubclassWithMethod"
+    def get_another_class(self) -> Tuple[TypeInfo, TypeInfo]:
+        node_name = "classes.AnotherClass"
         return self.get(node_name, TypeInfo)
 
     def get_method(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "classes.SuperWithMethod.a_method"
+        node_name = "classes.AClass.a_method"
         return self.get(node_name, FuncDef)
 
     def get_classmethod(self) -> Tuple[Decorator, Decorator]:
-        node_name = "classes.SuperWithClassmethod.a_classmethod"
+        node_name = "classes.AClass.a_classmethod"
         return self.get(node_name, Decorator)
 
     def get_overridden_method(self) -> Tuple[FuncDef, FuncDef]:
@@ -148,5 +152,6 @@ class MypyNodeFactory:
     def get_str_var(self) -> Var:
         node_name = "vars.str_var"
         return cast(Var, self._handwritten_stubs_map[node_name])
+
 
 mypy_node_factory = MypyNodeFactory()

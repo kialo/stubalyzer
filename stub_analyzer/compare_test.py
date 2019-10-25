@@ -80,7 +80,7 @@ class TestCompareNone:
 
 class TestCompareTypeInfos:
     def test_type_infos_with_same_name_match(self, mypy_nodes: MypyNodeFactory) -> None:
-        cls, cls_reference = mypy_nodes.get_class_with_method()
+        cls, cls_reference = mypy_nodes.get_class()
         result = compare_symbols(cls, cls_reference)
 
         assert result.match_result is MatchResult.MATCH
@@ -88,9 +88,9 @@ class TestCompareTypeInfos:
     def test_type_infos_with_different_names_mismatch(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        supercls, _ = mypy_nodes.get_class_with_method()
-        sublcls, _ = mypy_nodes.get_subclass_with_method()
-        result = compare_symbols(supercls, sublcls)
+        a_cls, _ = mypy_nodes.get_class()
+        antoher_cls, _ = mypy_nodes.get_another_class()
+        result = compare_symbols(a_cls, antoher_cls)
 
         assert result.match_result is MatchResult.MISMATCH
 
@@ -220,7 +220,7 @@ class TestCompareFunctions:
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MISMATCH
 
-    def test_decorated_function_mismatches_when_handwritten_stub_has_additional_optional_args(
+    def test_decorated_mismatches_if_handwritten_stub_has_additional_optional_args(
         self
     ) -> None:
         decorated, decorated_reference = (
