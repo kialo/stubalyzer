@@ -4,7 +4,7 @@ from argparse import ArgumentParser, Namespace
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Dict, Generator, List, Set, Tuple
+from typing import Dict, Generator, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
@@ -46,7 +46,11 @@ def parse_command_line() -> Namespace:
         help="Directory of handwritten stubs that need to be analyzed",
     )
     parser.add_argument(
-        "stubs_reference", help="Directory of reference stubs to compare against"
+        "stubs_reference",
+        required=False,
+        default=None,
+        help="Directory of reference stubs to compare against. If not specified stubgen will be used"
+        "to generate the reference stubs.",
     )
     return parser.parse_args()
 
@@ -124,24 +128,25 @@ def evaluate_compare_result(
     return err
 
 
-def main() -> None:
-    err = 0
+def analyze_stubs(
+    mypy_conf_path: str,
+    base_stubs_path: str,
+    reference_stubs_path: str,
+    expected_mismatches_path: Optional[str] = None,
+) -> bool:
+    err = False
     failed_count = 0
     total_count = 0
-    args = parse_command_line()
-    stub_types_base = get_stub_types(
-        args.stubs_handwritten, mypy_conf_path=str(args.config)
-    )
-    stub_types_reference = get_stub_types(
-        args.stubs_reference, mypy_conf_path=str(args.config)
-    )
+    stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
+    stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
+
     try:
         mismatches, unused_mismatches = setup_expected_mismatches(
-            args.expected_mismatches
+            expected_mismatches_path
         )
     except (JSONDecodeError, SchemaError) as ex:
         print(ex, "\n", CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
-        err = 1
+        err = True
 
     if err == 0:
         for res in compare(stub_types_base, stub_types_reference):
@@ -149,10 +154,10 @@ def main() -> None:
             err = evaluate_compare_result(res, mismatches, unused_mismatches)
             if err != 0:
                 failed_count += 1
-                print(CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
+                print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
         if unused_mismatches:
-            err = 1
+            err = True
             print(
                 "\n",
                 UNUSED_DEFINITION_ERROR.format(symbols=", ".join(unused_mismatches)),
@@ -160,8 +165,15 @@ def main() -> None:
             print(CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
 
     print(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
-    sys.exit(err)
+    return not err
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_command_line()
+    success = analyze_stubs(
+        args.config,
+        args.stubs_handwritten,
+        args.stubs_reference,
+        args.expected_mismatches,
+    )
+    sys.exit(0 if success else 0)
