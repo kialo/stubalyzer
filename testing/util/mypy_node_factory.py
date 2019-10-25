@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from typing import List, Mapping, Tuple, Type, TypeVar, cast
 
-from mypy.nodes import FuncDef, OverloadedFuncDef, TypeInfo
+from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo
+
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 T = TypeVar("T")
@@ -56,6 +57,20 @@ class MypyNodeFactory:
     ) -> Tuple[OverloadedFuncDef, OverloadedFuncDef]:
         node_name = "functions.overloaded_additional_optional_args"
         return self.get(node_name, OverloadedFuncDef)
+
+    def get_decorated_function(self) -> Tuple[Decorator, Decorator]:
+        node_name = "functions.decorated_function"
+        return self.get(node_name, Decorator)
+
+    def get_decorated_with_additional_args(self) -> Tuple[Decorator, Decorator]:
+        node_name = "functions.decorated_with_additional_args"
+        return self.get(node_name, Decorator)
+
+    def get_decorated_with_additional_optional_args(
+        self
+    ) -> Tuple[Decorator, Decorator]:
+        node_name = "functions.decorated_with_additional_optional_args"
+        return self.get(node_name, Decorator)
 
     def get_class_with_method(self) -> Tuple[TypeInfo, TypeInfo]:
         node_name = "classes.SuperWithMethod"

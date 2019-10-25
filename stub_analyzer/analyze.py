@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Generator, Iterable, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
+
 from schema import Schema, SchemaError, Use
 
 from stub_analyzer import (
@@ -102,17 +103,17 @@ def evaluate_compare_result(
     mismatches_left: Set[str],
 ) -> bool:
     symbol = compare_result.symbol_name
-    matchResult = compare_result.matchResult
+    match_result = compare_result.match_result
     success = True
     expected_mismatch = mismatches.get(symbol)
 
     if expected_mismatch is None:
-        if matchResult is not MatchResult.MATCH:
+        if match_result is not MatchResult.MATCH:
             success = False
             print(f"\n{compare_result.message}")
     else:
         mismatches_left.remove(symbol)
-        if matchResult is MatchResult.MATCH:
+        if match_result is MatchResult.MATCH:
             success = False
             print(
                 "\n",
@@ -120,14 +121,14 @@ def evaluate_compare_result(
                     symbol=symbol, mismatch_type=mismatches[symbol].value
                 ),
             )
-        elif matchResult is not expected_mismatch:
+        elif match_result is not expected_mismatch:
             success = False
             print(
                 "\n",
                 WRONG_MISMATCH_ERROR.format(
                     symbol=symbol,
                     expected=expected_mismatch.value,
-                    received=matchResult.value,
+                    received=match_result.value,
                 ),
             )
     return success

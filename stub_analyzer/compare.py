@@ -5,15 +5,14 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, NamedTuple, Optional
-from warnings import warn
+from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
 from mypy.nodes import (
     CONTRAVARIANT,
     COVARIANT,
-    Argument,
-    FuncDef,
+    Decorator,
+    Expression,
     TypeAlias,
     TypeInfo,
     TypeVarExpr,
@@ -68,7 +67,7 @@ class ComparisonResult(NamedTuple):
     Result of comparing two symbol nodes and their types.
     """
 
-    matchResult: MatchResult
+    match_result: MatchResult
     """Type of comparison result"""
 
     symbol: RelevantSymbolNode
@@ -101,7 +100,7 @@ class ComparisonResult(NamedTuple):
         if self.message_val:
             return self.message_val
 
-        if self.matchResult is MatchResult.MATCH:
+        if self.match_result is MatchResult.MATCH:
             return "\n".join(
                 [
                     f"Types for {self.symbol_name} match:",
@@ -109,7 +108,7 @@ class ComparisonResult(NamedTuple):
                     f"    {self.reference_type}",
                 ]
             )
-        elif self.matchResult is MatchResult.MISMATCH:
+        elif self.match_result is MatchResult.MISMATCH:
             return "\n".join(
                 [
                     f"Types for {self.symbol_name} do not match:",
@@ -117,13 +116,13 @@ class ComparisonResult(NamedTuple):
                     f"    {self.reference_type}",
                 ]
             )
-        elif self.matchResult is MatchResult.NOT_FOUND:
+        elif self.match_result is MatchResult.NOT_FOUND:
             return f'Symbol "{self.symbol_name}" not found in generated stubs'
 
     @classmethod
-    def _create(
+    def create(
         cls,
-        matchResult: MatchResult,
+        match_result: MatchResult,
         symbol: RelevantSymbolNode,
         reference: Optional[RelevantSymbolNode],
         data: Optional[Dict[str, Any]],
@@ -132,14 +131,14 @@ class ComparisonResult(NamedTuple):
         """
         Create a comparison result.
 
-        :param match: if the match was successful
+        :param match_result: if the match was successful
         :param symbol: symbol that was checked
         :param reference: reference symbol that was checked against
         :param data: optional additional data
         :param message: optional message
         """
         return cls(
-            matchResult=matchResult,
+            match_result=match_result,
             symbol=symbol,
             reference=reference,
             data=data,
@@ -165,8 +164,8 @@ class ComparisonResult(NamedTuple):
         :param data: optional additional data
         :param message: optional message
         """
-        return cls._create(
-            matchResult=MatchResult.NOT_FOUND,
+        return cls.create(
+            match_result=MatchResult.NOT_FOUND,
             symbol=symbol,
             reference=None,
             data=data,
@@ -191,8 +190,8 @@ class ComparisonResult(NamedTuple):
         :param data: optional additional data
         :param message: optional message
         """
-        return cls._create(
-            matchResult=MatchResult.MISMATCH,
+        return cls.create(
+            match_result=MatchResult.MISMATCH,
             symbol=symbol,
             reference=reference,
             data=data,
@@ -215,8 +214,8 @@ class ComparisonResult(NamedTuple):
         :param data: optional additional data
         :param message: optional message
         """
-        return cls._create(
-            matchResult=MatchResult.MATCH,
+        return cls.create(
+            match_result=MatchResult.MATCH,
             symbol=symbol,
             reference=reference,
             data=data,
@@ -237,21 +236,9 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
 
 
 def _callable_types_match(typ: CallableType, type_reference: CallableType) -> bool:
-
-    type_argument_list: List[Argument] = []
-    type_reference_argument_list: List[Argument] = []
-
-    if not isinstance(typ.definition, FuncDef):
-        warn(f"CallableType {typ.name} does not have a definition", Warning)
-    elif not isinstance(type_reference.definition, FuncDef):
-        warn(f"CallableType {type_reference.name} does not have a definition", Warning)
-    else:
-        type_argument_list = typ.definition.arguments
-        type_reference_argument_list = type_reference.definition.arguments
-
-    return len(type_argument_list) <= len(
-        type_reference_argument_list
-    ) and _mypy_types_match(typ, type_reference)
+    return len(typ.arg_kinds) <= len(type_reference.arg_kinds) and _mypy_types_match(
+        typ, type_reference
+    )
 
 
 def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:
@@ -395,6 +382,58 @@ def _compare_type_var_expr(
     )
 
 
+def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonResult:
+    """
+    Check if Decorator symbol matches the reference
+
+    Returns a successful comparision if:
+        - all decorators are the same and applied in the same order,
+        - the function these decorators are applied to match
+
+    :param symbol: decorator symbol to validate
+    :param reference: decorator symbol to validate against
+    """
+
+    def get_expression_fullname(expr: Expression) -> Optional[str]:
+        fullname_attr = getattr(expr, "fullname")
+
+        if fullname_attr is None:
+            fullname = None
+        elif callable(fullname_attr):
+            fullname = fullname_attr()
+        else:
+            fullname = fullname_attr
+
+        if isinstance(fullname, str):
+            return fullname
+        return fullname
+
+    symbol_decorators = list(map(get_expression_fullname, symbol.original_decorators))
+    reference_decorators = list(
+        map(get_expression_fullname, reference.original_decorators)
+    )
+
+    if symbol_decorators == reference_decorators:
+        function_comparision = compare_symbols(symbol.func, reference.func)
+        return ComparisonResult.create(
+            match_result=function_comparision.match_result,
+            symbol=symbol,
+            reference=reference,
+            data=function_comparision.data,
+            message=function_comparision.message,
+        )
+    else:
+        return ComparisonResult.create_mismatch(
+            symbol=symbol,
+            reference=reference,
+            data={
+                "Symbol decorators": symbol_decorators,
+                "Reference decorators": reference_decorators,
+            },
+            message=f"Function {symbol.func.fullname()} stubs have different decorators.",
+        )
+
+
 def compare_symbols(
     symbol: RelevantSymbolNode, reference: RelevantSymbolNode
 ) -> ComparisonResult:
@@ -429,6 +468,9 @@ def compare_symbols(
 
     if isinstance(symbol, TypeVarExpr) and isinstance(reference, TypeVarExpr):
         return _compare_type_var_expr(symbol, reference)
+
+    if isinstance(symbol, Decorator) and isinstance(reference, Decorator):
+        return _compare_decorator(symbol, reference)
 
     return compare_mypy_types(
         symbol, reference, getattr(symbol, "type"), getattr(reference, "type")
