@@ -430,7 +430,9 @@ def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonRes
                 "Symbol decorators": symbol_decorators,
                 "Reference decorators": reference_decorators,
             },
-            message=f"Function {symbol.func.fullname()} stubs have different decorators.",
+            message=(
+                f"Function {symbol.func.fullname()} stubs have different decorators."
+            ),
         )
 
 

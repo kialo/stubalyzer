@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Mapping, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
-
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 T = TypeVar("T")
