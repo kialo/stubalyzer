@@ -4,17 +4,40 @@ Compare mypy types.
 
 from __future__ import annotations
 
-from typing import Any, Dict, NamedTuple, Optional, List
+from enum import Enum
+from typing import Any, Dict, List, NamedTuple, Optional
 from warnings import warn
 
 from mypy.meet import is_overlapping_types
-
-from mypy.nodes import CONTRAVARIANT, COVARIANT, TypeAlias, TypeInfo, TypeVarExpr, Argument, FuncDef
+from mypy.nodes import (
+    CONTRAVARIANT,
+    COVARIANT,
+    Argument,
+    FuncDef,
+    TypeAlias,
+    TypeInfo,
+    TypeVarExpr,
+)
 from mypy.subtypes import is_subtype
 from mypy.types import CallableType, Overloaded
 from mypy.types import Type as TypeNode
 
 from .types import RelevantSymbolNode
+
+
+class MatchResult(Enum):
+    MATCH = "match"
+    MISMATCH = "mismatch"
+    NOT_FOUND = "not_found"
+
+    @classmethod
+    def declare_mismatch(cls, matchResultString: str) -> "MatchResult":
+        if matchResultString == MatchResult.MATCH.value:
+            raise ValueError(
+                f"'{MatchResult.MATCH.value}' is not a valid mismatch type."
+                f"(Use {', '.join([m.value for m in MatchResult])})"
+            )
+        return MatchResult(matchResultString)
 
 
 def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
@@ -38,8 +61,8 @@ class ComparisonResult(NamedTuple):
     Result of comparing two symbol nodes and their types.
     """
 
-    match: bool
-    """If the match was successful"""
+    matchResult: MatchResult
+    """Type of comparison result"""
 
     symbol: RelevantSymbolNode
     """Symbol that was checked"""
@@ -71,7 +94,7 @@ class ComparisonResult(NamedTuple):
         if self.message_val:
             return self.message_val
 
-        if self.match:
+        if self.matchResult is MatchResult.MATCH:
             return "\n".join(
                 [
                     f"Types for {self.symbol_name} match:",
@@ -79,19 +102,21 @@ class ComparisonResult(NamedTuple):
                     f"    {self.reference_type}",
                 ]
             )
-
-        return "\n".join(
-            [
-                f"Types for {self.symbol_name} do not match:",
-                f"    {self.symbol_type}",
-                f"    {self.reference_type}",
-            ]
-        )
+        elif self.matchResult is MatchResult.MISMATCH:
+            return "\n".join(
+                [
+                    f"Types for {self.symbol_name} do not match:",
+                    f"    {self.symbol_type}",
+                    f"    {self.reference_type}",
+                ]
+            )
+        elif self.matchResult is MatchResult.NOT_FOUND:
+            return f'Symbol "{self.symbol_name}" not found in generated stubs'
 
     @classmethod
     def _create(
         cls,
-        match: bool,
+        matchResult: MatchResult,
         symbol: RelevantSymbolNode,
         reference: Optional[RelevantSymbolNode],
         data: Optional[Dict[str, Any]],
@@ -107,7 +132,7 @@ class ComparisonResult(NamedTuple):
         :param message: optional message
         """
         return cls(
-            match=match,
+            matchResult=matchResult,
             symbol=symbol,
             reference=reference,
             data=data,
@@ -134,7 +159,7 @@ class ComparisonResult(NamedTuple):
         :param message: optional message
         """
         return cls._create(
-            match=False,
+            matchResult=MatchResult.NOT_FOUND,
             symbol=symbol,
             reference=None,
             data=data,
@@ -160,7 +185,11 @@ class ComparisonResult(NamedTuple):
         :param message: optional message
         """
         return cls._create(
-            match=False, symbol=symbol, reference=reference, data=data, message=message
+            matchResult=MatchResult.MISMATCH,
+            symbol=symbol,
+            reference=reference,
+            data=data,
+            message=message,
         )
 
     @classmethod
@@ -180,7 +209,11 @@ class ComparisonResult(NamedTuple):
         :param message: optional message
         """
         return cls._create(
-            match=True, symbol=symbol, reference=reference, data=data, message=message
+            matchResult=MatchResult.MATCH,
+            symbol=symbol,
+            reference=reference,
+            data=data,
+            message=message,
         )
 
 
@@ -196,12 +229,9 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
     )
 
 
-def _callable_types_match(
-        typ: CallableType,
-        type_reference: CallableType,
-) -> bool:
+def _callable_types_match(typ: CallableType, type_reference: CallableType) -> bool:
 
-    type_argument_list: List[Argument]  = []
+    type_argument_list: List[Argument] = []
     type_reference_argument_list: List[Argument] = []
 
     if not isinstance(typ.definition, FuncDef):
@@ -212,7 +242,9 @@ def _callable_types_match(
         type_argument_list = typ.definition.arguments
         type_reference_argument_list = type_reference.definition.arguments
 
-    return len(type_argument_list) <= len(type_reference_argument_list) and _mypy_types_match(typ, type_reference)
+    return len(type_argument_list) <= len(
+        type_reference_argument_list
+    ) and _mypy_types_match(typ, type_reference)
 
 
 def _overloaded_types_match(a: Overloaded, b: Overloaded) -> bool:

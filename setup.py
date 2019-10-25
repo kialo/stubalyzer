@@ -1,7 +1,7 @@
 from os import path
 
 # Always prefer setuptools over distutils
-from setuptools import find_packages, setup
+from setuptools import setup
 
 VERSION = "0.1.0"
 # This is the name of the GitHub repo and the package name on pypi
@@ -66,7 +66,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["mypy"],
+    install_requires=["mypy", "schema"],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
