@@ -110,4 +110,4 @@ You can update the API documentation using the following:
 
 .. code-block:: shell-session
 
-    $ sphinx-apidoc -o docs/api -e -f stub_analyzer '*_test.py'
+    $ ./dev/update-apidoc.sh
