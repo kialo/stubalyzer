@@ -6,10 +6,9 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Dict, Generator, Iterable, Optional, Set, Tuple
 
-from mypy.nodes import TypeAlias, TypeVarExpr, Var
-
 from schema import Schema, SchemaError, Use
 
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
@@ -174,7 +173,7 @@ def analyze_stubs(
             expected_mismatches_path
         )
     except (JSONDecodeError, SchemaError) as ex:
-        print(ex, "\n", CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
+        print(ex, "\n", CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
         success = False
 
     if success:
@@ -192,7 +191,7 @@ def analyze_stubs(
                 "\n",
                 UNUSED_DEFINITION_ERROR.format(symbols=", ".join(unused_mismatches)),
             )
-            print(CHECK_FILE_ERROR.format(file_path=args.expected_mismatches))
+            print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
     print(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
     return success
