@@ -25,14 +25,13 @@ def find_missing_symbols() -> Iterable[str]:
     for symbol in stub_types_base:
         lookup_result = lookup_symbol(generated_map, symbol)
         generated_symbol = lookup_result.symbol
-        if not generated_symbol:
+        if generated_symbol is None:
             yield f"Could not resolve symbol <{symbol.fullname()}> in generated stubs."
-        else:
-            if generated_symbol.fullname() != symbol.fullname():
-                yield (
-                    f"Found symbol <{symbol.fullname()}> in different location"
-                    f" <{generated_symbol.fullname()}>"
-                )
+        elif generated_symbol.fullname() != symbol.fullname():
+            yield (
+                f"Found symbol <{symbol.fullname()}> in different location"
+                f" <{generated_symbol.fullname()}>"
+            )
 
 
 if __name__ == "__main__":
