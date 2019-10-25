@@ -143,8 +143,8 @@ class ComparisonResult(NamedTuple):
             reference=reference,
             data=data,
             message_val=message,
-            symbol_name=symbol.fullname(),
-            symbol_type=_get_symbol_type_info(symbol),
+            symbol_name=symbol.fullname() if symbol else None,
+            symbol_type=_get_symbol_type_info(symbol) if symbol else None,
             reference_name=reference.fullname() if reference else None,
             reference_type=_get_symbol_type_info(reference) if reference else None,
         )
@@ -171,6 +171,30 @@ class ComparisonResult(NamedTuple):
             data=data,
             message=(
                 message or (f"Symbol {symbol.fullname()} not found in generated stubs.")
+            ),
+        )
+
+    @classmethod
+    def create_symbol_not_found(cls,
+                                reference: RelevantSymbolNode,
+                                data: Optional[Dict[str, Any]] = None,
+                                message: Optional[str] = None,
+                                ) -> ComparisonResult:
+        """
+        Create an unsuccessful comparison result
+        when there is no matching symbol found.
+
+        :param reference: reference symbol that was checked against
+        :param data: optional additional data
+        :param message: optional message
+        """
+        return cls._create(
+            matchResult=MatchResult.NOT_FOUND,
+            symbol=None,
+            reference=reference,
+            data=data,
+            message=(
+                    message or (f"Symbol {reference.fullname()} not found in handwritten stubs.")
             ),
         )
 
@@ -457,6 +481,10 @@ def compare_symbols(
     :param symbol: symbol node to validate
     :param reference: symbol node to validate against
     """
+    if symbol is None:
+        return ComparisonResult.create_symbol_not_found(
+            reference=reference
+        )
     # TODO: Check if this is always the case, i.e. could there be
     # cases where `symbol` and `reference` don't have the same class but still match?
     if type(symbol) != type(reference):

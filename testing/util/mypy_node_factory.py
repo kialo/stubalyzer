@@ -34,13 +34,21 @@ class MypyNodeFactory:
         }
 
     def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
+        handwritten_symbol_node = self._handwritten_stubs_map[node_name] \
+            if node_name in self._handwritten_stubs_map.keys() else None
+        generated_symbol_node = self._generated_stubs_map[node_name] \
+            if node_name in self._generated_stubs_map.keys() else None
         return (
-            cast(T, self._handwritten_stubs_map[node_name]),
-            cast(T, self._generated_stubs_map[node_name]),
+            cast(T, handwritten_symbol_node),
+            cast(T, generated_symbol_node),
         )
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
+        return self.get(node_name, FuncDef)
+
+    def get_missing_function_node(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.missing_function"
         return self.get(node_name, FuncDef)
 
     def get_additional_args_node(self) -> Tuple[FuncDef, FuncDef]:
@@ -76,7 +84,7 @@ class MypyNodeFactory:
     ) -> Tuple[Decorator, Decorator]:
         node_name = "functions.decorated_with_additional_optional_args"
         return self.get(node_name, Decorator)
-
+        
     def get_class_with_method(self) -> Tuple[TypeInfo, TypeInfo]:
         node_name = "classes.SuperWithMethod"
         return self.get(node_name, TypeInfo)
@@ -140,6 +148,5 @@ class MypyNodeFactory:
     def get_str_var(self) -> Var:
         node_name = "vars.str_var"
         return cast(Var, self._handwritten_stubs_map[node_name])
-
 
 mypy_node_factory = MypyNodeFactory()
