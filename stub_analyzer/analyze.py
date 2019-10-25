@@ -47,9 +47,11 @@ def parse_command_line() -> Namespace:
         help="Directory of handwritten stubs that need to be analyzed",
     )
     parser.add_argument(
-        "stubs_reference",
+        "-r",
+        "--reference",
         required=False,
         default=None,
+        metavar="REFERENCE_STUBS",
         help="Directory of reference stubs to compare against."
         "If not specified stubgen will be used to generate the reference stubs.",
     )
@@ -194,12 +196,13 @@ def analyze_stubs(
     return not err
 
 
-if __name__ == "__main__":
+def main() -> None:
     args = parse_command_line()
     success = analyze_stubs(
-        args.config,
-        args.stubs_handwritten,
-        args.stubs_reference,
-        args.expected_mismatches,
+        args.config, args.stubs_handwritten, args.reference, args.expected_mismatches
     )
-    sys.exit(0 if success else 0)
+    sys.exit(0 if success else 1)
+
+
+if __name__ == "__main__":
+    main()
