@@ -59,6 +59,11 @@ class TestSetupExpectedMismatches:
 
 
 class TestEvaluateCompareResult:
+    @staticmethod
+    def assert_err(expected: str, capsys: Any) -> None:
+        _, err = capsys.readouterr()
+        assert err.strip() == expected
+
     def test_everything_ok(self) -> None:
         mismatches_left = set(["1", "2", "4"])
         mismatches = {"1": MatchResult.NOT_FOUND}
@@ -89,8 +94,7 @@ class TestEvaluateCompareResult:
             symbol_name="3",
         )
         assert not evaluate_compare_result(compare_result, {}, mismatches_left)
-        _, err = capsys.readouterr()
-        assert err == "\nAn error happened\n"
+        self.assert_err("An error happened", capsys)
         assert mismatches_left == set(["1"])
 
     def test_unwanted_match_intead_mismatch(self, capsys: Any) -> None:
@@ -102,8 +106,7 @@ class TestEvaluateCompareResult:
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
-        _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "mismatch" but it matched.\n'
+        self.assert_err('Expected "3" to be "mismatch" but it matched.', capsys)
         assert mismatches_left == set(["1", "2", "4"])
 
     def test_unwanted_match_intead_not_found(self, capsys: Any) -> None:
@@ -115,8 +118,7 @@ class TestEvaluateCompareResult:
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
-        _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "not_found" but it matched.\n'
+        self.assert_err('Expected "3" to be "not_found" but it matched.', capsys)
         assert mismatches_left == set(["1", "2", "4"])
 
     def test_wrong_mismatch_type(self, capsys: Any) -> None:
@@ -130,6 +132,5 @@ class TestEvaluateCompareResult:
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
-        _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "mismatch" but it was "not_found".\n'
+        self.assert_err('Expected "3" to be "mismatch" but it was "not_found".', capsys)
         assert mismatches_left == set(["1", "2", "4"])
