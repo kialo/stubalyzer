@@ -33,7 +33,7 @@ SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
 
 
 def write_error(*messages: str) -> None:
-    sys.stderr.write("".join(messages))
+    sys.stderr.write(" ".join(messages))
     sys.stderr.write(linesep)
 
 
