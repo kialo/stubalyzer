@@ -1,10 +1,13 @@
 import re
 import sys
 from argparse import ArgumentParser, Namespace
+from importlib.util import find_spec
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
+from os import linesep, scandir
 from pathlib import Path
-from typing import Dict, Generator, Iterable, Optional, Set, Tuple
+from tempfile import TemporaryDirectory
+from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
@@ -31,6 +34,7 @@ SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
 
 def write_error(*messages: str) -> None:
     sys.stderr.write("".join(messages))
+    sys.stderr.write(linesep)
 
 
 def parse_command_line() -> Namespace:
@@ -137,8 +141,40 @@ def evaluate_compare_result(
     return success
 
 
-def generate_stub_types(base_stubs_path: str) -> Iterable[RelevantSymbolNode]:
-    raise NotImplementedError("I'm working on it")
+def call_stubgen(command_line_args: List[str]) -> None:
+    """
+    Calls stubgen like the command line tool
+    :param command_line_args: list of command line args
+    """
+    from mypy.stubgen import parse_options, generate_stubs
+
+    generate_stubs(parse_options(command_line_args))
+
+
+def generate_stub_types(
+    base_stubs_path: str, mypy_conf_path: str
+) -> Iterable[RelevantSymbolNode]:
+    """
+    Uses stubgen to generate reference stub types of the modules stubbed in
+    base_stubs_path. For this to work the modules need to be installed.
+    :param base_stubs_path: path to directory with (handwritten) stubs
+    :param mypy_conf_path: path to mypy.ini
+    :return: returns the reference stub types
+    """
+    with TemporaryDirectory() as reference_stubs_path:
+        packages = [entry.name for entry in scandir(base_stubs_path) if entry.is_dir()]
+        for package in packages:
+            if find_spec(package) is None:
+                print(
+                    f"Error: The package {package} is not installed. Therefore no "
+                    f"reference stubs can be generated for it automatically. Use the "
+                    f"option -r to provide the reference stubs manually, or install "
+                    f"the package."
+                )
+                sys.exit(1)
+            call_stubgen(["-p", package, "-o", reference_stubs_path])
+
+        return list(get_stub_types(reference_stubs_path, mypy_conf_path))
 
 
 def analyze_stubs(
@@ -170,7 +206,7 @@ def analyze_stubs(
     if reference_stubs_path:
         stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
     else:
-        stub_types_reference = generate_stub_types(base_stubs_path)
+        stub_types_reference = generate_stub_types(base_stubs_path, mypy_conf_path)
 
     try:
         mismatches, unused_mismatches = setup_expected_mismatches(

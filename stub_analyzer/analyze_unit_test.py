@@ -90,7 +90,7 @@ class TestEvaluateCompareResult:
         )
         assert not evaluate_compare_result(compare_result, {}, mismatches_left)
         _, err = capsys.readouterr()
-        assert err == "\nAn error happened"
+        assert err == "\nAn error happened\n"
         assert mismatches_left == set(["1"])
 
     def test_unwanted_match_intead_mismatch(self, capsys: Any) -> None:
@@ -103,7 +103,7 @@ class TestEvaluateCompareResult:
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
         _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "mismatch" but it matched.'
+        assert err == '\nExpected "3" to be "mismatch" but it matched.\n'
         assert mismatches_left == set(["1", "2", "4"])
 
     def test_unwanted_match_intead_not_found(self, capsys: Any) -> None:
@@ -116,7 +116,7 @@ class TestEvaluateCompareResult:
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
         _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "not_found" but it matched.'
+        assert err == '\nExpected "3" to be "not_found" but it matched.\n'
         assert mismatches_left == set(["1", "2", "4"])
 
     def test_wrong_mismatch_type(self, capsys: Any) -> None:
@@ -131,5 +131,5 @@ class TestEvaluateCompareResult:
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
         _, err = capsys.readouterr()
-        assert err == '\nExpected "3" to be "mismatch" but it was "not_found".'
+        assert err == '\nExpected "3" to be "mismatch" but it was "not_found".\n'
         assert mismatches_left == set(["1", "2", "4"])
