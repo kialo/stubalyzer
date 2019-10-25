@@ -64,7 +64,7 @@ class TestEvaluateCompareResult:
         mismatches = {"1": MatchResult.NOT_FOUND}
         compare_result = Mock()
         compare_result.configure_mock(
-            matchResult=MatchResult.MATCH, message="Alright", symbol_name="3"
+            match_result=MatchResult.MATCH, message="Alright", symbol_name="3"
         )
         assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
         assert mismatches_left == set(["1", "2", "4"])
@@ -74,7 +74,9 @@ class TestEvaluateCompareResult:
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
         compare_result = Mock()
-        compare_result.configure_mock(matchResult=MatchResult.MISMATCH, symbol_name="3")
+        compare_result.configure_mock(
+            match_result=MatchResult.MISMATCH, symbol_name="3"
+        )
         assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
         assert mismatches_left == set(["1", "2", "4"])
 
@@ -82,7 +84,7 @@ class TestEvaluateCompareResult:
         mismatches_left = set(["1"])
         compare_result = Mock()
         compare_result.configure_mock(
-            matchResult=MatchResult.MISMATCH,
+            match_result=MatchResult.MISMATCH,
             message="An error happened",
             symbol_name="3",
         )
@@ -96,7 +98,7 @@ class TestEvaluateCompareResult:
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
         compare_result = Mock()
-        compare_result.configure_mock(matchResult=MatchResult.MATCH, symbol_name="3")
+        compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
@@ -109,7 +111,7 @@ class TestEvaluateCompareResult:
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.NOT_FOUND}
 
         compare_result = Mock()
-        compare_result.configure_mock(matchResult=MatchResult.MATCH, symbol_name="3")
+        compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
 
@@ -123,7 +125,7 @@ class TestEvaluateCompareResult:
 
         compare_result = Mock()
         compare_result.configure_mock(
-            matchResult=MatchResult.NOT_FOUND, symbol_name="3"
+            match_result=MatchResult.NOT_FOUND, symbol_name="3"
         )
 
         assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
