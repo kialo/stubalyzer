@@ -6,9 +6,9 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Dict, Generator, Iterable, Optional, Set, Tuple
 
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use
 
-from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
@@ -27,6 +27,10 @@ FILE_NOT_FOUND_WARNING = (
     'WARNING: Provided file for expected mismatches ("{file_path}") not found.'
 )
 SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
+
+
+def write_error(*messages: str) -> None:
+    sys.stderr.write("".join(messages))
 
 
 def parse_command_line() -> Namespace:
@@ -87,7 +91,7 @@ def setup_expected_mismatches(
     mismatches: Dict[str, MatchResult] = {}
     mismatches_file = Path(file_path)
     if not mismatches_file.exists():
-        print(FILE_NOT_FOUND_WARNING.format(file_path=file_path))
+        write_error(FILE_NOT_FOUND_WARNING.format(file_path=file_path))
         return dict(), set()
     mismatches = EXPECTED_MISMATCH_SCHEMA.validate(
         json_loads(mismatches_file.read_text())
@@ -109,12 +113,12 @@ def evaluate_compare_result(
     if expected_mismatch is None:
         if match_result is not MatchResult.MATCH:
             success = False
-            print(f"\n{compare_result.message}")
+            write_error(f"\n{compare_result.message}")
     else:
         mismatches_left.remove(symbol)
         if match_result is MatchResult.MATCH:
             success = False
-            print(
+            write_error(
                 "\n",
                 MATCH_FOUND_ERROR.format(
                     symbol=symbol, mismatch_type=mismatches[symbol].value
@@ -122,7 +126,7 @@ def evaluate_compare_result(
             )
         elif match_result is not expected_mismatch:
             success = False
-            print(
+            write_error(
                 "\n",
                 WRONG_MISMATCH_ERROR.format(
                     symbol=symbol,
@@ -173,7 +177,9 @@ def analyze_stubs(
             expected_mismatches_path
         )
     except (JSONDecodeError, SchemaError) as ex:
-        print(ex, "\n", CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
+        write_error(
+            str(ex), "\n", CHECK_FILE_ERROR.format(file_path=expected_mismatches_path)
+        )
         success = False
 
     if success:
@@ -183,17 +189,19 @@ def analyze_stubs(
             if not success:
                 failed_count += 1
                 if expected_mismatches_path:
-                    print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
+                    write_error(
+                        CHECK_FILE_ERROR.format(file_path=expected_mismatches_path)
+                    )
 
         if unused_mismatches:
             success = False
-            print(
+            write_error(
                 "\n",
                 UNUSED_DEFINITION_ERROR.format(symbols=", ".join(unused_mismatches)),
             )
-            print(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
+            write_error(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
-    print(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
+    write_error(SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
     return success
 
 

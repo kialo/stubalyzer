@@ -1,10 +1,20 @@
 import pytest  # type: ignore
-
 from mypy.nodes import Var
 from mypy.types import NoneType
+
 from testing.util import MypyNodeFactory, mypy_node_factory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
+
+
+class TestMatchResult:
+    def test_declare_mismatch(self) -> None:
+        assert MatchResult.declare_mismatch("not_found") is MatchResult.NOT_FOUND
+        assert MatchResult.declare_mismatch("mismatch") is MatchResult.MISMATCH
+        with pytest.raises(ValueError, match=r".*not a valid mismatch type.*"):
+            MatchResult.declare_mismatch("match")
+        with pytest.raises(ValueError, match=r".*not a valid mismatch type.*"):
+            MatchResult.declare_mismatch("blablabla")
 
 
 class TestComparisonResult:
@@ -219,8 +229,9 @@ class TestCompareFunctions:
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MISMATCH
 
-    def test_create_not_found_mismatch_if_handwritten_stub_has_missing_a_function(self, mypy_nodes: MypyNodeFactory) -> None:
+    def test_create_not_found_mismatch_if_handwritten_stub_has_missing_a_function(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
         func_def, func_def_reference = mypy_nodes.get_missing_function_node()
         result = compare_symbols(func_def, func_def_reference)
-        assert result.matchResult is MatchResult.NOT_FOUND
-
+        assert result.match_result is MatchResult.NOT_FOUND
