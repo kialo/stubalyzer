@@ -181,6 +181,13 @@ class TestCompareFunctions:
         result = compare_symbols(func_def, func_def_reference)
         assert result.match_result is MatchResult.MISMATCH
 
+    def test_create_not_found_mismatch_if_generated_stub_is_missing_a_function(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func_def_reference = mypy_nodes.get_missing_function_node()
+        result = compare_symbols(None, func_def_reference)
+        assert result.match_result is MatchResult.NOT_FOUND
+
     def test_func_def_mismatches_when_handwritten_stub_has_additional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
