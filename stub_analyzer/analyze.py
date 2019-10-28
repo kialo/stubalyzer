@@ -7,11 +7,12 @@ from json.decoder import JSONDecodeError
 from os import linesep, scandir
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from traceback import format_exception
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
-
 from schema import Schema, SchemaError, Use
+
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
@@ -166,13 +167,20 @@ def generate_stub_types(
         for package in packages:
             if find_spec(package) is None:
                 print(
-                    f"Error: The package {package} is not installed. Therefore no "
+                    f'Error: The package "{package}" is not installed. Therefore no '
                     f"reference stubs can be generated for it automatically. Use the "
                     f"option -r to provide the reference stubs manually, or install "
                     f"the package."
                 )
                 sys.exit(1)
-            call_stubgen(["-p", package, "-o", reference_stubs_path])
+            try:
+                call_stubgen(["-p", package, "-o", reference_stubs_path])
+            except Exception as ex:
+                write_error(
+                    f'Error: Generating stubs for the package "{package}" failed:',
+                    linesep,
+                    *format_exception(type(ex), ex, ex.__traceback__),
+                )
 
         return list(get_stub_types(reference_stubs_path, mypy_conf_path))
 
