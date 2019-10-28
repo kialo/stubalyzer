@@ -1,6 +1,6 @@
 from typing import Dict, NamedTuple, Optional
 
-from mypy.nodes import SymbolNode, TypeInfo
+from mypy.nodes import FUNC_NO_INFO, SymbolNode, TypeInfo
 
 from .types import RelevantSymbolNode
 
@@ -30,7 +30,7 @@ def lookup_symbol(
 
     # Check if we have a class on the symbol we're looking up
     cls_to_lookup = getattr(symbol_to_lookup, "info", None)
-    if not cls_to_lookup:
+    if not cls_to_lookup or cls_to_lookup == FUNC_NO_INFO:
         return fail
 
     symbol_cls = symbol_map.get(cls_to_lookup.fullname())
