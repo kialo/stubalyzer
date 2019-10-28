@@ -9,21 +9,31 @@ from stub_analyzer import RelevantSymbolNode, get_stub_types
 T = TypeVar("T")
 
 
+class HandwrittenStubNotFound(Exception):
+    def __init__(self, symbol_name: str, path: str):
+        super().__init__(f"Handwritten stub {symbol_name} not found in {path}")
+
+
+class GeneratedStubNotFound(Exception):
+    def __init__(self, symbol_name: str, path: str):
+        super().__init__(f"Generated stub {symbol_name} not found in {path}")
+
+
 class MypyNodeFactory:
     def __init__(self) -> None:
         self._base_dir: Path = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
         self._mypy_conf: Path = self._base_dir / "mypy.ini"
-
+        self._handwritten_stubs_path = f"{self._base_dir}/stubs-handwritten"
         handwritten_stubs: List[RelevantSymbolNode] = list(
             get_stub_types(
-                f"{self._base_dir}/stubs-handwritten",
-                mypy_conf_path=str(self._mypy_conf),
+                self._handwritten_stubs_path, mypy_conf_path=str(self._mypy_conf)
             )
         )
 
+        self._generated_stubs_path = f"{self._base_dir}/stubs-generated"
         generated_stubs: List[RelevantSymbolNode] = list(
             get_stub_types(
-                f"{self._base_dir}/stubs-generated", mypy_conf_path=str(self._mypy_conf)
+                self._generated_stubs_path, mypy_conf_path=str(self._mypy_conf)
             )
         )
 
@@ -34,15 +44,41 @@ class MypyNodeFactory:
             symbol.fullname(): symbol for symbol in generated_stubs
         }
 
-    def get(self, node_name: str, _: Type[T]) -> Tuple[T, T]:
-        return (
-            cast(T, self._handwritten_stubs_map[node_name]),
-            cast(T, self._generated_stubs_map[node_name]),
+    def handwritten_stub_not_found(self, symbol_name: str) -> HandwrittenStubNotFound:
+        return HandwrittenStubNotFound(symbol_name, self._handwritten_stubs_path)
+
+    def generated_stub_not_found(self, symbol_name: str) -> GeneratedStubNotFound:
+        return GeneratedStubNotFound(symbol_name, self._handwritten_stubs_path)
+
+    def get(
+        self, symbol_name: str, _: Type[T], raise_error: bool = True
+    ) -> Tuple[T, T]:
+        handwritten_symbol_node = (
+            self._handwritten_stubs_map[symbol_name]
+            if symbol_name in self._handwritten_stubs_map.keys()
+            else None
         )
+        if handwritten_symbol_node is None and raise_error:
+            raise self.handwritten_stub_not_found(symbol_name)
+
+        generated_symbol_node = (
+            self._generated_stubs_map[symbol_name]
+            if symbol_name in self._generated_stubs_map.keys()
+            else None
+        )
+
+        if generated_symbol_node is None and raise_error:
+            raise self.generated_stub_not_found(symbol_name)
+
+        return cast(T, handwritten_symbol_node), cast(T, generated_symbol_node)
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
         return self.get(node_name, FuncDef)
+
+    def get_missing_function_node(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.missing_function"
+        return self.get(node_name, FuncDef, raise_error=False)
 
     def get_additional_args_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.additional_args"
@@ -50,6 +86,38 @@ class MypyNodeFactory:
 
     def get_additional_optional_args_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.additional_optional_args"
+        return self.get(node_name, FuncDef)
+
+    def get_matching_with_arg_star(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.matching_with_arg_star"
+        return self.get(node_name, FuncDef)
+
+    def get_matching_with_missing_arg_star(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.matching_with_missing_arg_star"
+        return self.get(node_name, FuncDef)
+
+    def get_mismatching_with_arg_star(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_arg_star"
+        return self.get(node_name, FuncDef)
+
+    def get_mismatching_with_additional_arg_star(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_additional_arg_star"
+        return self.get(node_name, FuncDef)
+
+    def get_matching_with_kwarg_star2(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.matching_with_kwarg_star2"
+        return self.get(node_name, FuncDef)
+
+    def get_matching_with_missing_kwarg_star2(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.matching_with_missing_kwarg_star2"
+        return self.get(node_name, FuncDef)
+
+    def get_mismatching_with_kwarg_star2(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_kwarg_star2"
+        return self.get(node_name, FuncDef)
+
+    def get_mismatching_with_additional_kwarg_star2(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_additional_kwarg_star2"
         return self.get(node_name, FuncDef)
 
     def get_overloaded_additional_args_node(

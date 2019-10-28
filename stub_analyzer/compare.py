@@ -5,10 +5,12 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, NamedTuple, Optional
+from typing import Any, Dict, List, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
 from mypy.nodes import (
+    ARG_STAR,
+    ARG_STAR2,
     CONTRAVARIANT,
     COVARIANT,
     Decorator,
@@ -70,16 +72,16 @@ class ComparisonResult(NamedTuple):
     match_result: MatchResult
     """Type of comparison result"""
 
-    symbol: RelevantSymbolNode
+    symbol: Optional[RelevantSymbolNode]
     """Symbol that was checked"""
 
     reference: Optional[RelevantSymbolNode]
     """Reference symbol that was checked against"""
 
-    symbol_name: str
+    symbol_name: Optional[str]
     """Full name of the symbol that was checked"""
 
-    symbol_type: str
+    symbol_type: Optional[str]
     """Type of the symbol that was checked"""
 
     reference_name: Optional[str]
@@ -123,7 +125,7 @@ class ComparisonResult(NamedTuple):
     def create(
         cls,
         match_result: MatchResult,
-        symbol: RelevantSymbolNode,
+        symbol: Optional[RelevantSymbolNode],
         reference: Optional[RelevantSymbolNode],
         data: Optional[Dict[str, Any]],
         message: Optional[str],
@@ -262,17 +264,34 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
 
 
 def _callable_types_match(
-    callable: CallableType, reference_callable: CallableType
+    callable_type: CallableType, reference_callable: CallableType
 ) -> bool:
     """
     Check if the given callable matches the reference.
 
-    :param callable: callable to check
+    :param callable_type: callable to check
     :param reference_callable: callable to check against
     """
-    return len(callable.arg_kinds) <= len(
-        reference_callable.arg_kinds
-    ) and _mypy_types_match(callable, reference_callable)
+
+    def strict_type_count(kinds: List[int]) -> int:
+        return len(list(filter(lambda kind: kind not in [ARG_STAR, ARG_STAR2], kinds)))
+
+    def arg_star_count(kinds: List[int]) -> int:
+        return len(list(filter(lambda kind: kind is ARG_STAR, kinds)))
+
+    def arg_start2_count(kinds: List[int]) -> int:
+        return len(list(filter(lambda kind: kind is ARG_STAR2, kinds)))
+
+    callable_kinds = callable_type.arg_kinds
+    reference_kinds = reference_callable.arg_kinds
+
+    arg_kinds_match = (
+        strict_type_count(callable_kinds) == strict_type_count(reference_kinds)
+        and arg_star_count(callable_kinds) <= arg_star_count(reference_kinds)
+        and arg_start2_count(callable_kinds) <= arg_start2_count(reference_kinds)
+    )
+
+    return arg_kinds_match and _mypy_types_match(callable_type, reference_callable)
 
 
 def _overloaded_types_match(

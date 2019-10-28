@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Iterable
 
 from mypy.nodes import SymbolNode
+
 from stub_analyzer import get_stub_types, lookup_symbol
 
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."

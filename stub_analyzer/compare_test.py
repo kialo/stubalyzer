@@ -7,6 +7,14 @@ from testing.util import MypyNodeFactory, mypy_node_factory
 from .compare import ComparisonResult, MatchResult, compare_symbols
 
 
+def assert_match(result: ComparisonResult) -> None:
+    assert result.match_result is MatchResult.MATCH
+
+
+def assert_mismatch(result: ComparisonResult) -> None:
+    assert result.match_result is MatchResult.MISMATCH
+
+
 class TestMatchResult:
     def test_declare_mismatch(self) -> None:
         assert MatchResult.declare_mismatch("not_found") is MatchResult.NOT_FOUND
@@ -187,6 +195,52 @@ class TestCompareFunctions:
         func_def, func_def_reference = mypy_nodes.get_additional_args_node()
         result = compare_symbols(func_def, func_def_reference)
         assert result.match_result is MatchResult.MISMATCH
+
+    def test_matching_with_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
+        func, func_ref = mypy_nodes.get_matching_with_arg_star()
+        result = compare_symbols(func, func_ref)
+        assert_match(result)
+
+    def test_matching_with_missing_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
+        func, func_ref = mypy_nodes.get_matching_with_missing_arg_star()
+        result = compare_symbols(func, func_ref)
+        assert_match(result)
+
+    def test_mismatching_with_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
+        func, func_ref = mypy_nodes.get_mismatching_with_arg_star()
+        result = compare_symbols(func, func_ref)
+        assert_mismatch(result)
+
+    def test_mismatching_with_additional_arg_star(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func, func_ref = mypy_nodes.get_mismatching_with_additional_arg_star()
+        result = compare_symbols(func, func_ref)
+        assert_mismatch(result)
+
+    def test_matching_with_kwarg_star2(self, mypy_nodes: MypyNodeFactory) -> None:
+        func, func_ref = mypy_nodes.get_matching_with_kwarg_star2()
+        result = compare_symbols(func, func_ref)
+        assert_match(result)
+
+    def test_matching_with_missing_kwarg_star2(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func, func_ref = mypy_nodes.get_matching_with_missing_kwarg_star2()
+        result = compare_symbols(func, func_ref)
+        assert_match(result)
+
+    def test_mismatching_with_kwarg_star2(self, mypy_nodes: MypyNodeFactory) -> None:
+        func, func_ref = mypy_nodes.get_mismatching_with_kwarg_star2()
+        result = compare_symbols(func, func_ref)
+        assert_mismatch(result)
+
+    def test_mismatching_with_additional_kwarg_star2(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func, func_ref = mypy_nodes.get_mismatching_with_additional_kwarg_star2()
+        result = compare_symbols(func, func_ref)
+        assert_mismatch(result)
 
     def test_overload_mismatches_if_any_handwritten_stub_has_additional_args(
         self, mypy_nodes: MypyNodeFactory

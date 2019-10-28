@@ -10,8 +10,8 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
-from schema import Schema, SchemaError, Use
 
+from schema import Schema, SchemaError, Use
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,

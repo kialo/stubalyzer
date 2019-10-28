@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
+
 from schema import SchemaError
 
 from .analyze import (
