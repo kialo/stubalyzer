@@ -44,10 +44,6 @@ class MypyNodeFactory:
         node_name = "functions.matching_function"
         return self.get(node_name, FuncDef)
 
-    def get_missing_function_node(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "functions.missing_function"
-        return cast(FuncDef, self._generated_stubs_map[node_name])
-
     def get_additional_args_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.additional_args"
         return self.get(node_name, FuncDef)

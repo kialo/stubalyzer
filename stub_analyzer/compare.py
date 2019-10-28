@@ -483,8 +483,6 @@ def compare_symbols(
     :param symbol: symbol node to validate
     :param reference: symbol node to validate against
     """
-    if symbol is None:
-        return ComparisonResult.create_symbol_not_found(reference=reference)
     # TODO: Check if this is always the case, i.e. could there be
     # cases where `symbol` and `reference` don't have the same class but still match?
     if type(symbol) != type(reference):
