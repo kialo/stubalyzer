@@ -83,7 +83,7 @@ class ComparisonResult(NamedTuple):
     symbol_name: str
     """Full name of the symbol that was checked"""
 
-    symbol_type: Optional[str]
+    symbol_type: str
     """Type of the symbol that was checked"""
 
     reference_name: Optional[str]
