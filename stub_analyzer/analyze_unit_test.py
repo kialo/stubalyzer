@@ -131,7 +131,7 @@ class TestEvaluateCompareResult:
         self.assert_err("An error happened", capsys)
         assert mismatches_left == set(["1"])
 
-    def test_unwanted_match_intead_mismatch(self, capsys: Any) -> None:
+    def test_unwanted_match_instead_mismatch(self, capsys: Any) -> None:
         mismatches_left = set(["1", "2", "3", "4"])
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
@@ -143,7 +143,7 @@ class TestEvaluateCompareResult:
         self.assert_err('Expected "3" to be "mismatch" but it matched.', capsys)
         assert mismatches_left == set(["1", "2", "4"])
 
-    def test_unwanted_match_intead_not_found(self, capsys: Any) -> None:
+    def test_unwanted_match_instead_not_found(self, capsys: Any) -> None:
         mismatches_left = set(["1", "2", "3", "4"])
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.NOT_FOUND}
 
