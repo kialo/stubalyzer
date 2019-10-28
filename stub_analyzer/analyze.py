@@ -161,7 +161,7 @@ def call_stubgen(command_line_args: List[str]) -> None:
     """
     from mypy.stubgen import parse_options, generate_stubs
 
-    generate_stubs(parse_options(command_line_args))
+    generate_stubs(parse_options(command_line_args), quiet=True)
 
 
 def generate_stub_types(
@@ -175,7 +175,11 @@ def generate_stub_types(
     :return: returns the reference stub types
     """
     with TemporaryDirectory() as reference_stubs_path:
-        packages = [entry.name for entry in scandir(base_stubs_path) if entry.is_dir()]
+        packages = [
+            entry.name.replace(".pyi", "")
+            for entry in scandir(base_stubs_path)
+            if entry.is_dir() or entry.name.endswith(".pyi")
+        ]
         for package in packages:
             if find_spec(package) is None:
                 print(
@@ -186,7 +190,9 @@ def generate_stub_types(
                 )
                 sys.exit(1)
             try:
-                call_stubgen(["-p", package, "-o", reference_stubs_path])
+                call_stubgen(
+                    ["--ignore-errors", "-p", package, "-o", reference_stubs_path]
+                )
             except Exception as ex:
                 write_error(
                     f'Error: Generating stubs for the package "{package}" failed:',
