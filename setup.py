@@ -99,4 +99,7 @@ setup(
         "Bug Reports": f"https://github.com/kialo/{PACKAGE_NAME}/issues",
         "Source": f"https://github.com/kialo/{PACKAGE_NAME}",
     },
+    # For mypy to find types
+    zip_safe=False,
+    package_data={"stub_analyzer": ["py.typed"]},
 )
