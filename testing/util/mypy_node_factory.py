@@ -1,9 +1,8 @@
 import os
 from pathlib import Path
-from typing import List, Mapping, Tuple, Type, TypeVar, cast
+from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
-
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 T = TypeVar("T")
@@ -20,27 +19,29 @@ class GeneratedStubNotFound(Exception):
 
 
 class MypyNodeFactory:
+    _handwritten_stubs_map: Dict[str, RelevantSymbolNode]
+    _generated_stubs_map: Dict[str, RelevantSymbolNode]
+    _handwritten_stubs_path: str
+    _generated_stubs_path: str
+
     def __init__(self) -> None:
-        self._base_dir: Path = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
-        self._mypy_conf: Path = self._base_dir / "mypy.ini"
-        self._handwritten_stubs_path = f"{self._base_dir}/stubs-handwritten"
-        handwritten_stubs: List[RelevantSymbolNode] = list(
-            get_stub_types(
-                self._handwritten_stubs_path, mypy_conf_path=str(self._mypy_conf)
-            )
+        base_dir = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
+        mypy_conf = str(base_dir / "mypy.ini")
+        self._handwritten_stubs_path = str(base_dir / "stubs-handwritten")
+        self._generated_stubs_path = str(base_dir / "stubs-generated")
+
+        handwritten_stubs = get_stub_types(
+            self._handwritten_stubs_path, mypy_conf_path=mypy_conf
         )
 
-        self._generated_stubs_path = f"{self._base_dir}/stubs-generated"
-        generated_stubs: List[RelevantSymbolNode] = list(
-            get_stub_types(
-                self._generated_stubs_path, mypy_conf_path=str(self._mypy_conf)
-            )
+        generated_stubs = get_stub_types(
+            self._generated_stubs_path, mypy_conf_path=mypy_conf
         )
 
-        self._handwritten_stubs_map: Mapping[str, RelevantSymbolNode] = {
+        self._handwritten_stubs_map = {
             symbol.fullname(): symbol for symbol in handwritten_stubs
         }
-        self._generated_stubs_map: Mapping[str, RelevantSymbolNode] = {
+        self._generated_stubs_map = {
             symbol.fullname(): symbol for symbol in generated_stubs
         }
 
@@ -49,6 +50,9 @@ class MypyNodeFactory:
 
     def generated_stub_not_found(self, symbol_name: str) -> GeneratedStubNotFound:
         return GeneratedStubNotFound(symbol_name, self._handwritten_stubs_path)
+
+    def get_generated_stubs_map(self) -> Dict[str, RelevantSymbolNode]:
+        return self._generated_stubs_map
 
     def get(
         self, symbol_name: str, _: Type[T], raise_error: bool = True
@@ -193,6 +197,14 @@ class MypyNodeFactory:
     def get_return_type_wrong(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "classes.ClassWithInvalidCustomStub.return_type_wrong"
         return self.get(node_name, FuncDef)
+
+    def get_mislocated_method_handwritten(self) -> FuncDef:
+        node_name = "classes.ClassWithoutSuperClassInHandwritten.a_method"
+        return cast(FuncDef, self._handwritten_stubs_map[node_name])
+
+    def get_mislocated_method_actual_location_generated(self) -> FuncDef:
+        node_name = "classes.AClass.a_method"
+        return cast(FuncDef, self._generated_stubs_map[node_name])
 
     def get_any_var(self) -> Var:
         node_name = "vars.any_var"

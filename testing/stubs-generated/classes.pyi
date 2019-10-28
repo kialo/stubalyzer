@@ -7,6 +7,11 @@ class AClass:
 
 class AnotherClass: ...
 
+class ClassWithoutSuperClassInHandwritten(AClass):
+    """Here, only inherits methods from AClass."""
+
+class SubClassOfAClass(AClass): ...
+
 class SuperWithOverridableMethod:
     def overwritten(self, bar: Any, foo: Any) -> Any: ...
 

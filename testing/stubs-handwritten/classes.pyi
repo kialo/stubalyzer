@@ -7,6 +7,15 @@ class AClass:
 
 class AnotherClass: ...
 
+class ClassWithoutSuperClassInHandwritten:
+    """Instead of subclassing "AClass" this class defines the method directly.
+
+    This is expected to give us a MISLOCATED_SYMBOL result."""
+
+    def a_method(self, foo: int) -> str: ...
+
+class SubClassOfAClass(AClass): ...
+
 class SuperWithOverridableMethod:
     def overwritten(self, bar: str, foo: int) -> str: ...
 

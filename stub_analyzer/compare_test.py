@@ -2,7 +2,7 @@ import pytest  # type: ignore
 
 from mypy.nodes import Var
 from mypy.types import NoneType
-from testing.util import MypyNodeFactory, mypy_node_factory
+from testing.util import MypyNodeFactory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
 
@@ -264,25 +264,23 @@ class TestCompareFunctions:
         result = compare_symbols(overloaded_def, overloaded_reference)
         assert result.match_result is MatchResult.MISMATCH
 
-    def test_decorated_function_matches(self) -> None:
-        decorated, decorated_reference = mypy_node_factory.get_decorated_function()
+    def test_decorated_function_matches(self, mypy_nodes: MypyNodeFactory) -> None:
+        decorated, decorated_reference = mypy_nodes.get_decorated_function()
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MATCH
 
     def test_decorated_function_mismatches_when_handwritten_stub_has_additional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        decorated, decorated_reference = (
-            mypy_node_factory.get_decorated_with_additional_args()
-        )
+        decorated, decorated_reference = mypy_nodes.get_decorated_with_additional_args()
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MISMATCH
 
     def test_decorated_mismatches_if_handwritten_stub_has_additional_optional_args(
-        self
+        self, mypy_nodes: MypyNodeFactory
     ) -> None:
         decorated, decorated_reference = (
-            mypy_node_factory.get_decorated_with_additional_optional_args()
+            mypy_nodes.get_decorated_with_additional_optional_args()
         )
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MISMATCH

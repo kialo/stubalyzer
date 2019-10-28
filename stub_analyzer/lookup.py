@@ -26,7 +26,7 @@ def lookup_symbol(
 
     symbol = symbol_map.get(symbol_to_lookup.fullname())
     if symbol:
-        return LookupResult(symbol, get_symbol_class(symbol_to_lookup))
+        return LookupResult(symbol, get_symbol_class(symbol))
 
     # Check if we have a class on the symbol we're looking up
     cls_to_lookup = getattr(symbol_to_lookup, "info", None)
