@@ -1,7 +1,7 @@
 import pytest  # type: ignore
-
 from mypy.nodes import Var
 from mypy.types import NoneType
+
 from testing.util import MypyNodeFactory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
@@ -172,6 +172,12 @@ class TestCompareMethods:
         meth, meth_ref = mypy_nodes.get_argument_types_less_specific()
         result = compare_symbols(meth, meth_ref)
         assert result.match_result is MatchResult.MISMATCH
+
+    @pytest.mark.xfail(reason="Not yet supported", strict=True)  # type: ignore
+    def test_argument_types_more_specific(self, mypy_nodes: MypyNodeFactory) -> None:
+        meth, meth_ref = mypy_nodes.get_argument_types_more_specific()
+        result = compare_symbols(meth, meth_ref)
+        assert result.match_result is MatchResult.MATCH
 
     @pytest.mark.xfail(reason="Not yet supported", strict=True)  # type: ignore
     def test_return_type_less_specific(self, mypy_nodes: MypyNodeFactory) -> None:

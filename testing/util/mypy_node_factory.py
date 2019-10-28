@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
+
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 T = TypeVar("T")
@@ -194,8 +195,16 @@ class MypyNodeFactory:
         node_name = "classes.ClassWithInvalidCustomStub.argument_types_less_specific"
         return self.get(node_name, FuncDef)
 
+    def get_argument_types_more_specific(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.argument_types_more_specific"
+        return self.get(node_name, FuncDef)
+
     def get_return_type_less_specific(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "classes.ClassWithInvalidCustomStub.return_type_less_specific"
+        return self.get(node_name, FuncDef)
+
+    def get_return_type_more_specific(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "classes.ClassWithInvalidCustomStub.return_type_more_specific"
         return self.get(node_name, FuncDef)
 
     def get_return_type_wrong(self) -> Tuple[FuncDef, FuncDef]:
