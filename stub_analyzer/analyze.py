@@ -90,7 +90,6 @@ def compare(
             lookup_result = lookup_symbol(gen_map, symbol)
             generated_symbol = lookup_result.symbol
             if generated_symbol:
-                print("Mislocated", symbol.fullname(), generated_symbol.fullname())
                 yield ComparisonResult.create_mislocated_symbol(
                     symbol=symbol,
                     reference=generated_symbol,
