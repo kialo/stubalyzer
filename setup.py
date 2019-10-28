@@ -32,6 +32,7 @@ setup(
     long_description_content_type="text/x-rst",
     url=f"https://github.com/kialo/{PACKAGE_NAME}",
     author="Kialo GmbH",
+    author_email="open-source@kialo.com",
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[
         # How mature is this project? Common values are
