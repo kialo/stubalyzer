@@ -158,6 +158,10 @@ class MypyNodeFactory:
         node_name = "classes.AnotherClass"
         return self.get(node_name, TypeInfo)
 
+    def get_missing_class(self) -> Tuple[TypeInfo, TypeInfo]:
+        node_name = "classes.MissingClass"
+        return self.get(node_name, TypeInfo, raise_error=False)
+
     def get_method(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "classes.AClass.a_method"
         return self.get(node_name, FuncDef)
