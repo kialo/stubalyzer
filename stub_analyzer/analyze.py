@@ -10,14 +10,15 @@ from tempfile import TemporaryDirectory
 from traceback import format_exception
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
-from mypy.nodes import TypeAlias, TypeVarExpr, Var
-from schema import Schema, SchemaError, Use
+from schema import Schema, SchemaError, Use  # type: ignore
 
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
     compare_symbols,
     get_stub_types,
+    lookup_symbol,
 )
 
 from .compare import MatchResult
@@ -71,7 +72,9 @@ def compare(
     hand_written: Iterable[RelevantSymbolNode], generated: Iterable[RelevantSymbolNode]
 ) -> Generator[ComparisonResult, None, None]:
     """Compare hand written to generated stubs."""
-    gen_map = {symbol.fullname(): symbol for symbol in generated}
+    gen_map: Dict[str, RelevantSymbolNode] = {
+        symbol.fullname(): symbol for symbol in generated
+    }
 
     for symbol in hand_written:
         name = symbol.fullname()
@@ -84,7 +87,17 @@ def compare(
             # since we assume they are private
             continue
         else:
-            yield ComparisonResult.create_not_found(symbol)
+            lookup_result = lookup_symbol(gen_map, symbol)
+            generated_symbol = lookup_result.symbol
+            if generated_symbol:
+                print("Mislocated", symbol.fullname(), generated_symbol.fullname())
+                yield ComparisonResult.create_mislocated_symbol(
+                    symbol=symbol,
+                    reference=generated_symbol,
+                    data={"containing_class": lookup_result.containing_class},
+                )
+            else:
+                yield ComparisonResult.create_not_found(symbol)
 
 
 def setup_expected_mismatches(

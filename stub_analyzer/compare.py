@@ -15,6 +15,7 @@ from mypy.nodes import (
     COVARIANT,
     Decorator,
     Expression,
+    SymbolNode,
     TypeAlias,
     TypeInfo,
     TypeVarExpr,
@@ -30,6 +31,7 @@ class MatchResult(Enum):
     MATCH = "match"
     MISMATCH = "mismatch"
     NOT_FOUND = "not_found"
+    MISLOCATED_SYMBOL = "mislocated_symbol"
 
     @classmethod
     def declare_mismatch(cls, matchResultString: str) -> "MatchResult":
@@ -48,7 +50,7 @@ class MatchResult(Enum):
         return result
 
 
-def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
+def _get_symbol_type_info(symbol: SymbolNode) -> str:
     """
     Get the type of the given symbol as a human readable string.
 
@@ -61,7 +63,7 @@ def _get_symbol_type_info(symbol: RelevantSymbolNode) -> str:
     if isinstance(symbol, TypeInfo):
         return f"Class({symbol.fullname()})"
 
-    return repr(symbol.type)
+    return repr(getattr(symbol, "type", None))
 
 
 class ComparisonResult(NamedTuple):
@@ -72,13 +74,13 @@ class ComparisonResult(NamedTuple):
     match_result: MatchResult
     """Type of comparison result"""
 
-    symbol: Optional[RelevantSymbolNode]
+    symbol: RelevantSymbolNode
     """Symbol that was checked"""
 
-    reference: Optional[RelevantSymbolNode]
+    reference: Optional[SymbolNode]
     """Reference symbol that was checked against"""
 
-    symbol_name: Optional[str]
+    symbol_name: str
     """Full name of the symbol that was checked"""
 
     symbol_type: Optional[str]
@@ -120,15 +122,20 @@ class ComparisonResult(NamedTuple):
             )
         elif self.match_result is MatchResult.NOT_FOUND:
             return f'Symbol "{self.symbol_name}" not found in generated stubs'
+        elif self.match_result is MatchResult.MISLOCATED_SYMBOL:
+            return (
+                f'Found symbol "{self.symbol_name}" in different location'
+                f' "{self.reference_name}".'
+            )
 
     @classmethod
     def create(
         cls,
         match_result: MatchResult,
-        symbol: Optional[RelevantSymbolNode],
-        reference: Optional[RelevantSymbolNode],
+        symbol: RelevantSymbolNode,
+        reference: Optional[SymbolNode],
         data: Optional[Dict[str, Any]],
-        message: Optional[str],
+        message: Optional[str] = None,
     ) -> ComparisonResult:
         """
         Create a comparison result.
@@ -145,18 +152,15 @@ class ComparisonResult(NamedTuple):
             reference=reference,
             data=data,
             message_val=message,
-            symbol_name=symbol.fullname() if symbol else None,
-            symbol_type=_get_symbol_type_info(symbol) if symbol else None,
+            symbol_name=symbol.fullname(),
+            symbol_type=_get_symbol_type_info(symbol),
             reference_name=reference.fullname() if reference else None,
             reference_type=_get_symbol_type_info(reference) if reference else None,
         )
 
     @classmethod
     def create_not_found(
-        cls,
-        symbol: RelevantSymbolNode,
-        data: Optional[Dict[str, Any]] = None,
-        message: Optional[str] = None,
+        cls, symbol: RelevantSymbolNode, data: Optional[Dict[str, Any]] = None
     ) -> ComparisonResult:
         """
         Create an unsuccessful comparison result
@@ -167,39 +171,30 @@ class ComparisonResult(NamedTuple):
         :param message: optional message
         """
         return cls.create(
-            match_result=MatchResult.NOT_FOUND,
-            symbol=symbol,
-            reference=None,
-            data=data,
-            message=(
-                message or (f"Symbol {symbol.fullname()} not found in generated stubs.")
-            ),
+            match_result=MatchResult.NOT_FOUND, symbol=symbol, reference=None, data=data
         )
 
     @classmethod
-    def create_symbol_not_found(
+    def create_mislocated_symbol(
         cls,
-        reference: RelevantSymbolNode,
+        symbol: RelevantSymbolNode,
+        reference: SymbolNode,
         data: Optional[Dict[str, Any]] = None,
-        message: Optional[str] = None,
     ) -> ComparisonResult:
         """
-        Create an unsuccessful comparison result
-        when there is no matching symbol found.
+        Create an unsuccessful comparison result where the reference symbol was found
+        in a different level of the class hierarchy.
 
-        :param reference: reference symbol that was checked against
+        :param symbol: symbol we wanted to check
+        :param reference: symbol that was found somewhere else in the hierarchy
         :param data: optional additional data
         :param message: optional message
         """
         return cls.create(
-            match_result=MatchResult.NOT_FOUND,
-            symbol=None,
+            match_result=MatchResult.MISLOCATED_SYMBOL,
+            symbol=symbol,
             reference=reference,
             data=data,
-            message=(
-                message
-                or (f"Symbol {reference.fullname()} not found in handwritten stubs.")
-            ),
         )
 
     @classmethod
@@ -349,10 +344,6 @@ def compare_mypy_types(
         symbol=symbol,
         reference=reference,
         data={
-            "a_name": symbol.fullname(),
-            "a_type": symbol_type,
-            "b_name": reference.fullname(),
-            "b_type": reference_type,
             "overlap": is_overlapping_types(symbol_type, reference_type),
             "subtype": is_subtype(symbol_type, reference_type),
         },

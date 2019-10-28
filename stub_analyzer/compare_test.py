@@ -1,7 +1,7 @@
 import pytest  # type: ignore
+
 from mypy.nodes import Var
 from mypy.types import NoneType
-
 from testing.util import MypyNodeFactory, mypy_node_factory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
@@ -19,6 +19,10 @@ class TestMatchResult:
     def test_declare_mismatch(self) -> None:
         assert MatchResult.declare_mismatch("not_found") is MatchResult.NOT_FOUND
         assert MatchResult.declare_mismatch("mismatch") is MatchResult.MISMATCH
+        assert (
+            MatchResult.declare_mismatch("mislocated_symbol")
+            is MatchResult.MISLOCATED_SYMBOL
+        )
         with pytest.raises(ValueError, match=r".*not a valid mismatch type.*"):
             MatchResult.declare_mismatch("match")
         with pytest.raises(ValueError, match=r".*not a valid mismatch type.*"):

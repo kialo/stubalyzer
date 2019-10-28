@@ -3,9 +3,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Iterable
 
-from mypy.nodes import SymbolNode
-
-from stub_analyzer import get_stub_types, lookup_symbol
+from stub_analyzer import RelevantSymbolNode, get_stub_types, lookup_symbol
 
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
 MYPY_CONF = BASE_DIR / "mypy.ini"
@@ -19,7 +17,7 @@ def find_missing_symbols() -> Iterable[str]:
         str(BASE_DIR / "stubs-generated"), str(MYPY_CONF)
     )
 
-    generated_map: Dict[str, SymbolNode] = {
+    generated_map: Dict[str, RelevantSymbolNode] = {
         sym.fullname(): sym for sym in stub_types_reference
     }
 

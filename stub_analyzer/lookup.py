@@ -2,6 +2,8 @@ from typing import Dict, NamedTuple, Optional
 
 from mypy.nodes import SymbolNode, TypeInfo
 
+from .types import RelevantSymbolNode
+
 
 class LookupResult(NamedTuple):
     symbol: Optional[SymbolNode]
@@ -18,7 +20,7 @@ def get_symbol_class(symbol: SymbolNode) -> Optional[TypeInfo]:
 
 
 def lookup_symbol(
-    symbol_map: Dict[str, SymbolNode], symbol_to_lookup: SymbolNode
+    symbol_map: Dict[str, RelevantSymbolNode], symbol_to_lookup: SymbolNode
 ) -> LookupResult:
     fail = LookupResult(None, None)
 
