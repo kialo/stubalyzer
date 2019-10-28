@@ -192,6 +192,11 @@ class TestCompareMethods:
 
 
 class TestCompareFunctions:
+    def test_matching_functions(self, mypy_nodes: MypyNodeFactory) -> None:
+        func_def, func_ref = mypy_nodes.get_matching_func_node()
+        result = compare_symbols(func_def, func_ref)
+        assert_match(result)
+
     def test_func_def_mismatches_when_handwritten_stub_has_additional_optional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:

@@ -1,42 +1,42 @@
-import os
 from pathlib import Path
-from typing import Dict, Tuple, Type, TypeVar, cast
+from typing import Dict, List, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
 
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
+from .stub_config import WithStubTestConfig
+
 T = TypeVar("T")
 
 
 class HandwrittenStubNotFound(Exception):
-    def __init__(self, symbol_name: str, path: str):
+    def __init__(self, symbol_name: str, path: Path):
         super().__init__(f"Handwritten stub {symbol_name} not found in {path}")
 
 
 class GeneratedStubNotFound(Exception):
-    def __init__(self, symbol_name: str, path: str):
+    def __init__(self, symbol_name: str, path: Path):
         super().__init__(f"Generated stub {symbol_name} not found in {path}")
 
 
-class MypyNodeFactory:
+class MypyNodeFactory(WithStubTestConfig):
     _handwritten_stubs_map: Dict[str, RelevantSymbolNode]
     _generated_stubs_map: Dict[str, RelevantSymbolNode]
-    _handwritten_stubs_path: str
-    _generated_stubs_path: str
 
     def __init__(self) -> None:
-        base_dir = Path(os.path.dirname(os.path.abspath(__file__))) / ".."
-        mypy_conf = str(base_dir / "mypy.ini")
-        self._handwritten_stubs_path = str(base_dir / "stubs-handwritten")
-        self._generated_stubs_path = str(base_dir / "stubs-generated")
-
-        handwritten_stubs = get_stub_types(
-            self._handwritten_stubs_path, mypy_conf_path=mypy_conf
+        handwritten_stubs: List[RelevantSymbolNode] = list(
+            get_stub_types(
+                str(self._handwritten_stubs_path),
+                mypy_conf_path=str(self._mypy_conf_path),
+            )
         )
 
-        generated_stubs = get_stub_types(
-            self._generated_stubs_path, mypy_conf_path=mypy_conf
+        generated_stubs: List[RelevantSymbolNode] = list(
+            get_stub_types(
+                str(self._generated_stubs_path),
+                mypy_conf_path=str(self._mypy_conf_path),
+            )
         )
 
         self._handwritten_stubs_map = {

@@ -1,6 +1,7 @@
 from copy import copy
 
 from mypy.nodes import FUNC_NO_INFO
+
 from testing.util import MypyNodeFactory
 
 from .lookup import LookupResult, lookup_symbol

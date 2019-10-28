@@ -10,9 +10,9 @@ from tempfile import TemporaryDirectory
 from traceback import format_exception
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use  # type: ignore
 
-from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from stub_analyzer import (
     ComparisonResult,
     RelevantSymbolNode,
