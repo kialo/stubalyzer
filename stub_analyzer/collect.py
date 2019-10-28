@@ -6,7 +6,6 @@ from os.path import abspath
 from typing import Iterable, Optional, Set
 
 from mypy.build import BuildResult, State, build
-from mypy.fscache import FileSystemCache
 from mypy.main import process_options
 from mypy.nodes import (
     GDEF,
@@ -38,21 +37,18 @@ def _mypy_analyze(
     """
     # The call to `build.build` is inspired by `mypy/mypy/main.py::main`
     # `build` is not a documented public API
-    args = ["--config-file", mypy_conf_path, root_path]
-    fscache = FileSystemCache()
-    sources, options = process_options(args, fscache=fscache)
+    args = [
+        "--config-file",
+        mypy_conf_path,
+        "--no-incremental",
+        "--cache-dir=" + ("nul" if os.name == "nt" else "/dev/null"),
+        root_path,
+    ]
+    sources, options = process_options(args)
     if stubs_path is not None:
         options = options.apply_changes({"mypy_path": [stubs_path]})
 
-    # disable cache
-    options.apply_changes(
-        {
-            "incremental": False,
-            "cache_dir": ("nul" if os.name == "nul" else "/dev/null"),
-        }
-    )
-
-    return build(sources, options, None, None, fscache)
+    return build(sources, options, None, None)
 
 
 def is_stubbed_module(module: State) -> bool:
