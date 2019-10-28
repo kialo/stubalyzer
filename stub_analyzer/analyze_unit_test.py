@@ -3,10 +3,43 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import SchemaError
 
-from .analyze import analyze_stubs, evaluate_compare_result, setup_expected_mismatches
-from .compare import MatchResult
+from .analyze import (
+    analyze_stubs,
+    compare,
+    evaluate_compare_result,
+    setup_expected_mismatches,
+)
+from .compare import ComparisonResult, MatchResult
+
+
+class TestCompare:
+    def test_skip_private_symbols(self) -> None:
+        handwritten = [
+            Mock(fullname=Mock(return_value="_private0"), spec=TypeAlias),
+            Mock(fullname=Mock(return_value="_private1"), spec=TypeVarExpr),
+            Mock(fullname=Mock(return_value="_private2"), spec=Var),
+            Mock(fullname=Mock(return_value="public0")),
+            Mock(fullname=Mock(return_value="__public1")),
+        ]
+        assert len(list(compare(handwritten, []))) == 2
+
+    @patch(
+        "stub_analyzer.analyze.compare_symbols",
+        return_value=ComparisonResult.create_match(Mock(), Mock()),
+    )
+    def test_match_to_generated_symbols(self, compare_mock: Mock) -> None:
+        handwritten = [
+            Mock(fullname=Mock(return_value="found_in_generated")),
+            Mock(fullname=Mock(return_value="not_found_in_generated")),
+        ]
+        generated = [Mock(fullname=Mock(return_value="found_in_generated"))]
+        result = list(compare(handwritten, generated))
+        assert len(result) == 2
+        assert result[0].match_result == MatchResult.MATCH
+        assert result[1].match_result == MatchResult.NOT_FOUND
 
 
 class TestSetupExpectedMismatches:
