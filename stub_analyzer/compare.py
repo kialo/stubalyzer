@@ -38,7 +38,7 @@ class MatchResult(Enum):
     MISMATCH_ADDITIONAL_ARGS = "mismatch_additional_args"
 
     @classmethod
-    def declare_mismatch(cls, matchResultString: str) -> "MatchResult":
+    def declare_mismatch(cls, matchResultString: str) -> MatchResult:
         err = matchResultString == MatchResult.MATCH.value
 
         try:
@@ -47,9 +47,12 @@ class MatchResult(Enum):
             err = True
 
         if err:
+            possible_values = ", ".join(
+                [f'"{m.value}"' for m in MatchResult if m is not MatchResult.MATCH]
+            )
             raise ValueError(
-                f"'{matchResultString}' is not a valid mismatch type."
-                f"(Use {', '.join([m.value for m in MatchResult])})"
+                f'"{matchResultString}" is not a valid mismatch type.'
+                f" (Use one of {possible_values}"
             )
         return result
 

@@ -22,16 +22,14 @@ class TestAnalyzeStubs(WithStubTestConfig):
 
         _, err = capsys.readouterr()
 
-        print(err)
-
         assert "missing.MISSING_CONSTANT" not in err
         assert (
-            'Expected "missing.missing_function" to be "mismatch" '
-            'but it was "not_found"' in err
+            'Expected "missing.missing_function" to be '
+            '"mismatch" but it was "not_found"' in err
         )
         assert (
-            'Expected "missing.missing_decorator" to fail, '
-            "but it was not even processed" in err
+            "Expected the following symbols to fail, but they were not processed:\n"
+            " - missing.missing_decorator" in err
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
 

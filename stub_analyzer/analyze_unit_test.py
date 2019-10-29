@@ -3,9 +3,8 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest  # type: ignore
-from schema import SchemaError  # type: ignore
-
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
+from schema import SchemaError  # type: ignore
 
 from .analyze import (
     analyze_stubs,
@@ -62,7 +61,7 @@ class TestSetupExpectedMismatches:
     @patch("pathlib.Path.exists", return_value=True)
     def test_json_contains_matches(self, *mocks: Mock) -> None:
         with pytest.raises(
-            SchemaError, match=r".*'match' is not a valid mismatch type.*"
+            SchemaError, match=r'.*"match" is not a valid mismatch type.*'
         ):
             assert setup_expected_mismatches("a_file")
 
@@ -70,7 +69,7 @@ class TestSetupExpectedMismatches:
     @patch("pathlib.Path.exists", return_value=True)
     def test_json_contains_invalid_types(self, *mocks: Mock) -> None:
         with pytest.raises(
-            SchemaError, match=r".*'unknown_match' is not a valid mismatch type.*"
+            SchemaError, match=r'.*"unknown_match" is not a valid mismatch type.*'
         ):
             assert setup_expected_mismatches("a_file")
 
@@ -88,28 +87,25 @@ class TestSetupExpectedMismatches:
     def test_json_is_correct(self, *mocks: Mock) -> None:
         assert setup_expected_mismatches("a_file") == (
             {"lib.1": MatchResult.NOT_FOUND, "lib.2": MatchResult.MISMATCH},
-            set(["lib.1", "lib.2"]),
+            {"lib.1", "lib.2"},
         )
 
 
 class TestEvaluateCompareResult:
-    @staticmethod
-    def assert_err(expected: str, capsys: Any) -> None:
-        _, err = capsys.readouterr()
-        assert err.strip() == expected
-
-    def test_everything_ok(self) -> None:
-        mismatches_left = set(["1", "2", "4"])
+    def test_everything_ok(self, capsys: Any) -> None:
+        mismatches_left = {"1", "2", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND}
         compare_result = Mock()
         compare_result.configure_mock(
             match_result=MatchResult.MATCH, message="Alright", symbol_name="3"
         )
         assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
-        assert mismatches_left == set(["1", "2", "4"])
+        _, err = capsys.readouterr()
+        assert err == ""
+        assert mismatches_left == {"1", "2", "4"}
 
-    def test_accept_expected_mismatches(self) -> None:
-        mismatches_left = set(["1", "2", "3", "4"])
+    def test_accept_expected_mismatches(self, capsys: Any) -> None:
+        mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
         compare_result = Mock()
@@ -117,10 +113,12 @@ class TestEvaluateCompareResult:
             match_result=MatchResult.MISMATCH, symbol_name="3"
         )
         assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
-        assert mismatches_left == set(["1", "2", "4"])
+        _, err = capsys.readouterr()
+        assert err == ""
+        assert mismatches_left == {"1", "2", "4"}
 
     def test_unwanted_mismatch(self, capsys: Any) -> None:
-        mismatches_left = set(["1"])
+        mismatches_left = {"1"}
         compare_result = Mock()
         compare_result.configure_mock(
             match_result=MatchResult.MISMATCH,
@@ -128,65 +126,62 @@ class TestEvaluateCompareResult:
             symbol_name="3",
         )
         assert not evaluate_compare_result(compare_result, {}, mismatches_left)
-        self.assert_err("An error happened", capsys)
-        assert mismatches_left == set(["1"])
+        _, err = capsys.readouterr()
+        assert "An error happened" in err
+        assert mismatches_left == {"1"}
 
     def test_unwanted_match_instead_mismatch(self, capsys: Any) -> None:
-        mismatches_left = set(["1", "2", "3", "4"])
+        mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
         compare_result = Mock()
         compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
 
-        assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
+        expected_mismatches_path = "the/mismatch/path.json"
+        assert not evaluate_compare_result(
+            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        )
 
-        self.assert_err('Expected "3" to be "mismatch" but it matched.', capsys)
-        assert mismatches_left == set(["1", "2", "4"])
+        _, err = capsys.readouterr()
+        assert 'Expected "3" to be "mismatch" but it matched.' in err
+        assert mismatches_left == {"1", "2", "4"}
 
     def test_unwanted_match_instead_not_found(self, capsys: Any) -> None:
-        mismatches_left = set(["1", "2", "3", "4"])
+        mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.NOT_FOUND}
 
         compare_result = Mock()
         compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
+        expected_mismatches_path = "the/mismatch/path.json"
 
-        assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
+        assert not evaluate_compare_result(
+            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        )
 
-        self.assert_err('Expected "3" to be "not_found" but it matched.', capsys)
-        assert mismatches_left == set(["1", "2", "4"])
+        _, err = capsys.readouterr()
+        assert 'Expected "3" to be "not_found" but it matched.' in err
+        assert mismatches_left == {"1", "2", "4"}
 
     def test_wrong_mismatch_type(self, capsys: Any) -> None:
-        mismatches_left = set(["1", "2", "3", "4"])
+        mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
         compare_result = Mock()
         compare_result.configure_mock(
             match_result=MatchResult.NOT_FOUND, symbol_name="3"
         )
+        expected_mismatches_path = "the/mismatch/path.json"
 
-        assert not evaluate_compare_result(compare_result, mismatches, mismatches_left)
+        assert not evaluate_compare_result(
+            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        )
 
-        self.assert_err('Expected "3" to be "mismatch" but it was "not_found".', capsys)
-        assert mismatches_left == set(["1", "2", "4"])
+        _, err = capsys.readouterr()
+        assert 'Expected "3" to be "mismatch" but it was "not_found".' in err
+        assert mismatches_left == {"1", "2", "4"}
 
 
 class TestAnalyzeStubs:
-    @staticmethod
-    def assert_stdout(expected: str, capsys: Any) -> None:
-        out, _ = capsys.readouterr()
-        assert out.strip() == expected
-
-    @staticmethod
-    def assert_out(expected_std: str, expected_err: str, capsys: Any) -> None:
-        std, err = capsys.readouterr()
-        assert std.strip() == expected_std
-        assert err.strip() == expected_err
-
-    @staticmethod
-    def assert_err_contains_line(line: str, capsys: Any) -> None:
-        _, err = capsys.readouterr()
-        assert line in [err_line.strip() for err_line in err.strip().split("\n")]
-
     @patch("stub_analyzer.analyze.evaluate_compare_result", return_value=True)
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
@@ -194,7 +189,9 @@ class TestAnalyzeStubs:
         self, generate_mock: Mock, compare_mock: Mock, result_mock: Mock, capsys: Any
     ) -> None:
         assert analyze_stubs("mypy_conf_path", "base_stubs_path")
-        self.assert_out("Comparing failed on 0 of 10 stubs.", "", capsys)
+        std, err = capsys.readouterr()
+        assert "Comparing failed on 0 of 10 stubs." in std
+        assert "" == err
 
     @patch(
         "stub_analyzer.analyze.setup_expected_mismatches",
@@ -202,7 +199,8 @@ class TestAnalyzeStubs:
     )
     def test_json_error(self, setup_mock: Mock, capsys: Any) -> None:
         assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
-        self.assert_err_contains_line("Boom: line 1 column 5 (char 4)", capsys)
+        _, err = capsys.readouterr()
+        assert "Boom: line 1 column 5 (char 4)" in err
 
     @patch(
         "stub_analyzer.analyze.setup_expected_mismatches",
@@ -210,12 +208,13 @@ class TestAnalyzeStubs:
     )
     def test_schema_error(self, setup_mock: Mock, capsys: Any) -> None:
         assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
-        self.assert_err_contains_line("Boom", capsys)
+        _, err = capsys.readouterr()
+        assert "Boom" in err
 
     @patch("stub_analyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
     @patch(
         "stub_analyzer.analyze.evaluate_compare_result",
-        side_effect=[False] * 3 + [True] * 7,
+        side_effect=[False] * 2 + [True] * 8,
     )
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
@@ -232,12 +231,9 @@ class TestAnalyzeStubs:
             "base_stubs_path",
             expected_mismatches_path="a/proper/mismatch_path",
         )
-        self.assert_out(
-            "",
-            "\n".join(['Check "a/proper/mismatch_path" to fix.'] * 3)
-            + "\n\nComparing failed on 3 of 10 stubs.",
-            capsys,
-        )
+        std, err = capsys.readouterr()
+        assert "Comparing failed on 2 of 10 stubs." in err
+        assert "" == std
 
     @patch(
         "stub_analyzer.analyze.setup_expected_mismatches",
@@ -253,6 +249,11 @@ class TestAnalyzeStubs:
             "base_stubs_path",
             expected_mismatches_path="a/proper/mismatch_path",
         )
-        self.assert_err_contains_line(
-            'Expected "lib.1, lib.2" to fail, but it was not even processed.', capsys
+
+        _, err = capsys.readouterr()
+        assert (
+            "Expected the following symbols to fail, but they were not processed:\n"
+            " - lib.1\n"
+            " - lib.2\n"
+            'Check "a/proper/mismatch_path" to fix.' in err
         )

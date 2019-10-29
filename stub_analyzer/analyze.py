@@ -10,9 +10,9 @@ from tempfile import TemporaryDirectory
 from traceback import format_exception
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
-from schema import Schema, SchemaError, Use  # type: ignore
-
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
+from mypy.stubgen import generate_stubs, parse_options
+from schema import Schema, SchemaError, Use  # type: ignore
 
 from .collect import get_stub_types
 from .compare import ComparisonResult, MatchResult, compare_symbols
@@ -21,9 +21,20 @@ from .types import RelevantSymbolNode
 
 EXPECTED_MISMATCH_SCHEMA = Schema({str: Use(MatchResult.declare_mismatch)})
 CHECK_FILE_ERROR = 'Check "{file_path}" to fix.'
-MATCH_FOUND_ERROR = 'Expected "{symbol}" to be "{mismatch_type}" but it matched.'
-WRONG_MISMATCH_ERROR = 'Expected "{symbol}" to be "{expected}" but it was "{received}".'
-UNUSED_DEFINITION_ERROR = 'Expected "{symbols}" to fail, but it was not even processed.'
+MATCH_FOUND_ERROR = (
+    'Expected "{symbol}" to be "{mismatch_type}" but it matched.'
+    f"{linesep}{CHECK_FILE_ERROR}"
+)
+WRONG_MISMATCH_ERROR = (
+    'Expected "{symbol}" to be "{expected}" but it was "{received}".'
+    f"{linesep}{CHECK_FILE_ERROR}"
+)
+UNUSED_DEFINITION_ERROR = (
+    "Expected the following symbols to fail, "
+    f"but they were not processed:{linesep}"
+    "{symbols}"
+    f"{linesep}{CHECK_FILE_ERROR}"
+)
 FILE_NOT_FOUND_WARNING = (
     'WARNING: Provided file for expected mismatches ("{file_path}") not found.'
 )
@@ -117,6 +128,7 @@ def evaluate_compare_result(
     compare_result: ComparisonResult,
     mismatches: Dict[str, MatchResult],
     mismatches_left: Set[str],
+    expected_mismatches_path: Optional[str] = None,
 ) -> bool:
     symbol = compare_result.symbol_name
     match_result = compare_result.match_result
@@ -126,26 +138,33 @@ def evaluate_compare_result(
     if expected_mismatch is None:
         if match_result is not MatchResult.MATCH:
             success = False
-            write_error(f"\n{compare_result.message}")
+            write_error(linesep, compare_result.message, sep="")
     else:
         mismatches_left.remove(symbol)
         if match_result is MatchResult.MATCH:
             success = False
+            assert expected_mismatches_path
             write_error(
-                "\n",
+                linesep,
                 MATCH_FOUND_ERROR.format(
-                    symbol=symbol, mismatch_type=mismatches[symbol].value
+                    symbol=symbol,
+                    mismatch_type=mismatches[symbol].value,
+                    file_path=expected_mismatches_path,
                 ),
+                sep="",
             )
         elif match_result is not expected_mismatch:
             success = False
+            assert expected_mismatches_path
             write_error(
-                "\n",
+                linesep,
                 WRONG_MISMATCH_ERROR.format(
                     symbol=symbol,
                     expected=expected_mismatch.value,
                     received=match_result.value,
+                    file_path=expected_mismatches_path,
                 ),
+                sep="",
             )
     return success
 
@@ -155,7 +174,6 @@ def call_stubgen(command_line_args: List[str]) -> None:
     Calls stubgen like the command line tool
     :param command_line_args: list of command line args
     """
-    from mypy.stubgen import parse_options, generate_stubs
 
     generate_stubs(parse_options(command_line_args), quiet=True)
 
@@ -194,6 +212,7 @@ def generate_stub_types(
                     f'Error: Generating stubs for the package "{package}" failed:',
                     linesep,
                     *format_exception(type(ex), ex, ex.__traceback__),
+                    sep="",
                 )
 
         return list(get_stub_types(reference_stubs_path, mypy_conf_path))
@@ -231,7 +250,10 @@ def analyze_stubs(
         )
     except (JSONDecodeError, SchemaError) as ex:
         write_error(
-            str(ex), "\n", CHECK_FILE_ERROR.format(file_path=expected_mismatches_path)
+            str(ex),
+            linesep,
+            CHECK_FILE_ERROR.format(file_path=expected_mismatches_path),
+            sep="",
         )
         success = False
 
@@ -245,29 +267,28 @@ def analyze_stubs(
         for res in compare(stub_types_base, stub_types_reference):
             total_count += 1
             compare_success = evaluate_compare_result(
-                res, mismatches, unused_mismatches
+                res, mismatches, unused_mismatches, expected_mismatches_path
             )
             if not compare_success:
                 failed_count += 1
-                if expected_mismatches_path:
-                    write_error(
-                        CHECK_FILE_ERROR.format(file_path=expected_mismatches_path)
-                    )
         success = failed_count == 0
 
         if unused_mismatches:
             success = False
+            symbols = linesep.join([f" - {mm}" for mm in unused_mismatches])
             write_error(
-                "\n",
-                UNUSED_DEFINITION_ERROR.format(symbols=", ".join(unused_mismatches)),
+                linesep,
+                UNUSED_DEFINITION_ERROR.format(
+                    symbols=symbols, file_path=expected_mismatches_path
+                ),
+                sep="",
             )
-            write_error(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
     summary = SUMMARY_MESSAGE.format(total=total_count, failed=failed_count)
     if success:
-        print("\n", summary, sep="")
+        print(linesep, summary, sep="")
     else:
-        write_error("\n", summary, sep="")
+        write_error(linesep, summary, sep="")
 
     return success
 
