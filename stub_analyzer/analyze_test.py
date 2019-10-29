@@ -27,11 +27,11 @@ class TestAnalyzeStubs(WithStubTestConfig):
         assert "missing.MISSING_CONSTANT" not in err
         assert (
             'Expected "missing.missing_function" to be "mismatch" but it was '
-            '"not_found" ' in err
+            '"not_found"' in err
         )
         assert (
             'Expected "missing.missing_decorator" to fail, but it was not even '
-            "processed " in err
+            "processed" in err
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
 
@@ -48,7 +48,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
         assert "mismatching.mismatching_function" not in err
         assert (
             'Expected "mismatching.MISMATCHING_CONSTANT" to be "not_found" but it was '
-            '"mismatch" ' in err
+            '"mismatch"' in err
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
 
