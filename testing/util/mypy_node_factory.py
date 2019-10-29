@@ -226,6 +226,3 @@ class MypyNodeFactory(WithStubTestConfig):
     def get_str_var(self) -> Var:
         node_name = "vars.str_var"
         return cast(Var, self._handwritten_stubs_map[node_name])
-
-
-mypy_node_factory = MypyNodeFactory()
