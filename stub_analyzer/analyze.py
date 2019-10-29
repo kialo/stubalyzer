@@ -29,8 +29,8 @@ FILE_NOT_FOUND_WARNING = (
 SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
 
 
-def write_error(*messages: str) -> None:
-    sys.stderr.write(" ".join(messages))
+def write_error(*messages: str, sep=" ") -> None:
+    sys.stderr.write(sep.join(messages))
     sys.stderr.write(linesep)
 
 
@@ -262,7 +262,12 @@ def analyze_stubs(
             )
             write_error(CHECK_FILE_ERROR.format(file_path=expected_mismatches_path))
 
-    print("\n", SUMMARY_MESSAGE.format(total=total_count, failed=failed_count))
+    summary = SUMMARY_MESSAGE.format(total=total_count, failed=failed_count)
+    if success:
+        print("\n", summary, sep="")
+    else:
+        write_error("\n", summary, sep="")
+
     return success
 
 

@@ -232,8 +232,9 @@ class TestAnalyzeStubs:
             expected_mismatches_path="a/proper/mismatch_path",
         )
         self.assert_out(
-            "Comparing failed on 3 of 10 stubs.",
-            "\n".join(['Check "a/proper/mismatch_path" to fix.'] * 3),
+            "",
+            "\n".join(['Check "a/proper/mismatch_path" to fix.'] * 3)
+            + "\n\nComparing failed on 3 of 10 stubs.",
             capsys,
         )
 
