@@ -35,6 +35,21 @@ class TestAnalyzeStubs(WithStubTestConfig):
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
 
+    def test_ignore_missing_module_symbols(self, capsys: CaptureFixture) -> None:
+        success = analyze_stubs(
+            self.mypy_config_path,
+            str(self._base_dir / "test-stubs" / "test_ignore_missing_module_symbols"),
+        )
+
+        stdout, err = capsys.readouterr()
+
+        assert 'Symbol "isort.comments.__name__" not found' not in err
+        assert 'Symbol "isort.comments.__doc__" not found' not in err
+        assert 'Symbol "isort.comments.__file__" not found' not in err
+        assert 'Symbol "isort.comments.__package__" not found' not in err
+
+        assert success
+
     def test_analyze_mismatching(self, capsys: Any) -> None:
         analyze_stubs(
             self.mypy_config_path,
