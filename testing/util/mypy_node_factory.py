@@ -1,6 +1,7 @@
 from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
+
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 from .stub_config import WithStubTestConfig
@@ -47,35 +48,24 @@ class MypyNodeFactory(WithStubTestConfig):
     def get_generated_stubs_map(self) -> Dict[str, RelevantSymbolNode]:
         return self._generated_stubs_map
 
-    def get(
-        self, symbol_name: str, _: Type[T], raise_error: bool = True
-    ) -> Tuple[T, T]:
-        handwritten_symbol_node = (
-            self._handwritten_stubs_map[symbol_name]
-            if symbol_name in self._handwritten_stubs_map.keys()
-            else None
-        )
-        if handwritten_symbol_node is None and raise_error:
+    def get_handwritten(self, symbol_name: str) -> T:
+        handwritten_symbol_node = self._handwritten_stubs_map.get(symbol_name)
+        if handwritten_symbol_node is None:
             raise self.handwritten_stub_not_found(symbol_name)
+        return cast(T, handwritten_symbol_node)
 
-        generated_symbol_node = (
-            self._generated_stubs_map[symbol_name]
-            if symbol_name in self._generated_stubs_map.keys()
-            else None
-        )
-
-        if generated_symbol_node is None and raise_error:
+    def get_generated(self, symbol_name: str) -> T:
+        generated_symbol_node = self._generated_stubs_map.get(symbol_name)
+        if generated_symbol_node is None:
             raise self.generated_stub_not_found(symbol_name)
+        return cast(T, generated_symbol_node)
 
-        return cast(T, handwritten_symbol_node), cast(T, generated_symbol_node)
+    def get(self, symbol_name: str, _: Type[T]) -> Tuple[T, T]:
+        return self.get_handwritten(symbol_name), self.get_generated(symbol_name)
 
     def get_matching_func_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.matching_function"
         return self.get(node_name, FuncDef)
-
-    def get_missing_function_node(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "functions.missing_function"
-        return self.get(node_name, FuncDef, raise_error=False)
 
     def get_additional_args_node(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "functions.additional_args"
@@ -151,10 +141,6 @@ class MypyNodeFactory(WithStubTestConfig):
         node_name = "classes.AnotherClass"
         return self.get(node_name, TypeInfo)
 
-    def get_missing_class(self) -> Tuple[TypeInfo, TypeInfo]:
-        node_name = "classes.MissingClass"
-        return self.get(node_name, TypeInfo, raise_error=False)
-
     def get_method(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "classes.AClass.a_method"
         return self.get(node_name, FuncDef)
@@ -206,6 +192,14 @@ class MypyNodeFactory(WithStubTestConfig):
     def get_mislocated_method_handwritten(self) -> FuncDef:
         node_name = "classes.ClassWithoutSuperClassInHandwritten.a_method"
         return cast(FuncDef, self._handwritten_stubs_map[node_name])
+
+    def get_missing_function_node(self) -> FuncDef:
+        node_name = "functions.missing_function"
+        return cast(FuncDef, self._handwritten_stubs_map[node_name])
+
+    def get_missing_class(self) -> TypeInfo:
+        node_name = "classes.MissingClass"
+        return cast(TypeInfo, self._handwritten_stubs_map[node_name])
 
     def get_mislocated_method_actual_location_generated(self) -> FuncDef:
         node_name = "classes.AClass.a_method"
