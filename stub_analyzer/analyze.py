@@ -29,7 +29,7 @@ FILE_NOT_FOUND_WARNING = (
 SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
 
 
-def write_error(*messages: str, sep=" ") -> None:
+def write_error(*messages: str, sep: str = " ") -> None:
     sys.stderr.write(sep.join(messages))
     sys.stderr.write(linesep)
 

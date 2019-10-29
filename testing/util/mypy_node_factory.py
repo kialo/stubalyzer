@@ -1,5 +1,4 @@
-from pathlib import Path
-from typing import Dict, List, Tuple, Type, TypeVar, cast
+from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
 

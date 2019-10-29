@@ -5,16 +5,13 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
 from mypy.nodes import (
-    ARG_STAR,
-    ARG_STAR2,
     CONTRAVARIANT,
     COVARIANT,
     Decorator,
-    Expression,
     SymbolNode,
     TypeAlias,
     TypeInfo,
