@@ -10,4 +10,5 @@ __all__ = [
     "lookup_symbol",
     "MatchResult",
     "RelevantSymbolNode",
+    "STRICT_ARG_KINDS",
 ]
