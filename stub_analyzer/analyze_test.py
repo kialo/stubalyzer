@@ -39,7 +39,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
             str(self._base_dir / "test-stubs" / "test_ignore_missing_module_symbols"),
         )
 
-        stdout, err = capsys.readouterr()
+        _, err = capsys.readouterr()
 
         assert 'Symbol "isort.comments.__name__" not found' not in err
         assert 'Symbol "isort.comments.__doc__" not found' not in err
