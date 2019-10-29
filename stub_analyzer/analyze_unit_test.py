@@ -79,6 +79,11 @@ class TestSetupExpectedMismatches:
         with pytest.raises(SchemaError, match=r".*should be instance of 'dict'.*"):
             assert setup_expected_mismatches("a_file")
 
+    @patch("pathlib.Path.read_text", return_value="{}")
+    @patch("pathlib.Path.exists", return_value=True)
+    def test_json_empty_dict(self, *mocks: Mock) -> None:
+        assert setup_expected_mismatches("a_file") == ({}, set())
+
     @patch(
         "pathlib.Path.read_text",
         return_value='{"lib.1": "not_found", "lib.2": "mismatch"}',

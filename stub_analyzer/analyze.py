@@ -12,14 +12,14 @@ from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from mypy.stubgen import generate_stubs, parse_options
-from schema import Schema, SchemaError, Use  # type: ignore
+from schema import Or, Schema, SchemaError, Use  # type: ignore
 
 from .collect import get_stub_types
 from .compare import ComparisonResult, MatchResult, compare_symbols
 from .lookup import lookup_symbol
 from .types import RelevantSymbolNode
 
-EXPECTED_MISMATCH_SCHEMA = Schema({str: Use(MatchResult.declare_mismatch)})
+EXPECTED_MISMATCH_SCHEMA = Schema(Or({}, {str: Use(MatchResult.declare_mismatch)}))
 CHECK_FILE_ERROR = 'Check "{file_path}" to fix.'
 MATCH_FOUND_ERROR = (
     'Expected "{symbol}" to be "{mismatch_type}" but it matched.'
