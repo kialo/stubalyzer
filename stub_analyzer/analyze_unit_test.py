@@ -3,8 +3,9 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest  # type: ignore
-from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import SchemaError  # type: ignore
+
+from mypy.nodes import TypeAlias, TypeVarExpr, Var
 
 from .analyze import (
     analyze_stubs,

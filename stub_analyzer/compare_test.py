@@ -1,7 +1,7 @@
 import pytest  # type: ignore
+
 from mypy.nodes import Var
 from mypy.types import NoneType
-
 from testing.util import MypyNodeFactory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols

@@ -1,7 +1,6 @@
 from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
-
 from stub_analyzer import RelevantSymbolNode, get_stub_types
 
 from .stub_config import WithStubTestConfig
