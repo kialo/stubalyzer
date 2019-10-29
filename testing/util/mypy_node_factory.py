@@ -11,12 +11,12 @@ T = TypeVar("T")
 
 
 class HandwrittenStubNotFound(Exception):
-    def __init__(self, symbol_name: str, path: Path):
+    def __init__(self, symbol_name: str, path: str):
         super().__init__(f"Handwritten stub {symbol_name} not found in {path}")
 
 
 class GeneratedStubNotFound(Exception):
-    def __init__(self, symbol_name: str, path: Path):
+    def __init__(self, symbol_name: str, path: str):
         super().__init__(f"Generated stub {symbol_name} not found in {path}")
 
 
@@ -25,18 +25,12 @@ class MypyNodeFactory(WithStubTestConfig):
     _generated_stubs_map: Dict[str, RelevantSymbolNode]
 
     def __init__(self) -> None:
-        handwritten_stubs: List[RelevantSymbolNode] = list(
-            get_stub_types(
-                str(self._handwritten_stubs_path),
-                mypy_conf_path=str(self._mypy_conf_path),
-            )
+        handwritten_stubs = get_stub_types(
+            str(self._handwritten_stubs_path), mypy_conf_path=str(self._mypy_conf_path)
         )
 
-        generated_stubs: List[RelevantSymbolNode] = list(
-            get_stub_types(
-                str(self._generated_stubs_path),
-                mypy_conf_path=str(self._mypy_conf_path),
-            )
+        generated_stubs = get_stub_types(
+            str(self._generated_stubs_path), mypy_conf_path=str(self._mypy_conf_path)
         )
 
         self._handwritten_stubs_map = {
@@ -47,10 +41,10 @@ class MypyNodeFactory(WithStubTestConfig):
         }
 
     def handwritten_stub_not_found(self, symbol_name: str) -> HandwrittenStubNotFound:
-        return HandwrittenStubNotFound(symbol_name, self._handwritten_stubs_path)
+        return HandwrittenStubNotFound(symbol_name, self.handwritten_stubs_path)
 
     def generated_stub_not_found(self, symbol_name: str) -> GeneratedStubNotFound:
-        return GeneratedStubNotFound(symbol_name, self._handwritten_stubs_path)
+        return GeneratedStubNotFound(symbol_name, self.generated_stubs_path)
 
     def get_generated_stubs_map(self) -> Dict[str, RelevantSymbolNode]:
         return self._generated_stubs_map
