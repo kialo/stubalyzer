@@ -57,7 +57,12 @@ def parse_command_line() -> Namespace:
         "--expected-mismatches",
         required=False,
         default=None,
-        help="A JSON file of expected mismatching symbols and their match results",
+        help="""A JSON file of expected mismatching symbols and their match results.
+        Example:
+        {
+            "my.module.function: "mismatch",
+            "another.module.Class: "not_found"
+        }""",
     )
     parser.add_argument(
         "stubs_handwritten",
@@ -107,7 +112,7 @@ def compare(
 
 
 def setup_expected_mismatches(
-    file_path: Optional[str] = None
+    file_path: Optional[str] = None,
 ) -> Tuple[Dict[str, MatchResult], Set[str]]:
     if not file_path:
         return dict(), set()
@@ -236,8 +241,12 @@ def analyze_stubs(
     :param base_stubs_path: path to the directory that contains the stubs to analyze
     :param reference_stubs_path: Path to the folder that contains the reference stubs.
         If not provided mypy's stubgen tool will be used to generate them.
-    :param expected_mismatches_path: Path to JSON file that defines expected mismatches
-        TODO: add/reference example of a expected_mismatches.json here
+    :param expected_mismatches_path: Path to JSON file that defines expected mismatches.
+        Example:
+        {
+            "my.module.function: "mismatch",
+            "another.module.Class: "not_found"
+        }
     :return: True if the stubs in base_stubs_path are considered correct
     """
     success = True
