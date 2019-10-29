@@ -13,15 +13,10 @@ from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import Schema, SchemaError, Use  # type: ignore
 
-from stub_analyzer import (
-    ComparisonResult,
-    RelevantSymbolNode,
-    compare_symbols,
-    get_stub_types,
-    lookup_symbol,
-)
-
-from .compare import MatchResult
+from .collect import get_stub_types
+from .compare import ComparisonResult, MatchResult, compare_symbols
+from .lookup import lookup_symbol
+from .types import RelevantSymbolNode
 
 EXPECTED_MISMATCH_SCHEMA = Schema({str: Use(MatchResult.declare_mismatch)})
 CHECK_FILE_ERROR = 'Check "{file_path}" to fix.'

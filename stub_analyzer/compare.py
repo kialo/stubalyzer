@@ -25,6 +25,12 @@ from mypy.types import CallableType, Overloaded
 from mypy.types import Type as TypeNode
 
 from .types import RelevantSymbolNode
+from .utils import (
+    arg_star2_count,
+    arg_star_count,
+    get_expression_fullname,
+    strict_type_count,
+)
 
 
 class MatchResult(Enum):
@@ -279,16 +285,6 @@ def _callable_types_match(
     :param callable_type: callable to check
     :param reference_callable: callable to check against
     """
-
-    def strict_type_count(kinds: List[int]) -> int:
-        return len(list(filter(lambda kind: kind not in [ARG_STAR, ARG_STAR2], kinds)))
-
-    def arg_star_count(kinds: List[int]) -> int:
-        return len(list(filter(lambda kind: kind is ARG_STAR, kinds)))
-
-    def arg_start2_count(kinds: List[int]) -> int:
-        return len(list(filter(lambda kind: kind is ARG_STAR2, kinds)))
-
     callable_kinds = callable_type.arg_kinds
     reference_kinds = reference_callable.arg_kinds
 
@@ -301,7 +297,7 @@ def _callable_types_match(
     arg_kinds_match = (
         strict_type_count_callable == strict_type_count_reference
         and arg_star_count(callable_kinds) <= arg_star_count(reference_kinds)
-        and arg_start2_count(callable_kinds) <= arg_start2_count(reference_kinds)
+        and arg_star2_count(callable_kinds) <= arg_star2_count(reference_kinds)
     )
 
     if not arg_kinds_match:
@@ -465,20 +461,6 @@ def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonRes
     :param symbol: decorator symbol to validate
     :param reference: decorator symbol to validate against
     """
-
-    def get_expression_fullname(expr: Expression) -> Optional[str]:
-        fullname_attr = getattr(expr, "fullname")
-
-        if fullname_attr is None:
-            fullname = None
-        elif callable(fullname_attr):
-            fullname = fullname_attr()
-        else:
-            fullname = fullname_attr
-
-        if isinstance(fullname, str):
-            return fullname
-        return fullname
 
     symbol_decorators = list(map(get_expression_fullname, symbol.original_decorators))
     reference_decorators = list(
