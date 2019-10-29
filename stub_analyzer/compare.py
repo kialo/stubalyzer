@@ -29,7 +29,7 @@ from .utils import (
     arg_star2_count,
     arg_star_count,
     get_expression_fullname,
-    strict_type_count,
+    strict_kind_count,
 )
 
 
@@ -288,14 +288,14 @@ def _callable_types_match(
     callable_kinds = callable_type.arg_kinds
     reference_kinds = reference_callable.arg_kinds
 
-    strict_type_count_callable = strict_type_count(callable_kinds)
-    strict_type_count_reference = strict_type_count(reference_kinds)
+    strict_kind_count_callable = strict_kind_count(callable_kinds)
+    strict_kind_count_reference = strict_kind_count(reference_kinds)
 
-    if strict_type_count_callable > strict_type_count_reference:
+    if strict_kind_count_callable > strict_kind_count_reference:
         return MatchResult.MISMATCH_ADDITIONAL_ARGS
 
     arg_kinds_match = (
-        strict_type_count_callable == strict_type_count_reference
+        strict_kind_count_callable == strict_kind_count_reference
         and arg_star_count(callable_kinds) <= arg_star_count(reference_kinds)
         and arg_star2_count(callable_kinds) <= arg_star2_count(reference_kinds)
     )
