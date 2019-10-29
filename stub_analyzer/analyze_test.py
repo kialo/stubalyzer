@@ -26,12 +26,12 @@ class TestAnalyzeStubs(WithStubTestConfig):
 
         assert "missing.MISSING_CONSTANT" not in err
         assert (
-            'Expected "missing.missing_function" to be "mismatch" but it was '
-            '"not_found"' in err
+            'Expected "missing.missing_function" to be "mismatch" '
+            'but it was "not_found"' in err
         )
         assert (
-            'Expected "missing.missing_decorator" to fail, but it was not even '
-            "processed" in err
+            'Expected "missing.missing_decorator" to fail, '
+            "but it was not even processed" in err
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
 
@@ -47,8 +47,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
 
         assert "mismatching.mismatching_function" not in err
         assert (
-            'Expected "mismatching.MISMATCHING_CONSTANT" to be "not_found" but it was '
-            '"mismatch"' in err
+            'Expected "mismatching.MISMATCHING_CONSTANT" to be "not_found" '
+            'but it was "mismatch"' in err
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
 
@@ -70,6 +70,22 @@ class TestAnalyzeStubs(WithStubTestConfig):
         assert (
             'Expected "matching.matching_variable" to be "mismatch" but it matched'
             in err
+        )
+
+    def test_analyze_additional_params(self, capsys: Any) -> None:
+        analyze_stubs(
+            self.mypy_config_path,
+            self.handwritten_stubs_path,
+            self.generated_stubs_path,
+            self.get_expectations_path("additional_function_params.json"),
+        )
+
+        _, err = capsys.readouterr()
+
+        assert "functions.additional_args" not in err
+        assert (
+            'Expected "functions.matching_function" to be "mismatch_additional_args" '
+            "but it matched" in err
         )
 
 

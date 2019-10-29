@@ -32,6 +32,7 @@ class MatchResult(Enum):
     MISMATCH = "mismatch"
     NOT_FOUND = "not_found"
     MISLOCATED_SYMBOL = "mislocated_symbol"
+    MISMATCH_ADDITIONAL_ARGS = "mismatch_additional_args"
 
     @classmethod
     def declare_mismatch(cls, matchResultString: str) -> "MatchResult":
@@ -126,6 +127,15 @@ class ComparisonResult(NamedTuple):
             return (
                 f'Found symbol "{self.symbol_name}" in different location'
                 f' "{self.reference_name}".'
+            )
+        elif self.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS:
+            return "\n".join(
+                [
+                    f'Symbol "{self.symbol_name}" has more arguments than reference'
+                    f' "{self.reference_name}":',
+                    f"    {self.symbol_type}",
+                    f"    {self.reference_type}",
+                ]
             )
 
     @classmethod
@@ -246,21 +256,23 @@ class ComparisonResult(NamedTuple):
         )
 
 
-def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> bool:
+def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> MatchResult:
     """
     Check if the given symbol type matches the the reference type.
 
     :param symbol_type: symbol type to check
     :param reference_type: reference type to check against
     """
-    return is_overlapping_types(symbol_type, reference_type) or is_subtype(
+    if is_overlapping_types(symbol_type, reference_type) or is_subtype(
         symbol_type, reference_type
-    )
+    ):
+        return MatchResult.MATCH
+    return MatchResult.MISMATCH
 
 
 def _callable_types_match(
     callable_type: CallableType, reference_callable: CallableType
-) -> bool:
+) -> MatchResult:
     """
     Check if the given callable matches the reference.
 
@@ -280,18 +292,27 @@ def _callable_types_match(
     callable_kinds = callable_type.arg_kinds
     reference_kinds = reference_callable.arg_kinds
 
+    strict_type_count_callable = strict_type_count(callable_kinds)
+    strict_type_count_reference = strict_type_count(reference_kinds)
+
+    if strict_type_count_callable > strict_type_count_reference:
+        return MatchResult.MISMATCH_ADDITIONAL_ARGS
+
     arg_kinds_match = (
-        strict_type_count(callable_kinds) == strict_type_count(reference_kinds)
+        strict_type_count_callable == strict_type_count_reference
         and arg_star_count(callable_kinds) <= arg_star_count(reference_kinds)
         and arg_start2_count(callable_kinds) <= arg_start2_count(reference_kinds)
     )
 
-    return arg_kinds_match and _mypy_types_match(callable_type, reference_callable)
+    if not arg_kinds_match:
+        return MatchResult.MISMATCH
+
+    return _mypy_types_match(callable_type, reference_callable)
 
 
 def _overloaded_types_match(
     overloaded: Overloaded, reference_overloaded: Overloaded
-) -> bool:
+) -> MatchResult:
     """
     Check if the given overloaded type matches the reference.
 
@@ -299,14 +320,13 @@ def _overloaded_types_match(
     :param reference_overloaded: overloaded type to check against
     """
     if len(overloaded.items()) != len(reference_overloaded.items()):
-        return False
+        return MatchResult.MISMATCH
 
-    return all(
-        [
-            _callable_types_match(ovl, ref)
-            for ovl, ref in zip(overloaded.items(), reference_overloaded.items())
-        ]
-    )
+    for ovl, ref in zip(overloaded.items(), reference_overloaded.items()):
+        if _callable_types_match(ovl, ref) != MatchResult.MATCH:
+            return MatchResult.MISMATCH
+
+    return MatchResult.MATCH
 
 
 def compare_mypy_types(
@@ -340,7 +360,19 @@ def compare_mypy_types(
     if symbol_type is None:
         return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
-    match = ComparisonResult.create_match(
+    match = MatchResult.MATCH
+
+    if isinstance(symbol_type, CallableType) and isinstance(
+        reference_type, CallableType
+    ):
+        match = _callable_types_match(symbol_type, reference_type)
+    elif isinstance(symbol_type, Overloaded) and isinstance(reference_type, Overloaded):
+        match = _overloaded_types_match(symbol_type, reference_type)
+    else:
+        match = _mypy_types_match(symbol_type, reference_type)
+
+    result = ComparisonResult.create(
+        match_result=match,
         symbol=symbol,
         reference=reference,
         data={
@@ -349,24 +381,7 @@ def compare_mypy_types(
         },
     )
 
-    mismatch = ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
-
-    if isinstance(symbol_type, CallableType) and isinstance(
-        reference_type, CallableType
-    ):
-        if _callable_types_match(symbol_type, reference_type):
-            return match
-        return mismatch
-
-    if isinstance(symbol_type, Overloaded) and isinstance(reference_type, Overloaded):
-        if _overloaded_types_match(symbol_type, reference_type):
-            return match
-        return mismatch
-
-    if _mypy_types_match(symbol_type, reference_type):
-        return match
-
-    return mismatch
+    return result
 
 
 def _type_infos_are_same_class(

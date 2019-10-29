@@ -1,0 +1,4 @@
+{
+    "elasticsearch.client.indices.IndicesClient.create": "mismatch_additional_args",
+    "passlib.ifc.PasswordHash.encrypt": "mismatch_additional_args"
+}

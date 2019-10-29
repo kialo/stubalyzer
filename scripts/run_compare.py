@@ -12,5 +12,6 @@ if __name__ == "__main__":
         f"{BASE_DIR}/mypy.ini",
         f"{BASE_DIR}/stubs-handwritten",
         f"{BASE_DIR}/stubs-generated",
+        f"{BASE_DIR}/stubs-handwritten/expected_mismatches.json",
     )
     sys.exit(0 if success else 1)

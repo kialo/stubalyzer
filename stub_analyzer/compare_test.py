@@ -202,14 +202,14 @@ class TestCompareFunctions:
     ) -> None:
         func_def, func_def_reference = mypy_nodes.get_additional_optional_args_node()
         result = compare_symbols(func_def, func_def_reference)
-        assert result.match_result is MatchResult.MISMATCH
+        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
 
     def test_func_def_mismatches_when_handwritten_stub_has_additional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
         func_def, func_def_reference = mypy_nodes.get_additional_args_node()
         result = compare_symbols(func_def, func_def_reference)
-        assert result.match_result is MatchResult.MISMATCH
+        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
 
     def test_matching_with_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
         func, func_ref = mypy_nodes.get_matching_with_arg_star()
@@ -285,7 +285,7 @@ class TestCompareFunctions:
     ) -> None:
         decorated, decorated_reference = mypy_nodes.get_decorated_with_additional_args()
         result = compare_symbols(decorated, decorated_reference)
-        assert result.match_result is MatchResult.MISMATCH
+        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
 
     def test_decorated_mismatches_if_handwritten_stub_has_additional_optional_args(
         self, mypy_nodes: MypyNodeFactory
@@ -294,4 +294,4 @@ class TestCompareFunctions:
             mypy_nodes.get_decorated_with_additional_optional_args()
         )
         result = compare_symbols(decorated, decorated_reference)
-        assert result.match_result is MatchResult.MISMATCH
+        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
