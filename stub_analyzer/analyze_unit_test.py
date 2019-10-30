@@ -1,8 +1,8 @@
 from json.decoder import JSONDecodeError
-from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
+from _pytest.capture import CaptureFixture
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import SchemaError  # type: ignore
 
@@ -47,7 +47,7 @@ class TestSetupExpectedMismatches:
     def test_file_not_provided(self) -> None:
         assert setup_expected_mismatches(None) == ({}, set())
 
-    def test_file_not_exists(self, capsys: Any) -> None:
+    def test_file_not_exists(self, capsys: CaptureFixture) -> None:
         assert setup_expected_mismatches("a_file") == ({}, set())
         _, err = capsys.readouterr()
         assert err.startswith("WARNING: Provided")
@@ -98,7 +98,7 @@ class TestSetupExpectedMismatches:
 
 
 class TestEvaluateCompareResult:
-    def test_everything_ok(self, capsys: Any) -> None:
+    def test_everything_ok(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1", "2", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND}
         compare_result = Mock()
@@ -113,7 +113,7 @@ class TestEvaluateCompareResult:
         assert err == ""
         assert mismatches_left == {"1", "2", "4"}
 
-    def test_accept_expected_mismatches(self, capsys: Any) -> None:
+    def test_accept_expected_mismatches(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
@@ -129,7 +129,7 @@ class TestEvaluateCompareResult:
         assert err == ""
         assert mismatches_left == {"1", "2", "4"}
 
-    def test_unwanted_mismatch(self, capsys: Any) -> None:
+    def test_unwanted_mismatch(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1"}
         compare_result = Mock()
         compare_result.configure_mock(
@@ -145,7 +145,7 @@ class TestEvaluateCompareResult:
         assert "An error happened" in err
         assert mismatches_left == {"1"}
 
-    def test_unwanted_match_instead_mismatch(self, capsys: Any) -> None:
+    def test_unwanted_match_instead_mismatch(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
@@ -164,7 +164,7 @@ class TestEvaluateCompareResult:
         assert 'Expected "3" to be "mismatch" but it matched.' in err
         assert mismatches_left == {"1", "2", "4"}
 
-    def test_unwanted_match_instead_not_found(self, capsys: Any) -> None:
+    def test_unwanted_match_instead_not_found(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.NOT_FOUND}
 
@@ -183,7 +183,7 @@ class TestEvaluateCompareResult:
         assert 'Expected "3" to be "not_found" but it matched.' in err
         assert mismatches_left == {"1", "2", "4"}
 
-    def test_wrong_mismatch_type(self, capsys: Any) -> None:
+    def test_wrong_mismatch_type(self, capsys: CaptureFixture) -> None:
         mismatches_left = {"1", "2", "3", "4"}
         mismatches = {"1": MatchResult.NOT_FOUND, "3": MatchResult.MISMATCH}
 
@@ -212,8 +212,14 @@ class TestAnalyzeStubs:
     )
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
+    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
     def test_everything_ok(
-        self, generate_mock: Mock, compare_mock: Mock, result_mock: Mock, capsys: Any
+        self,
+        generate_mock: Mock,
+        compare_mock: Mock,
+        result_mock: Mock,
+        get_stub_types_mock: Mock,
+        capsys: CaptureFixture,
     ) -> None:
         assert analyze_stubs("mypy_conf_path", "base_stubs_path")
         std, err = capsys.readouterr()
@@ -225,7 +231,7 @@ class TestAnalyzeStubs:
         "stub_analyzer.analyze.setup_expected_mismatches",
         side_effect=JSONDecodeError("Boom", '{"a": 2}', 4),
     )
-    def test_json_error(self, setup_mock: Mock, capsys: Any) -> None:
+    def test_json_error(self, setup_mock: Mock, capsys: CaptureFixture) -> None:
         assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
         _, err = capsys.readouterr()
         assert "Boom: line 1 column 5 (char 4)" in err
@@ -234,7 +240,7 @@ class TestAnalyzeStubs:
         "stub_analyzer.analyze.setup_expected_mismatches",
         side_effect=SchemaError("Boom"),
     )
-    def test_schema_error(self, setup_mock: Mock, capsys: Any) -> None:
+    def test_schema_error(self, setup_mock: Mock, capsys: CaptureFixture) -> None:
         assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
         _, err = capsys.readouterr()
         assert "Boom" in err
@@ -248,13 +254,15 @@ class TestAnalyzeStubs:
     )
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
+    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
     def test_some_results_fail_ok(
         self,
         generate_mock: Mock,
         compare_mock: Mock,
         result_mock: Mock,
         setup_mock: Mock,
-        capsys: Any,
+        get_stub_types_mock: Mock,
+        capsys: CaptureFixture,
     ) -> None:
         assert not analyze_stubs(
             "mypy_conf_path",
@@ -272,8 +280,14 @@ class TestAnalyzeStubs:
     )
     @patch("stub_analyzer.analyze.compare", return_value=[])
     @patch("stub_analyzer.analyze.generate_stub_types")
+    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
     def test_unused_mismatches(
-        self, generate_mock: Mock, compare_mock: Mock, setup_mock: Mock, capsys: Any
+        self,
+        generate_mock: Mock,
+        compare_mock: Mock,
+        setup_mock: Mock,
+        get_stub_types_mock: Mock,
+        capsys: CaptureFixture,
     ) -> None:
         assert not analyze_stubs(
             "mypy_conf_path",
