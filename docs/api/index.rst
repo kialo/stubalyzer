@@ -1,5 +1,5 @@
-Stub Analyzer API Documentation
-===============================
+Stubalyzer API Documentation
+============================
 
 .. toctree::
    :maxdepth: 4

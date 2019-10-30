@@ -1,5 +1,5 @@
-Stub Analyzer
-=============
+Stubalyzer
+==========
 
 .. image:: https://readthedocs.org/projects/stubalyzer/badge/?version=latest
     :target: https://stubalyzer.readthedocs.io/en/latest/?badge=latest
