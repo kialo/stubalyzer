@@ -298,3 +298,18 @@ class TestCompareFunctions:
         ) = mypy_nodes.get_decorated_with_additional_optional_args()
         result = compare_symbols(decorated, decorated_reference)
         assert result.match_result is MatchResult.MISMATCH
+
+    def test_generated_has_no_parameters_and_return_type(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        (
+            func_def,
+            func_def_reference,
+        ) = mypy_nodes.get_no_parameters_and_return_type_node()
+        result = compare_symbols(func_def, func_def_reference)
+        assert result.match_result is MatchResult.MISMATCH
+
+    def test_generated_has_no_parameters(self, mypy_nodes: MypyNodeFactory) -> None:
+        func_def, func_def_reference = mypy_nodes.get_mismatch_with_zero_parameters()
+        result = compare_symbols(func_def, func_def_reference)
+        assert result.match_result is MatchResult.MISMATCH
