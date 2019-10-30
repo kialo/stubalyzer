@@ -3,15 +3,17 @@ jobs:
     executor: python/default
     steps:
       - checkout
+      - python/load-cache
       - python/install-deps
+      - python/save-cache
       - run:
-          command: flake8 stub_analyzer testing
+          command: python -m flake8 stub_analyzer testing
           name: Lint
       - run:
-          command: mypy stub_analyzer testing
+          command: python -m mypy stub_analyzer testing
           name: Typecheck
       - run:
-          command: pytest
+          command: python -m pytest
           name: Test
 orbs:
   python: circleci/python@0.2.1
