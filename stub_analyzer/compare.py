@@ -12,15 +12,13 @@ from mypy.nodes import (
     CONTRAVARIANT,
     COVARIANT,
     Decorator,
-    FuncDef,
-    OverloadedFuncDef,
     SymbolNode,
     TypeAlias,
     TypeInfo,
     TypeVarExpr,
 )
 from mypy.subtypes import is_subtype
-from mypy.types import CallableType, Overloaded
+from mypy.types import CallableType, FunctionLike, Overloaded
 from mypy.types import Type as TypeNode
 
 from .types import RelevantSymbolNode
@@ -523,9 +521,7 @@ def compare_symbols(
     symbol_type = getattr(symbol, "type")
     reference_type = getattr(reference, "type")
 
-    if reference_type is None and isinstance(
-        symbol_type.definition, (FuncDef, OverloadedFuncDef)
-    ):
+    if reference_type is None and isinstance(symbol_type, FunctionLike):
         return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
     return compare_mypy_types(
