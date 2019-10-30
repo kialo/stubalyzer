@@ -64,7 +64,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
             'but it was "mismatch"' in err
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
-        assert "1 more fail(s) were ignored." in err
+        assert "Types for mismatching.other_missing_parameters do not match"
+        assert "2 more fail(s) were ignored." in err
 
     def test_analyze_matching(self, capsys: CaptureFixture) -> None:
         analyze_stubs(
@@ -119,9 +120,10 @@ class TestCompareSymbols:
     def test_generated_has_no_parameters_and_return_type(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        func_def, func_def_reference = (
-            mypy_nodes.get_no_parameters_and_return_type_node()
-        )
+        (
+            func_def,
+            func_def_reference,
+        ) = mypy_nodes.get_no_parameters_and_return_type_node()
         result = compare([func_def], [func_def_reference])
 
         assert all([x.match_result is MatchResult.MISMATCH for x in result])
