@@ -1,6 +1,0 @@
-from typing import Any, Optional
-
-import passlib.utils.handlers as uh
-
-class bcrypt(uh.TruncateMixin, uh.GenericHandler): ...
-class md5_crypt(uh.GenericHandler): ...

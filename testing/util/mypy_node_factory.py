@@ -25,11 +25,11 @@ class MypyNodeFactory(WithStubTestConfig):
 
     def __init__(self) -> None:
         handwritten_stubs = get_stub_types(
-            str(self._handwritten_stubs_path), mypy_conf_path=str(self._mypy_conf_path)
+            self.handwritten_stubs_path, mypy_conf_path=self.mypy_config_path,
         )
 
         generated_stubs = get_stub_types(
-            str(self._generated_stubs_path), mypy_conf_path=str(self._mypy_conf_path)
+            self.generated_stubs_path, mypy_conf_path=self.mypy_config_path
         )
 
         self._handwritten_stubs_map = {
@@ -112,13 +112,13 @@ class MypyNodeFactory(WithStubTestConfig):
         return self.get(node_name, FuncDef)
 
     def get_overloaded_additional_args_node(
-        self
+        self,
     ) -> Tuple[OverloadedFuncDef, OverloadedFuncDef]:
         node_name = "functions.overloaded_additional_args"
         return self.get(node_name, OverloadedFuncDef)
 
     def get_overloaded_additional_optional_args_node(
-        self
+        self,
     ) -> Tuple[OverloadedFuncDef, OverloadedFuncDef]:
         node_name = "functions.overloaded_additional_optional_args"
         return self.get(node_name, OverloadedFuncDef)
@@ -132,7 +132,7 @@ class MypyNodeFactory(WithStubTestConfig):
         return self.get(node_name, Decorator)
 
     def get_decorated_with_additional_optional_args(
-        self
+        self,
     ) -> Tuple[Decorator, Decorator]:
         node_name = "functions.decorated_with_additional_optional_args"
         return self.get(node_name, Decorator)
