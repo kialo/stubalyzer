@@ -11,6 +11,7 @@ Submodules
    stub_analyzer.compare
    stub_analyzer.lookup
    stub_analyzer.types
+   stub_analyzer.utils
 
 Module contents
 ---------------

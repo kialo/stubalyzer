@@ -176,7 +176,8 @@ def evaluate_compare_result(
 
 def call_stubgen(command_line_args: List[str]) -> None:
     """
-    Calls stubgen like the command line tool
+    Call stubgen like the command line tool.
+
     :param command_line_args: list of command line args
     """
 
@@ -187,8 +188,9 @@ def generate_stub_types(
     base_stubs_path: str, mypy_conf_path: str
 ) -> Iterable[RelevantSymbolNode]:
     """
-    Uses stubgen to generate reference stub types of the modules stubbed in
+    Use stubgen to generate reference stub types of the modules stubbed in
     base_stubs_path. For this to work the modules need to be installed.
+
     :param base_stubs_path: path to directory with (handwritten) stubs
     :param mypy_conf_path: path to mypy.ini
     :return: returns the reference stub types
@@ -230,8 +232,9 @@ def analyze_stubs(
     expected_mismatches_path: Optional[str] = None,
 ) -> bool:
     """
-    Determines if the (presumably) handwritten stubs in base_stubs_path are correct;
+    Determine if the (presumably) handwritten stubs in base_stubs_path are correct;
     i.e. if they match the API of the modules that they are stubbing.
+
     For this they are compared to reference stubs, which by default are generated
     with mypy's stubgen tool. For each type mismatch (e.g. different function signature,
     missing class member) a message will be printed to stdout. The function will return
@@ -243,10 +246,13 @@ def analyze_stubs(
         If not provided mypy's stubgen tool will be used to generate them.
     :param expected_mismatches_path: Path to JSON file that defines expected mismatches.
         Example:
-        {
-            "my.module.function: "mismatch",
-            "another.module.Class: "not_found"
-        }
+
+        .. code-block:: json
+
+            {
+                "my.module.function": "mismatch",
+                "another.module.Class": "not_found"
+            }
     :return: True if the stubs in base_stubs_path are considered correct
     """
     success = True
