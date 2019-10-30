@@ -7,14 +7,14 @@ jobs:
       - python/install-deps
       - python/save-cache
       - run:
-        command: flake8 stub_analyzer testing
-        name: flake8
+          command: flake8 stub_analyzer testing
+          name: flake8
       - run:
-        command: mypy stub_analyzer testing
-        name: mypy
+          command: mypy stub_analyzer testing
+          name: mypy
       - run:
-        command: pytest
-        name: pytest
+          command: pytest
+          name: pytest
 orbs:
   python: circleci/python@0.2.1
 version: 2.1
