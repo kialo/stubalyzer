@@ -107,6 +107,10 @@ class MypyNodeFactory(WithStubTestConfig):
         node_name = "functions.mismatching_with_additional_kwarg_star2"
         return self.get(node_name, FuncDef)
 
+    def get_no_parameters_and_return_type_node(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_no_parameters_and_no_return_type"
+        return self.get(node_name, FuncDef)
+
     def get_overloaded_additional_args_node(
         self
     ) -> Tuple[OverloadedFuncDef, OverloadedFuncDef]:
@@ -192,6 +196,10 @@ class MypyNodeFactory(WithStubTestConfig):
     def get_mislocated_methods_class(self) -> Tuple[TypeInfo, TypeInfo]:
         node_name = "classes.ClassWithoutSuperClassInHandwritten"
         return self.get(node_name, TypeInfo)
+
+    def get_mismatch_with_zero_parameters(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.mismatching_with_zero_parameters"
+        return self.get(node_name, FuncDef)
 
     def get_mislocated_method_handwritten(self) -> FuncDef:
         node_name = "classes.ClassWithoutSuperClassInHandwritten.a_method"

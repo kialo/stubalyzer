@@ -12,6 +12,8 @@ from mypy.nodes import (
     CONTRAVARIANT,
     COVARIANT,
     Decorator,
+    FuncDef,
+    OverloadedFuncDef,
     SymbolNode,
     TypeAlias,
     TypeInfo,
@@ -517,6 +519,14 @@ def compare_symbols(
 
     if isinstance(symbol, Decorator) and isinstance(reference, Decorator):
         return _compare_decorator(symbol, reference)
+
+    symbol_type = getattr(symbol, "type")
+    reference_type = getattr(reference, "type")
+
+    if reference_type is None and isinstance(
+        symbol_type.definition, (FuncDef, OverloadedFuncDef)
+    ):
+        return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
     return compare_mypy_types(
         symbol, reference, getattr(symbol, "type"), getattr(reference, "type")

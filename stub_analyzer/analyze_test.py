@@ -106,15 +106,31 @@ class TestAnalyzeStubs(WithStubTestConfig):
 class TestCompareSymbols:
     def test_generated_is_missing_a_function(self, mypy_nodes: MypyNodeFactory) -> None:
         func_def_symbol = mypy_nodes.get_missing_function_node()
-        result = list(compare([func_def_symbol], []))
+        result = compare([func_def_symbol], [])
 
-        assert all(map(lambda x: x.match_result is MatchResult.NOT_FOUND, result))
+        assert all([x.match_result is MatchResult.NOT_FOUND for x in result])
 
     def test_generated_is_missing_a_class(self, mypy_nodes: MypyNodeFactory) -> None:
         class_symbol = mypy_nodes.get_missing_class()
-        result = list(compare([class_symbol], []))
+        result = compare([class_symbol], [])
 
-        assert all(map(lambda x: x.match_result is MatchResult.NOT_FOUND, result))
+        assert all([x.match_result is MatchResult.NOT_FOUND for x in result])
+
+    def test_generated_has_no_parameters_and_return_type(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func_def, func_def_reference = (
+            mypy_nodes.get_no_parameters_and_return_type_node()
+        )
+        result = compare([func_def], [func_def_reference])
+
+        assert all([x.match_result is MatchResult.MISMATCH for x in result])
+
+    def test_generated_has_no_parameters(self, mypy_nodes: MypyNodeFactory) -> None:
+        func_def, func_def_reference = mypy_nodes.get_mismatch_with_zero_parameters()
+        result = compare([func_def], [func_def_reference])
+
+        assert all([x.match_result is MatchResult.MISMATCH for x in result])
 
     def test_mislocated_symbol(self, mypy_nodes: MypyNodeFactory) -> None:
         mislocated_method = mypy_nodes.get_mislocated_method_handwritten()
