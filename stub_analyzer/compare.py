@@ -5,6 +5,7 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
+from os import linesep
 from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
@@ -140,7 +141,7 @@ class ComparisonResult(NamedTuple):
         match_result: MatchResult,
         symbol: RelevantSymbolNode,
         reference: Optional[SymbolNode],
-        data: Optional[Dict[str, Any]],
+        data: Optional[Dict[str, Any]] = None,
         message: Optional[str] = None,
     ) -> ComparisonResult:
         """
@@ -357,17 +358,9 @@ def compare_mypy_types(
     else:
         match = _mypy_types_match(symbol_type, reference_type)
 
-    result = ComparisonResult.create(
-        match_result=match,
-        symbol=symbol,
-        reference=reference,
-        data={
-            "overlap": is_overlapping_types(symbol_type, reference_type),
-            "subtype": is_subtype(symbol_type, reference_type),
-        },
+    return ComparisonResult.create(
+        match_result=match, symbol=symbol, reference=reference
     )
-
-    return result
 
 
 def _type_infos_are_same_class(
@@ -418,7 +411,7 @@ def _format_type_var(symbol: TypeVarExpr) -> str:
     if symbol.values:
         values = ", " + (", ".join(str(t) for t in symbol.values))
 
-    return f"{symbol.name} = TypeVar('{symbol.name}'{values}{variance})"
+    return f"{symbol.name} = TypeVar('{symbol.name()}'{values}{variance})"
 
 
 def _compare_type_var_expr(
@@ -427,16 +420,22 @@ def _compare_type_var_expr(
     """
     Check if a TypeVarExpr symbol matches the reference.
 
-    Currently not implemented as we do not expect TypeVar's in stubgen stubs.
+    Currently only implemented for type variables that have a bound but no values.
 
     :param symbol: type var symbol to validate
     :param reference: type var symbol to validate against
     :raises NotImplementedError: always
     """
+    if not symbol.values and not reference.values:
+        return compare_mypy_types(
+            symbol, reference, symbol.upper_bound, reference.upper_bound
+        )
+
     raise NotImplementedError(
-        "Comparison of type variables (TypeVarExpr) is not implemented, encountered:"
-        f"\n - {_format_type_var(symbol)}"
-        f"\n - {_format_type_var(reference)}"
+        "Comparison of type variables (TypeVarExpr) with listed values is not"
+        " implemented, encountered:"
+        f"{linesep} - {_format_type_var(symbol)}"
+        f"{linesep} - {_format_type_var(reference)}"
     )
 
 

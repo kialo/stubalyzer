@@ -1,0 +1,4 @@
+{
+    "_pytest.fixtures.fixture": "mismatch",
+    "_pytest.capture.CaptureFixture.readouterr": "mismatch"
+}

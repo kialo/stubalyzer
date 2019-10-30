@@ -1,8 +1,8 @@
 import re
 from unittest.mock import patch
 
-import pytest  # type: ignore
-from _pytest.capture import CaptureFixture  # type: ignore
+import pytest
+from _pytest.capture import CaptureFixture
 
 from testing.util import MypyNodeFactory, WithStubTestConfig
 

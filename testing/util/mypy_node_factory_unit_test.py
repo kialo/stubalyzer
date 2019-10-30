@@ -1,4 +1,4 @@
-import pytest  # type: ignore
+import pytest
 from mypy.nodes import FuncDef, Node
 
 from . import GeneratedStubNotFound, HandwrittenStubNotFound, mypy_node_factory

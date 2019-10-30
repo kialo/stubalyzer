@@ -287,7 +287,8 @@ def analyze_stubs(
         success = False
 
     if success:
-        stub_types_base = get_stub_types(base_stubs_path, mypy_conf_path)
+        # Make a set since overloaded function definitions appear multiple times
+        stub_types_base = set(get_stub_types(base_stubs_path, mypy_conf_path))
         if reference_stubs_path:
             stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
         else:

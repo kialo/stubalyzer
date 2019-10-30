@@ -2,7 +2,7 @@ from json.decoder import JSONDecodeError
 from typing import Any
 from unittest.mock import Mock, patch
 
-import pytest  # type: ignore
+import pytest
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import SchemaError  # type: ignore
 

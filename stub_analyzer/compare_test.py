@@ -1,4 +1,4 @@
-import pytest  # type: ignore
+import pytest
 from mypy.nodes import Var
 from mypy.types import NoneType
 
