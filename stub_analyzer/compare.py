@@ -107,7 +107,7 @@ class ComparisonResult(NamedTuple):
 
     @property
     def message(self) -> str:
-        """Human readable result of the comparison."""
+        """Human readable result of the comparison"""
         if self.message_val:
             return self.message_val
 
