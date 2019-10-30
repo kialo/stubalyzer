@@ -5,7 +5,6 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
-from os import linesep
 from typing import Any, Dict, NamedTuple, Optional
 
 from mypy.meet import is_overlapping_types
@@ -414,28 +413,39 @@ def _format_type_var(symbol: TypeVarExpr) -> str:
     return f"{symbol.name} = TypeVar('{symbol.name()}'{values}{variance})"
 
 
+def _match_type_var_expr(symbol: TypeVarExpr, reference: TypeVarExpr) -> MatchResult:
+    if symbol.variance != reference.variance:
+        return MatchResult.MISMATCH
+
+    if not symbol.values and not reference.values:
+        return compare_mypy_types(
+            symbol, reference, symbol.upper_bound, reference.upper_bound
+        ).match_result
+
+    if len(symbol.values) != len(reference.values):
+        return MatchResult.MISMATCH
+
+    for symbol_type, reference_type in zip(symbol.values, reference.values):
+        result = compare_mypy_types(symbol, reference, symbol_type, reference_type)
+        if result.match_result is not MatchResult.MATCH:
+            return result.match_result
+
+    return MatchResult.MATCH
+
+
 def _compare_type_var_expr(
     symbol: TypeVarExpr, reference: TypeVarExpr
 ) -> ComparisonResult:
     """
     Check if a TypeVarExpr symbol matches the reference.
 
-    Currently only implemented for type variables that have a bound but no values.
-
     :param symbol: type var symbol to validate
     :param reference: type var symbol to validate against
-    :raises NotImplementedError: always
     """
-    if not symbol.values and not reference.values:
-        return compare_mypy_types(
-            symbol, reference, symbol.upper_bound, reference.upper_bound
-        )
-
-    raise NotImplementedError(
-        "Comparison of type variables (TypeVarExpr) with listed values is not"
-        " implemented, encountered:"
-        f"{linesep} - {_format_type_var(symbol)}"
-        f"{linesep} - {_format_type_var(reference)}"
+    return ComparisonResult.create(
+        match_result=_match_type_var_expr(symbol, reference),
+        symbol=symbol,
+        reference=reference,
     )
 
 
