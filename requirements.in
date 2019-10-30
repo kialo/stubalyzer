@@ -8,3 +8,4 @@ isort
 pip-tools
 pytest
 schema
+Pygments
