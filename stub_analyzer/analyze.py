@@ -13,7 +13,7 @@ from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from mypy.stubgen import generate_stubs, parse_options
-from schema import Or, Schema, SchemaError, Use  # type: ignore
+from schema import Or, Schema, SchemaError, Use
 
 from .collect import get_stub_types
 from .compare import ComparisonResult, MatchResult, compare_symbols

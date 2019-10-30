@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 from _pytest.capture import CaptureFixture
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
-from schema import SchemaError  # type: ignore
+from schema import SchemaError
 
 from .analyze import (
     EvaluationResult,
