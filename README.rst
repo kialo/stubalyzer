@@ -1,6 +1,10 @@
 Stub Analyzer
 =============
 
+.. image:: https://readthedocs.org/projects/stubalyzer/badge/?version=latest
+    :target: https://stubalyzer.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 A tool comparing hand written mypy stubs to stubgen-generated ones.
 Reporting inconsistencies in the types, e.g. if the generated types are missing
 functions or are more specific than the hand written ones.
