@@ -11,6 +11,9 @@ class WithStubTestConfig:
     def get_expectations_path(self, file: str) -> str:
         return str(self._base_dir / "stub-expectations" / file)
 
+    def get_test_stub_path(self, dir: str) -> str:
+        return str(self._base_dir / "test-stubs" / dir)
+
     @property
     def base_dir(self) -> str:
         return str(self._base_dir)

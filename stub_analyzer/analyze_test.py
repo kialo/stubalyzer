@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from _pytest.capture import CaptureFixture
+from mypy.errors import CompileError
 
 from testing.util import MypyNodeFactory, WithStubTestConfig
 
@@ -36,7 +37,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
     def test_ignore_missing_module_symbols(self, capsys: CaptureFixture) -> None:
         success = analyze_stubs(
             self.mypy_config_path,
-            str(self._base_dir / "test-stubs" / "test_ignore_missing_module_symbols"),
+            self.get_test_stub_path("test_ignore_missing_module_symbols"),
         )
 
         _, err = capsys.readouterr()
@@ -213,3 +214,29 @@ class TestMislocatedSymbol(WithStubTestConfig):
             'Found symbol "classes.ClassWithoutSuperClassInHandwritten.a_method"'
             ' in different location "classes.AClass.a_method".'
         ) not in err
+
+
+class TestCompileError(WithStubTestConfig):
+    def test_compile_error_invalid_syntax_in_base_stubs(self) -> None:
+        """ Invalid stubs written by the user should cause a CompileError """
+        with pytest.raises(CompileError) as ex:
+            analyze_stubs(
+                self.mypy_config_path,
+                self.get_test_stub_path("test_compile_error_invalid_syntax"),
+            )
+
+        assert "poolmanager.pyi:7: error: invalid syntax" in ex.value.messages[0]
+
+    def test_compile_error_invalid_syntax_in_reference(self) -> None:
+        """
+        Invalid reference stubs should cause a CompileError, too. This simulates the
+        case where stubgen generates invalid stubs due to an internal error.
+        """
+        with pytest.raises(CompileError) as ex:
+            analyze_stubs(
+                self.mypy_config_path,
+                self.handwritten_stubs_path,
+                self.get_test_stub_path("test_compile_error_invalid_syntax"),
+            )
+
+        assert "poolmanager.pyi:7: error: invalid syntax" in ex.value.messages[0]
