@@ -1,10 +1,7 @@
+import pytest
 from mypy.nodes import FuncDef, Node
 
-from testing.util import (
-    GeneratedStubNotFound,
-    HandwrittenStubNotFound,
-    mypy_node_factory,
-)
+from . import GeneratedStubNotFound, HandwrittenStubNotFound, mypy_node_factory
 
 
 class TestMypyNodeFactory:
@@ -19,26 +16,21 @@ class TestMypyNodeFactory:
     def test_get_throws_handwritten_stub_not_found_error_if_handwritten_missing(
         self
     ) -> None:
-        error = None
         mypy_node_fullname = "mypy_node_factory_test_nodes.not_in_handwritten"
-        try:
+
+        with pytest.raises(
+            HandwrittenStubNotFound,
+            match=f"Handwritten stub {mypy_node_fullname} not found",
+        ):
             mypy_node_factory.get(mypy_node_fullname, Node)
-        except HandwrittenStubNotFound as err:
-            error = err
-        finally:
-            assert error is not None
-            assert f"Handwritten stub {mypy_node_fullname} not found" in str(error)
 
     def test_get_throws_generated_stub_not_found_error_if_generated_missing(
         self
     ) -> None:
-        error = None
-
         mypy_node_fullname = "mypy_node_factory_test_nodes.not_in_generated"
-        try:
+
+        with pytest.raises(
+            GeneratedStubNotFound,
+            match=f"Generated stub {mypy_node_fullname} not found",
+        ):
             mypy_node_factory.get(mypy_node_fullname, Node)
-        except GeneratedStubNotFound as err:
-            error = err
-        finally:
-            assert error is not None
-            assert f"Generated stub {mypy_node_fullname} not found" in str(error)
