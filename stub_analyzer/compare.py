@@ -35,7 +35,6 @@ class MatchResult(Enum):
     MISMATCH = "mismatch"
     NOT_FOUND = "not_found"
     MISLOCATED_SYMBOL = "mislocated_symbol"
-    MISMATCH_ADDITIONAL_ARGS = "mismatch_additional_args"
 
     @classmethod
     def declare_mismatch(cls, matchResultString: str) -> MatchResult:
@@ -133,15 +132,6 @@ class ComparisonResult(NamedTuple):
             return (
                 f'Found symbol "{self.symbol_name}" in different location'
                 f' "{self.reference_name}".'
-            )
-        elif self.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS:
-            return "\n".join(
-                [
-                    f'Symbol "{self.symbol_name}" has more arguments than reference'
-                    f' "{self.reference_name}":',
-                    f"    {self.symbol_type}",
-                    f"    {self.reference_type}",
-                ]
             )
 
     @classmethod
@@ -292,7 +282,7 @@ def _callable_types_match(
     strict_kind_count_reference = strict_kind_count(reference_kinds)
 
     if strict_kind_count_callable > strict_kind_count_reference:
-        return MatchResult.MISMATCH_ADDITIONAL_ARGS
+        return MatchResult.MISMATCH
 
     arg_kinds_match = (
         strict_kind_count_callable == strict_kind_count_reference

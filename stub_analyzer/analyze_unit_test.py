@@ -7,6 +7,7 @@ from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from schema import SchemaError  # type: ignore
 
 from .analyze import (
+    EvaluationResult,
     analyze_stubs,
     compare,
     evaluate_compare_result,
@@ -104,7 +105,10 @@ class TestEvaluateCompareResult:
         compare_result.configure_mock(
             match_result=MatchResult.MATCH, message="Alright", symbol_name="3"
         )
-        assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
+        assert (
+            evaluate_compare_result(compare_result, mismatches, mismatches_left)
+            is EvaluationResult.SUCCESS
+        )
         _, err = capsys.readouterr()
         assert err == ""
         assert mismatches_left == {"1", "2", "4"}
@@ -117,7 +121,10 @@ class TestEvaluateCompareResult:
         compare_result.configure_mock(
             match_result=MatchResult.MISMATCH, symbol_name="3"
         )
-        assert evaluate_compare_result(compare_result, mismatches, mismatches_left)
+        assert (
+            evaluate_compare_result(compare_result, mismatches, mismatches_left)
+            is EvaluationResult.EXPECTED_FAILURE
+        )
         _, err = capsys.readouterr()
         assert err == ""
         assert mismatches_left == {"1", "2", "4"}
@@ -130,7 +137,10 @@ class TestEvaluateCompareResult:
             message="An error happened",
             symbol_name="3",
         )
-        assert not evaluate_compare_result(compare_result, {}, mismatches_left)
+        assert (
+            evaluate_compare_result(compare_result, {}, mismatches_left)
+            is EvaluationResult.FAILURE
+        )
         _, err = capsys.readouterr()
         assert "An error happened" in err
         assert mismatches_left == {"1"}
@@ -143,8 +153,11 @@ class TestEvaluateCompareResult:
         compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
 
         expected_mismatches_path = "the/mismatch/path.json"
-        assert not evaluate_compare_result(
-            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        assert (
+            evaluate_compare_result(
+                compare_result, mismatches, mismatches_left, expected_mismatches_path
+            )
+            is EvaluationResult.FAILURE
         )
 
         _, err = capsys.readouterr()
@@ -159,8 +172,11 @@ class TestEvaluateCompareResult:
         compare_result.configure_mock(match_result=MatchResult.MATCH, symbol_name="3")
         expected_mismatches_path = "the/mismatch/path.json"
 
-        assert not evaluate_compare_result(
-            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        assert (
+            evaluate_compare_result(
+                compare_result, mismatches, mismatches_left, expected_mismatches_path
+            )
+            is EvaluationResult.FAILURE
         )
 
         _, err = capsys.readouterr()
@@ -177,8 +193,11 @@ class TestEvaluateCompareResult:
         )
         expected_mismatches_path = "the/mismatch/path.json"
 
-        assert not evaluate_compare_result(
-            compare_result, mismatches, mismatches_left, expected_mismatches_path
+        assert (
+            evaluate_compare_result(
+                compare_result, mismatches, mismatches_left, expected_mismatches_path
+            )
+            is EvaluationResult.FAILURE
         )
 
         _, err = capsys.readouterr()
@@ -187,7 +206,10 @@ class TestEvaluateCompareResult:
 
 
 class TestAnalyzeStubs:
-    @patch("stub_analyzer.analyze.evaluate_compare_result", return_value=True)
+    @patch(
+        "stub_analyzer.analyze.evaluate_compare_result",
+        return_value=EvaluationResult.SUCCESS,
+    )
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
     def test_everything_ok(
@@ -196,6 +218,7 @@ class TestAnalyzeStubs:
         assert analyze_stubs("mypy_conf_path", "base_stubs_path")
         std, err = capsys.readouterr()
         assert "Comparing failed on 0 of 10 stubs." in std
+        assert "0 more fail(s) were ignored." in std
         assert "" == err
 
     @patch(
@@ -219,7 +242,9 @@ class TestAnalyzeStubs:
     @patch("stub_analyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
     @patch(
         "stub_analyzer.analyze.evaluate_compare_result",
-        side_effect=[False] * 2 + [True] * 8,
+        side_effect=[EvaluationResult.FAILURE] * 2
+        + [EvaluationResult.SUCCESS] * 4
+        + [EvaluationResult.EXPECTED_FAILURE] * 4,
     )
     @patch("stub_analyzer.analyze.compare", return_value=range(10))
     @patch("stub_analyzer.analyze.generate_stub_types")
@@ -238,6 +263,7 @@ class TestAnalyzeStubs:
         )
         std, err = capsys.readouterr()
         assert "Comparing failed on 2 of 10 stubs." in err
+        assert "4 more fail(s) were ignored." in err
         assert "" == std
 
     @patch(

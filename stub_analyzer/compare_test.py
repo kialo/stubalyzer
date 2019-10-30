@@ -1,7 +1,7 @@
 import pytest  # type: ignore
-
 from mypy.nodes import Var
 from mypy.types import NoneType
+
 from testing.util import MypyNodeFactory
 
 from .compare import ComparisonResult, MatchResult, compare_symbols
@@ -202,14 +202,14 @@ class TestCompareFunctions:
     ) -> None:
         func_def, func_def_reference = mypy_nodes.get_additional_optional_args_node()
         result = compare_symbols(func_def, func_def_reference)
-        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
+        assert result.match_result is MatchResult.MISMATCH
 
     def test_func_def_mismatches_when_handwritten_stub_has_additional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
         func_def, func_def_reference = mypy_nodes.get_additional_args_node()
         result = compare_symbols(func_def, func_def_reference)
-        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
+        assert result.match_result is MatchResult.MISMATCH
 
     def test_matching_with_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
         func, func_ref = mypy_nodes.get_matching_with_arg_star()
@@ -260,18 +260,20 @@ class TestCompareFunctions:
     def test_overload_mismatches_if_any_handwritten_stub_has_additional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        overloaded_def, overloaded_reference = (
-            mypy_nodes.get_overloaded_additional_args_node()
-        )
+        (
+            overloaded_def,
+            overloaded_reference,
+        ) = mypy_nodes.get_overloaded_additional_args_node()
         result = compare_symbols(overloaded_def, overloaded_reference)
         assert result.match_result is MatchResult.MISMATCH
 
     def test_overload_mismatch_if_any_handwritten_stub_has_additional_optional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        overloaded_def, overloaded_reference = (
-            mypy_nodes.get_overloaded_additional_optional_args_node()
-        )
+        (
+            overloaded_def,
+            overloaded_reference,
+        ) = mypy_nodes.get_overloaded_additional_optional_args_node()
         result = compare_symbols(overloaded_def, overloaded_reference)
         assert result.match_result is MatchResult.MISMATCH
 
@@ -285,13 +287,14 @@ class TestCompareFunctions:
     ) -> None:
         decorated, decorated_reference = mypy_nodes.get_decorated_with_additional_args()
         result = compare_symbols(decorated, decorated_reference)
-        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
+        assert result.match_result is MatchResult.MISMATCH
 
     def test_decorated_mismatches_if_handwritten_stub_has_additional_optional_args(
         self, mypy_nodes: MypyNodeFactory
     ) -> None:
-        decorated, decorated_reference = (
-            mypy_nodes.get_decorated_with_additional_optional_args()
-        )
+        (
+            decorated,
+            decorated_reference,
+        ) = mypy_nodes.get_decorated_with_additional_optional_args()
         result = compare_symbols(decorated, decorated_reference)
-        assert result.match_result is MatchResult.MISMATCH_ADDITIONAL_ARGS
+        assert result.match_result is MatchResult.MISMATCH

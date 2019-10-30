@@ -1,6 +1,7 @@
 import re
 import sys
 from argparse import ArgumentParser, Namespace
+from enum import Enum
 from importlib.util import find_spec
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
@@ -38,7 +39,17 @@ UNUSED_DEFINITION_ERROR = (
 FILE_NOT_FOUND_WARNING = (
     'WARNING: Provided file for expected mismatches ("{file_path}") not found.'
 )
-SUMMARY_MESSAGE = "Comparing failed on {failed} of {total} stubs."
+SUMMARY_MESSAGE = (
+    "Comparing failed on {failed} of {total} stubs."
+    f"{linesep}"
+    "{ignored} more fail(s) were ignored."
+)
+
+
+class EvaluationResult(Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+    EXPECTED_FAILURE = "expected_failure"
 
 
 def write_error(*messages: str, sep: str = " ") -> None:
@@ -134,20 +145,20 @@ def evaluate_compare_result(
     mismatches: Dict[str, MatchResult],
     mismatches_left: Set[str],
     expected_mismatches_path: Optional[str] = None,
-) -> bool:
+) -> EvaluationResult:
     symbol = compare_result.symbol_name
     match_result = compare_result.match_result
-    success = True
+    evaluation_result = EvaluationResult.SUCCESS
     expected_mismatch = mismatches.get(symbol)
 
     if expected_mismatch is None:
         if match_result is not MatchResult.MATCH:
-            success = False
+            evaluation_result = EvaluationResult.FAILURE
             write_error(linesep, compare_result.message, sep="")
     else:
         mismatches_left.remove(symbol)
         if match_result is MatchResult.MATCH:
-            success = False
+            evaluation_result = EvaluationResult.FAILURE
             assert expected_mismatches_path
             write_error(
                 linesep,
@@ -159,7 +170,7 @@ def evaluate_compare_result(
                 sep="",
             )
         elif match_result is not expected_mismatch:
-            success = False
+            evaluation_result = EvaluationResult.FAILURE
             assert expected_mismatches_path
             write_error(
                 linesep,
@@ -171,7 +182,9 @@ def evaluate_compare_result(
                 ),
                 sep="",
             )
-    return success
+        else:
+            evaluation_result = EvaluationResult.EXPECTED_FAILURE
+    return evaluation_result
 
 
 def call_stubgen(command_line_args: List[str]) -> None:
@@ -258,6 +271,7 @@ def analyze_stubs(
     success = True
     failed_count = 0
     total_count = 0
+    expected_count = 0
 
     try:
         mismatches, unused_mismatches = setup_expected_mismatches(
@@ -281,11 +295,13 @@ def analyze_stubs(
 
         for res in compare(stub_types_base, stub_types_reference):
             total_count += 1
-            compare_success = evaluate_compare_result(
+            evaluation_result = evaluate_compare_result(
                 res, mismatches, unused_mismatches, expected_mismatches_path
             )
-            if not compare_success:
+            if evaluation_result is EvaluationResult.FAILURE:
                 failed_count += 1
+            elif evaluation_result is EvaluationResult.EXPECTED_FAILURE:
+                expected_count += 1
         success = failed_count == 0
 
         if unused_mismatches:
@@ -299,7 +315,9 @@ def analyze_stubs(
                 sep="",
             )
 
-    summary = SUMMARY_MESSAGE.format(total=total_count, failed=failed_count)
+    summary = SUMMARY_MESSAGE.format(
+        total=total_count, failed=failed_count, ignored=expected_count
+    )
     if success:
         print(linesep, summary, sep="")
     else:
