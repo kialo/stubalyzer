@@ -111,7 +111,7 @@ doc8.ini
 
 # Intellij
 .idea/
-stub-analyzer.iml
+stubalyzer.iml
 
 # mypy source
 /mypy

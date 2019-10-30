@@ -26,7 +26,7 @@ For a development setup, run the following shell script:
 
    $ ./dev/setup.sh
 
-This will create a virtual environment called ``stub-analyzer``
+This will create a virtual environment called ``stubalyzer``
 and install the projects dependencies.
 The setup script also creates a ``.venv`` file so the environment
 activates automatically if you use auto-activation with virtualenv.
@@ -49,7 +49,7 @@ Type checking is done with Mypy:
 
 .. code-block:: shell-session
 
-   $ mypy stub_analyzer
+   $ mypy stubalyzer
 
 
 Code Formatting

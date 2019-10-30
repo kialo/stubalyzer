@@ -2,7 +2,7 @@ from typing import Dict, Tuple, Type, TypeVar, cast
 
 from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, TypeVarExpr, Var
 
-from stub_analyzer import RelevantSymbolNode, get_stub_types
+from stubalyzer import RelevantSymbolNode, get_stub_types
 
 from .stub_config import WithStubTestConfig
 
@@ -250,7 +250,7 @@ class MypyNodeFactory(WithStubTestConfig):
         return self.get(node_name, TypeVarExpr)
 
     def get_values_type_var_no_values_in_generated(
-        self
+        self,
     ) -> Tuple[TypeVarExpr, TypeVarExpr]:
         node_name = "typevars.ValuesTypeVarNoValuesInGenerated"
         return self.get(node_name, TypeVarExpr)

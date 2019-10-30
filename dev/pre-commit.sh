@@ -12,7 +12,7 @@ fi
 
 pyfiles=$(echo "$files_to_consider" | grep -E '\.py$' | tr '\n' ' ')
 if [ "$pyfiles" ]; then
-    venv=$(ls -1 ~/.virtualenvs/stub-analyzer{,*}/bin/activate 2>/dev/null | head -n1)
+    venv=$(ls -1 ~/.virtualenvs/stubalyzer{,*}/bin/activate 2>/dev/null | head -n1)
     if [ -f "$venv" ]; then
         # Allow multiple environments
         set +u  # Ignore error: "bin/activate: line 57: PS1: unbound variable"

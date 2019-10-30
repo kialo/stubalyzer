@@ -5,7 +5,7 @@ from setuptools import setup
 
 VERSION = "0.1.0"
 # This is the name of the GitHub repo and the package name on pypi
-PACKAGE_NAME = "stub-analyzer"
+PACKAGE_NAME = "stubalyzer"
 
 
 here = path.abspath(path.dirname(__file__))
@@ -58,7 +58,7 @@ setup(
     #
     # Note that this is a string of words separated by whitespace, not a list.
     keywords="mypy analysis stubgen stubs",
-    packages=["stub_analyzer"],
+    packages=["stubalyzer"],
     # TODO: Check if we support 3.5 & 3.6
     python_requires=">=3.5",
     # This field lists other packages that your project depends on to run.
@@ -92,7 +92,7 @@ setup(
     # `pip` to create the appropriate form of executable for the target
     # platform.
     entry_points={
-        "console_scripts": ["analyze-stubs=stub_analyzer.analyze:main"]
+        "console_scripts": ["stubalyzer=stubalyzer.analyze:main"]
     },  # Optional
     # List additional URLs that are relevant to your project as a dict.
     project_urls={
@@ -101,5 +101,5 @@ setup(
     },
     # For mypy to find types
     zip_safe=False,
-    package_data={"stub_analyzer": ["py.typed"]},
+    package_data={"stubalyzer": ["py.typed"]},
 )

@@ -1,7 +1,7 @@
-stub_analyzer
-=============
+stubalyzer
+==========
 
 .. toctree::
    :maxdepth: 4
 
-   stub_analyzer
+   stubalyzer

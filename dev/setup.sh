@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VIRTUALENV_NAME=stub-analyzer
+VIRTUALENV_NAME=stubalyzer
 
 rm -rf ~/.virtualenvs/$VIRTUALENV_NAME
 virtualenv -p python3.7 ~/.virtualenvs/$VIRTUALENV_NAME

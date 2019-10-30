@@ -7,10 +7,10 @@ jobs:
       - python/install-deps
       - python/save-cache
       - run:
-          command: python -m flake8 stub_analyzer testing
+          command: python -m flake8 stubalyzer testing
           name: Lint
       - run:
-          command: python -m mypy stub_analyzer testing
+          command: python -m mypy stubalyzer testing
           name: Typecheck
       - run:
           command: python -m pytest

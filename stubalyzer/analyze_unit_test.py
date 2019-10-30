@@ -28,7 +28,7 @@ class TestCompare:
         assert len(list(compare(handwritten, []))) == 2
 
     @patch(
-        "stub_analyzer.analyze.compare_symbols",
+        "stubalyzer.analyze.compare_symbols",
         return_value=ComparisonResult.create_match(Mock(), Mock()),
     )
     def test_match_to_generated_symbols(self, compare_mock: Mock) -> None:
@@ -207,12 +207,12 @@ class TestEvaluateCompareResult:
 
 class TestAnalyzeStubs:
     @patch(
-        "stub_analyzer.analyze.evaluate_compare_result",
+        "stubalyzer.analyze.evaluate_compare_result",
         return_value=EvaluationResult.SUCCESS,
     )
-    @patch("stub_analyzer.analyze.compare", return_value=range(10))
-    @patch("stub_analyzer.analyze.generate_stub_types")
-    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
+    @patch("stubalyzer.analyze.compare", return_value=range(10))
+    @patch("stubalyzer.analyze.generate_stub_types")
+    @patch("stubalyzer.analyze.get_stub_types", return_value=[])
     def test_everything_ok(
         self,
         generate_mock: Mock,
@@ -228,7 +228,7 @@ class TestAnalyzeStubs:
         assert "" == err
 
     @patch(
-        "stub_analyzer.analyze.setup_expected_mismatches",
+        "stubalyzer.analyze.setup_expected_mismatches",
         side_effect=JSONDecodeError("Boom", '{"a": 2}', 4),
     )
     def test_json_error(self, setup_mock: Mock, capsys: CaptureFixture) -> None:
@@ -237,7 +237,7 @@ class TestAnalyzeStubs:
         assert "Boom: line 1 column 5 (char 4)" in err
 
     @patch(
-        "stub_analyzer.analyze.setup_expected_mismatches",
+        "stubalyzer.analyze.setup_expected_mismatches",
         side_effect=SchemaError("Boom"),
     )
     def test_schema_error(self, setup_mock: Mock, capsys: CaptureFixture) -> None:
@@ -245,16 +245,16 @@ class TestAnalyzeStubs:
         _, err = capsys.readouterr()
         assert "Boom" in err
 
-    @patch("stub_analyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
+    @patch("stubalyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
     @patch(
-        "stub_analyzer.analyze.evaluate_compare_result",
+        "stubalyzer.analyze.evaluate_compare_result",
         side_effect=[EvaluationResult.FAILURE] * 2
         + [EvaluationResult.SUCCESS] * 4
         + [EvaluationResult.EXPECTED_FAILURE] * 4,
     )
-    @patch("stub_analyzer.analyze.compare", return_value=range(10))
-    @patch("stub_analyzer.analyze.generate_stub_types")
-    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
+    @patch("stubalyzer.analyze.compare", return_value=range(10))
+    @patch("stubalyzer.analyze.generate_stub_types")
+    @patch("stubalyzer.analyze.get_stub_types", return_value=[])
     def test_some_results_fail_ok(
         self,
         generate_mock: Mock,
@@ -275,12 +275,12 @@ class TestAnalyzeStubs:
         assert "" == std
 
     @patch(
-        "stub_analyzer.analyze.setup_expected_mismatches",
+        "stubalyzer.analyze.setup_expected_mismatches",
         return_value=({}, ["lib.1", "lib.2"]),
     )
-    @patch("stub_analyzer.analyze.compare", return_value=[])
-    @patch("stub_analyzer.analyze.generate_stub_types")
-    @patch("stub_analyzer.analyze.get_stub_types", return_value=[])
+    @patch("stubalyzer.analyze.compare", return_value=[])
+    @patch("stubalyzer.analyze.generate_stub_types")
+    @patch("stubalyzer.analyze.get_stub_types", return_value=[])
     def test_unused_mismatches(
         self,
         generate_mock: Mock,
