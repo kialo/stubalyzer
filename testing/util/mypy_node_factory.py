@@ -189,6 +189,10 @@ class MypyNodeFactory(WithStubTestConfig):
         node_name = "classes.ClassWithInvalidCustomStub.return_type_wrong"
         return self.get(node_name, FuncDef)
 
+    def get_mislocated_methods_class(self) -> Tuple[TypeInfo, TypeInfo]:
+        node_name = "classes.ClassWithoutSuperClassInHandwritten"
+        return self.get(node_name, TypeInfo)
+
     def get_mislocated_method_handwritten(self) -> FuncDef:
         node_name = "classes.ClassWithoutSuperClassInHandwritten.a_method"
         return cast(FuncDef, self._handwritten_stubs_map[node_name])

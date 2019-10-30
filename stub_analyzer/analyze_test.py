@@ -1,5 +1,4 @@
 import re
-from typing import Any
 from unittest.mock import patch
 
 import pytest  # type: ignore
@@ -8,11 +7,11 @@ from _pytest.capture import CaptureFixture  # type: ignore
 from testing.util import MypyNodeFactory, WithStubTestConfig
 
 from .analyze import analyze_stubs, compare, main
-from .compare import MatchResult
+from .compare import ComparisonResult, MatchResult
 
 
 class TestAnalyzeStubs(WithStubTestConfig):
-    def test_analyze_missing(self, capsys: Any) -> None:
+    def test_analyze_missing(self, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
@@ -48,7 +47,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
 
         assert success
 
-    def test_analyze_mismatching(self, capsys: Any) -> None:
+    def test_analyze_mismatching(self, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
@@ -65,7 +64,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
 
-    def test_analyze_matching(self, capsys: Any) -> None:
+    def test_analyze_matching(self, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
@@ -85,7 +84,7 @@ class TestAnalyzeStubs(WithStubTestConfig):
             in err
         )
 
-    def test_analyze_additional_params(self, capsys: Any) -> None:
+    def test_analyze_additional_params(self, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
@@ -114,6 +113,26 @@ class TestCompareSymbols:
         result = list(compare([class_symbol], []))
 
         assert all(map(lambda x: x.match_result is MatchResult.NOT_FOUND, result))
+
+    def test_mislocated_symbol(self, mypy_nodes: MypyNodeFactory) -> None:
+        mislocated_method = mypy_nodes.get_mislocated_method_handwritten()
+        _, mislocated_methods_class = mypy_nodes.get_mislocated_methods_class()
+        _, original_class = mypy_nodes.get_class()
+        _, original_method = mypy_nodes.get_method()
+
+        result = list(
+            compare(
+                [mislocated_method],
+                [mislocated_methods_class, original_class, original_method],
+            )
+        )
+        assert result == [
+            ComparisonResult.create_mislocated_symbol(
+                symbol=mislocated_method,
+                reference=original_method,
+                data={"containing_class": original_method.info},
+            )
+        ]
 
 
 class TestCommandLineTool:
@@ -160,3 +179,34 @@ class TestCommandLineTool:
 
         # cancel has been correctly stubbed
         assert not re.search(r"cancel", output)
+
+
+class TestMislocatedSymbol(WithStubTestConfig):
+    def test_mislocated_symbol(self, capsys: CaptureFixture) -> None:
+        analyze_stubs(
+            self.mypy_config_path,
+            self.handwritten_stubs_path,
+            self.generated_stubs_path,
+        )
+
+        _, err = capsys.readouterr()
+
+        assert (
+            'Found symbol "classes.ClassWithoutSuperClassInHandwritten.a_method"'
+            ' in different location "classes.AClass.a_method".'
+        ) in err
+
+    def test_mislocated_symbol_expected(self, capsys: CaptureFixture) -> None:
+        analyze_stubs(
+            self.mypy_config_path,
+            self.handwritten_stubs_path,
+            self.generated_stubs_path,
+            self.get_expectations_path("mislocated_symbol.json"),
+        )
+
+        _, err = capsys.readouterr()
+
+        assert (
+            'Found symbol "classes.ClassWithoutSuperClassInHandwritten.a_method"'
+            ' in different location "classes.AClass.a_method".'
+        ) not in err
