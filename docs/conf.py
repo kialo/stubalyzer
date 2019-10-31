@@ -20,7 +20,7 @@ sys.path.insert(0, str(module_path))
 
 # -- Project information -----------------------------------------------------
 
-project = "Stub Analyzer"
+project = "Stubalyzer"
 copyright = "2019, Kialo GmbH"
 author = "Kialo GmbH"
 
