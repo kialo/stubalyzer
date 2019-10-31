@@ -25,7 +25,7 @@ class WithStubSymbols(WithStubTestConfig):
         return self._symbols
 
 
-class TestGetStubTypesWithHandwrittenStubs(WithStubSymbols):
+class TestGetStubTypes(WithStubSymbols):
     def test_method_stub(self) -> None:
         method = cast(
             FuncDef,
@@ -62,8 +62,6 @@ class TestGetStubTypesWithHandwrittenStubs(WithStubSymbols):
         assert isinstance(subclass, TypeInfo)
         assert {b.type.fullname() for b in subclass.bases} == {"classes.AClass"}
 
-
-class TestGetStubTypesWithGeneratedStubs(WithStubSymbols):
     def test_inherited_definitions(self) -> None:
         another_class = self.symbols.get("classes.SubClassOfAClass")
         assert isinstance(another_class, TypeInfo)
