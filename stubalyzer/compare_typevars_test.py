@@ -1,37 +1,27 @@
+import pytest
+from mypy.nodes import TypeVarExpr
+
 from testing.util import MypyNodeFactory
 
 from .compare import MatchResult, compare_symbols
 
 
 class TestCompareTypevars:
-    def test_plain_type_var(self, mypy_nodes: MypyNodeFactory) -> None:
-        symbol, reference = mypy_nodes.get_plain_type_var()
-        result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MATCH
-
-    def test_bound_type_var(self, mypy_nodes: MypyNodeFactory) -> None:
-        symbol, reference = mypy_nodes.get_bound_type_var()
-        result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MATCH
-
-    def test_bound_type_var_more_specific(self, mypy_nodes: MypyNodeFactory) -> None:
-        symbol, reference = mypy_nodes.get_bound_type_var_more_specific()
-        result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MATCH
-
-    def test_values_type_var(self, mypy_nodes: MypyNodeFactory) -> None:
-        symbol, reference = mypy_nodes.get_values_type_var()
-        result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MATCH
-
-    def test_values_type_var_no_values_in_generated(
-        self, mypy_nodes: MypyNodeFactory
+    @pytest.mark.parametrize(  # type: ignore
+        "node_name, expected_result",
+        [
+            ("typevars.PlainTypeVar", MatchResult.MATCH),
+            ("typevars.BoundTypeVar", MatchResult.MATCH),
+            ("typevars.BoundTypeVarMoreSpecific", MatchResult.MATCH),
+            ("typevars.ValuesTypeVar", MatchResult.MATCH),
+            ("typevars.ValuesTypeVarWrongOrder", MatchResult.MISMATCH),
+            ("typevars.ValuesTypeVarNoValuesInGenerated", MatchResult.MISMATCH),
+            ("typevars.ValuesTypeVarMoreSpecific", MatchResult.MATCH),
+        ],
+    )
+    def test_compare_typevars(
+        self, node_name: str, expected_result: MatchResult, mypy_nodes: MypyNodeFactory
     ) -> None:
-        symbol, reference = mypy_nodes.get_values_type_var_no_values_in_generated()
+        symbol, reference = mypy_nodes.get(node_name, TypeVarExpr)
         result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MISMATCH
-
-    def test_values_type_var_more_specific(self, mypy_nodes: MypyNodeFactory) -> None:
-        symbol, reference = mypy_nodes.get_values_type_var_more_specific()
-        result = compare_symbols(symbol, reference)
-        assert result.match_result is MatchResult.MATCH
+        assert result.match_result is expected_result

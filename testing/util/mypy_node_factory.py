@@ -1,6 +1,6 @@
 from typing import Dict, Tuple, Type, TypeVar, cast
 
-from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, TypeVarExpr, Var
+from mypy.nodes import Decorator, FuncDef, OverloadedFuncDef, TypeInfo, Var
 
 from stubalyzer import RelevantSymbolNode, get_stub_types
 
@@ -232,29 +232,3 @@ class MypyNodeFactory(WithStubTestConfig):
     def get_str_var(self) -> Var:
         node_name = "vars.str_var"
         return cast(Var, self._handwritten_stubs_map[node_name])
-
-    def get_plain_type_var(self) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.PlainTypeVar"
-        return self.get(node_name, TypeVarExpr)
-
-    def get_bound_type_var(self) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.BoundTypeVar"
-        return self.get(node_name, TypeVarExpr)
-
-    def get_bound_type_var_more_specific(self) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.BoundTypeVarMoreSpecific"
-        return self.get(node_name, TypeVarExpr)
-
-    def get_values_type_var(self) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.ValuesTypeVar"
-        return self.get(node_name, TypeVarExpr)
-
-    def get_values_type_var_no_values_in_generated(
-        self,
-    ) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.ValuesTypeVarNoValuesInGenerated"
-        return self.get(node_name, TypeVarExpr)
-
-    def get_values_type_var_more_specific(self) -> Tuple[TypeVarExpr, TypeVarExpr]:
-        node_name = "typevars.ValuesTypeVarMoreSpecific"
-        return self.get(node_name, TypeVarExpr)
