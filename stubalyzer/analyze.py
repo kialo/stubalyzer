@@ -74,7 +74,8 @@ def parse_command_line() -> Namespace:
         }""",
     )
     parser.add_argument(
-        "stubs_handwritten",
+        dest="stubs_handwritten",
+        metavar="STUBS_HANDWRITTEN",
         help="Directory of handwritten stubs that need to be analyzed",
     )
     parser.add_argument(
