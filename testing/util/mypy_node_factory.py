@@ -173,14 +173,6 @@ class MypyNodeFactory(WithStubTestConfig):
         node_name = "classes.ClassWithInvalidCustomStub.argument_types_wrong"
         return self.get(node_name, FuncDef)
 
-    def get_argument_types_less_specific(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "classes.ClassWithInvalidCustomStub.argument_types_less_specific"
-        return self.get(node_name, FuncDef)
-
-    def get_argument_types_more_specific(self) -> Tuple[FuncDef, FuncDef]:
-        node_name = "classes.ClassWithInvalidCustomStub.argument_types_more_specific"
-        return self.get(node_name, FuncDef)
-
     def get_return_type_less_specific(self) -> Tuple[FuncDef, FuncDef]:
         node_name = "classes.ClassWithInvalidCustomStub.return_type_less_specific"
         return self.get(node_name, FuncDef)
