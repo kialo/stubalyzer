@@ -39,11 +39,9 @@ UNUSED_DEFINITION_ERROR = (
 FILE_NOT_FOUND_WARNING = (
     'WARNING: Provided file for expected mismatches ("{file_path}") not found.'
 )
-SUMMARY_MESSAGE = (
-    "Comparing failed on {failed} of {total} stubs."
-    f"{linesep}"
-    "{ignored} more fail(s) were ignored."
-)
+SUCCESS_MESSAGE = "Successfully validated {total} stubs."
+FAIL_MESSAGE = "Failure: {failed} of {total} stubs seem not to be valid."
+IGNORE_MESSAGE = "{ignored} more fail(s) were ignored."
 
 
 class EvaluationResult(Enum):
@@ -316,13 +314,14 @@ def analyze_stubs(
                 sep="",
             )
 
-    summary = SUMMARY_MESSAGE.format(
-        total=total_count, failed=failed_count, ignored=expected_count
-    )
+    ignore_message = IGNORE_MESSAGE.format(ignored=expected_count)
+
     if success:
-        print(linesep, summary, sep="")
+        summary = SUCCESS_MESSAGE.format(total=total_count)
+        print("", summary, ignore_message, sep=linesep)
     else:
-        write_error(linesep, summary, sep="")
+        summary = FAIL_MESSAGE.format(total=total_count, failed=failed_count)
+        write_error("", summary, ignore_message, sep=linesep)
 
     return success
 

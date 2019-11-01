@@ -223,7 +223,7 @@ class TestAnalyzeStubs:
     ) -> None:
         assert analyze_stubs("mypy_conf_path", "base_stubs_path")
         std, err = capsys.readouterr()
-        assert "Comparing failed on 0 of 10 stubs." in std
+        assert "Successfully validated 10 stubs." in std
         assert "0 more fail(s) were ignored." in std
         assert "" == err
 
@@ -237,8 +237,7 @@ class TestAnalyzeStubs:
         assert "Boom: line 1 column 5 (char 4)" in err
 
     @patch(
-        "stubalyzer.analyze.setup_expected_mismatches",
-        side_effect=SchemaError("Boom"),
+        "stubalyzer.analyze.setup_expected_mismatches", side_effect=SchemaError("Boom")
     )
     def test_schema_error(self, setup_mock: Mock, capsys: CaptureFixture) -> None:
         assert not analyze_stubs("mypy_conf_path", "base_stubs_path")
@@ -270,7 +269,7 @@ class TestAnalyzeStubs:
             expected_mismatches_path="a/proper/mismatch_path",
         )
         std, err = capsys.readouterr()
-        assert "Comparing failed on 2 of 10 stubs." in err
+        assert "Failure: 2 of 10 stubs seem not to be valid." in err
         assert "4 more fail(s) were ignored." in err
         assert "" == std
 
