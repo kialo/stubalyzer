@@ -150,7 +150,7 @@ class TestCommandLineTool:
 
         assert re.search(r"analyze-stubs: error", output)
         assert re.search(
-            r"the following arguments are required: -c/--config, stubs_handwritten",
+            r"the following arguments are required: -c/--config, STUBS_HANDWRITTEN",
             output,
         )
 
