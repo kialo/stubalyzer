@@ -60,7 +60,10 @@ def parse_command_line() -> Namespace:
         description="Analyze a set of (handcrafted) mypy stubs "
         + "by comparing them to (generated) reference stubs"
     )
-    parser.add_argument("-c", "--config", required=True, help="Mypy config file")
+    required_group = parser.add_argument_group("required arguments")
+    required_group.add_argument(
+        "-c", "--config", required=True, help="Mypy config file"
+    )
     parser.add_argument(
         "-e",
         "--expected-mismatches",
