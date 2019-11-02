@@ -80,7 +80,7 @@ Run stabalyzer with the following command:
 Output
 ++++++
 
-If comparison ends successfully with zero inconsistency,
+If comparison ends successfully with zero inconsistencies,
 stubalyzer will print a success message to stdout, alongside with an ignore message.
 
 Ignore message includes the number of failures ignored,
