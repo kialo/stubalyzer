@@ -80,9 +80,8 @@ Run stabalyzer with the following command:
 Output
 ++++++
 
-In case of a successful comparison without any inconsistencies in types found,
-stubalyzer will print a success message to stdout, alongside
-with an ignore message.
+If comparison ends successfully with zero inconsistency,
+stubalyzer will print a success message to stdout, alongside with an ignore message.
 
 Ignore message includes the number of failures ignored,
 which are declared as expected in expected_mismatches file. If expected_mismatches file
@@ -95,10 +94,9 @@ is not provided, ignore message will always return 0 failure.
       0 fail(s) were ignored.
 
 
-In case of a comparison with some mismatches in the types found,
-stubalyzer will print a list of all inconsistencies
-with a result message, alongside with an ignore message
-similar to the following:
+If some mismatches in the types found, stubalyzer will print
+a list of all inconsistencies with a result message,
+alongside with an ignore message similar to the following:
 
 .. code-block:: shell-session
 
