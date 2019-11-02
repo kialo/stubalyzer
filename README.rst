@@ -33,7 +33,6 @@ How to run
 
 Run stabalyzer with the following command:
 
-
 .. code-block:: shell-session
 
    $ stabalyzer [-h] -c CONFIG

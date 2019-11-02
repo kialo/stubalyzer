@@ -69,8 +69,8 @@ def parse_command_line() -> Namespace:
         "--expected-mismatches",
         required=False,
         default=None,
-        help="""A JSON file of expected mismatching symbols and their match results.
-        Example:
+        help="""Directory of JSON file which defines expected mismatching symbols and their match results.
+        Example expected mismatches JSON file content:
         {
             "my.module.function: "mismatch",
             "another.module.Class: "not_found"
