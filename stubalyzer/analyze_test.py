@@ -65,7 +65,6 @@ class TestAnalyzeStubs(WithStubTestConfig):
             'but it was "mismatch"' in err
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
-        assert "Types for mismatching.other_missing_parameters do not match" in err
         assert "2 more fail(s) were ignored." in err
 
     def test_analyze_matching(self, capsys: CaptureFixture) -> None:

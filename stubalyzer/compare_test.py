@@ -108,14 +108,14 @@ class TestCompareTypeInfos:
 
 
 class TestComparePrimitiveVars:
-    def test_int_and_bool_match(self, mypy_nodes: MypyNodeFactory) -> None:
+    def test_bool_more_specific_than_int(self, mypy_nodes: MypyNodeFactory) -> None:
         int_var = mypy_nodes.get_int_var()
         bool_var = mypy_nodes.get_bool_var()
 
         result_a = compare_symbols(int_var, bool_var)
         result_b = compare_symbols(bool_var, int_var)
 
-        assert result_a.match_result is MatchResult.MATCH
+        assert result_a.match_result is MatchResult.MISMATCH
         assert result_b.match_result is MatchResult.MATCH
 
     def test_str_and_int_dont_match(self, mypy_nodes: MypyNodeFactory) -> None:
@@ -156,10 +156,12 @@ class TestCompareMethods:
 
         assert result.match_result is MatchResult.MISMATCH
 
-    def test_argument_names_wrong_does_match(self, mypy_nodes: MypyNodeFactory) -> None:
+    def test_argument_names_wrong_does_mismatch(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
         meth, meth_ref = mypy_nodes.get_argument_names_wrong()
         result = compare_symbols(meth, meth_ref)
-        assert result.match_result is MatchResult.MATCH
+        assert result.match_result is MatchResult.MISMATCH
 
     def test_argument_types_wrong(self, mypy_nodes: MypyNodeFactory) -> None:
         meth, meth_ref = mypy_nodes.get_argument_types_wrong()
@@ -207,7 +209,7 @@ class TestCompareFunctions:
     def test_matching_with_missing_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
         func, func_ref = mypy_nodes.get_matching_with_missing_arg_star()
         result = compare_symbols(func, func_ref)
-        assert_match(result)
+        assert_mismatch(result)
 
     def test_mismatching_with_arg_star(self, mypy_nodes: MypyNodeFactory) -> None:
         func, func_ref = mypy_nodes.get_mismatching_with_arg_star()
@@ -231,7 +233,7 @@ class TestCompareFunctions:
     ) -> None:
         func, func_ref = mypy_nodes.get_matching_with_missing_kwarg_star2()
         result = compare_symbols(func, func_ref)
-        assert_match(result)
+        assert_mismatch(result)
 
     def test_mismatching_with_kwarg_star2(self, mypy_nodes: MypyNodeFactory) -> None:
         func, func_ref = mypy_nodes.get_mismatching_with_kwarg_star2()
@@ -301,3 +303,20 @@ class TestCompareFunctions:
         func_def, func_def_reference = mypy_nodes.get_mismatch_with_zero_parameters()
         result = compare_symbols(func_def, func_def_reference)
         assert result.match_result is MatchResult.MISMATCH
+
+    def test_no_annotation_matches_if_argc_matches(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        func_def, func_def_reference = mypy_nodes.get_function_with_no_annotation()
+        result = compare_symbols(func_def, func_def_reference)
+        assert result.match_result is MatchResult.MATCH
+
+    def test_args_with_no_annotation_matches_if_argc_matches(
+        self, mypy_nodes: MypyNodeFactory
+    ) -> None:
+        (
+            func_def,
+            func_def_reference,
+        ) = mypy_nodes.get_function_with_args_but_no_annotation()
+        result = compare_symbols(func_def, func_def_reference)
+        assert result.match_result is MatchResult.MATCH

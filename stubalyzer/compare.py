@@ -5,29 +5,26 @@ Compare mypy types.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, NamedTuple, Optional
+from typing import Any, Dict, NamedTuple, Optional, Union
 
-from mypy.meet import is_overlapping_types
 from mypy.nodes import (
+    ARG_NAMED,
+    ARG_POS,
     CONTRAVARIANT,
     COVARIANT,
     Decorator,
+    FuncDef,
     SymbolNode,
     TypeAlias,
     TypeInfo,
     TypeVarExpr,
 )
 from mypy.subtypes import is_subtype
-from mypy.types import CallableType, FunctionLike, Overloaded
+from mypy.types import CallableType, Overloaded
 from mypy.types import Type as TypeNode
 
 from .types import RelevantSymbolNode
-from .utils import (
-    arg_star2_count,
-    arg_star_count,
-    get_expression_fullname,
-    strict_kind_count,
-)
+from .utils import get_expression_fullname
 
 
 class MatchResult(Enum):
@@ -174,7 +171,6 @@ class ComparisonResult(NamedTuple):
 
         :param symbol: symbol we wanted to check
         :param data: optional additional data
-        :param message: optional message
         """
         return cls.create(
             match_result=MatchResult.NOT_FOUND, symbol=symbol, reference=None, data=data
@@ -194,7 +190,6 @@ class ComparisonResult(NamedTuple):
         :param symbol: symbol we wanted to check
         :param reference: symbol that was found somewhere else in the hierarchy
         :param data: optional additional data
-        :param message: optional message
         """
         return cls.create(
             match_result=MatchResult.MISLOCATED_SYMBOL,
@@ -259,11 +254,47 @@ def _mypy_types_match(symbol_type: TypeNode, reference_type: TypeNode) -> MatchR
     :param symbol_type: symbol type to check
     :param reference_type: reference type to check against
     """
-    if is_overlapping_types(symbol_type, reference_type) or is_subtype(
-        symbol_type, reference_type
-    ):
+    if is_subtype(symbol_type, reference_type):
         return MatchResult.MATCH
     return MatchResult.MISMATCH
+
+
+def _check_arguments_compatible(
+    callable_type_or_func_def: Union[CallableType, FuncDef],
+    reference: Union[CallableType, FuncDef],
+) -> bool:
+    """
+    Check if argument kinds and names are compatible. This is used as a fallback, if
+    mypy does not provide type information or is not strict enough.
+
+    :param callable_type_or_func_def: CallableType or FuncDef to check arg_kinds and
+        arg_names on
+    :param reference: referent to check against
+    """
+    a = list(
+        zip(callable_type_or_func_def.arg_kinds, callable_type_or_func_def.arg_names)
+    )
+    b = list(zip(reference.arg_kinds, reference.arg_names))
+
+    positional_required_identical = [
+        (kind, name) for (kind, name) in a if kind == ARG_POS
+    ] == [(kind, name) for (kind, name) in b if kind == ARG_POS]
+
+    keyword_required_equal = {
+        (kind, name) for (kind, name) in a if kind == ARG_NAMED
+    } == {(kind, name) for (kind, name) in b if kind == ARG_NAMED}
+
+    optional_args = {
+        (kind, name) for (kind, name) in a if kind not in {ARG_POS, ARG_NAMED}
+    }
+    optional_reference_args = {
+        (kind, name) for (kind, name) in b if kind not in {ARG_POS, ARG_NAMED}
+    }
+    optional_compatible = optional_args.issubset(optional_reference_args)
+
+    return (
+        positional_required_identical and keyword_required_equal and optional_compatible
+    )
 
 
 def _callable_types_match(
@@ -275,22 +306,10 @@ def _callable_types_match(
     :param callable_type: callable to check
     :param reference_callable: callable to check against
     """
-    callable_kinds = callable_type.arg_kinds
-    reference_kinds = reference_callable.arg_kinds
-
-    strict_kind_count_callable = strict_kind_count(callable_kinds)
-    strict_kind_count_reference = strict_kind_count(reference_kinds)
-
-    if strict_kind_count_callable > strict_kind_count_reference:
-        return MatchResult.MISMATCH
-
-    arg_kinds_match = (
-        strict_kind_count_callable == strict_kind_count_reference
-        and arg_star_count(callable_kinds) <= arg_star_count(reference_kinds)
-        and arg_star2_count(callable_kinds) <= arg_star2_count(reference_kinds)
+    arguments_compatible = _check_arguments_compatible(
+        callable_type, reference_callable
     )
-
-    if not arg_kinds_match:
+    if not arguments_compatible:
         return MatchResult.MISMATCH
 
     return _mypy_types_match(callable_type, reference_callable)
@@ -337,16 +356,28 @@ def compare_mypy_types(
     :param reference_type: type of the symbol to validate against
     """
     if reference_type is None:
-        # MyPy does not have enough type information
-        # hence we accept that our stub is correct
-        return ComparisonResult.create_match(
-            symbol=symbol, reference=reference, message="Generated type is None"
-        )
+        if isinstance(symbol, FuncDef):
+            assert isinstance(reference, FuncDef)
+            arguments_compatible = _check_arguments_compatible(symbol, reference)
+            if arguments_compatible:
+                return ComparisonResult.create_match(
+                    symbol=symbol,
+                    reference=reference,
+                    message="Matched FunctionLike without reference type.",
+                )
+            else:
+                return ComparisonResult.create_mismatch(
+                    symbol=symbol, reference=reference, message="Arguments don't match."
+                )
+        else:
+            # MyPy does not have enough type information
+            # hence we accept that our stub is correct
+            return ComparisonResult.create_match(
+                symbol=symbol, reference=reference, message="Generated type is None"
+            )
 
     if symbol_type is None:
         return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
-
-    match = MatchResult.MATCH
 
     if isinstance(symbol_type, CallableType) and isinstance(
         reference_type, CallableType
@@ -526,12 +557,6 @@ def compare_symbols(
 
     if isinstance(symbol, Decorator) and isinstance(reference, Decorator):
         return _compare_decorator(symbol, reference)
-
-    symbol_type = getattr(symbol, "type")
-    reference_type = getattr(reference, "type")
-
-    if reference_type is None and isinstance(symbol_type, FunctionLike):
-        return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
 
     return compare_mypy_types(
         symbol, reference, getattr(symbol, "type"), getattr(reference, "type")

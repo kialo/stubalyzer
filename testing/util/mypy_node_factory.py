@@ -111,6 +111,14 @@ class MypyNodeFactory(WithStubTestConfig):
         node_name = "functions.mismatching_with_no_parameters_and_no_return_type"
         return self.get(node_name, FuncDef)
 
+    def get_function_with_no_annotation(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.function_with_no_annotation"
+        return self.get(node_name, FuncDef)
+
+    def get_function_with_args_but_no_annotation(self) -> Tuple[FuncDef, FuncDef]:
+        node_name = "functions.function_with_args_but_no_annotation"
+        return self.get(node_name, FuncDef)
+
     def get_overloaded_additional_args_node(
         self,
     ) -> Tuple[OverloadedFuncDef, OverloadedFuncDef]:
