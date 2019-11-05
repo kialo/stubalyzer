@@ -1,6 +1,6 @@
 import re
 import sys
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from enum import Enum
 from importlib.util import find_spec
 from json import loads as json_loads
@@ -8,6 +8,7 @@ from json.decoder import JSONDecodeError
 from os import linesep, scandir
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from textwrap import dedent
 from traceback import format_exception
 from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
 
@@ -57,8 +58,13 @@ def write_error(*messages: str, sep: str = " ") -> None:
 
 def parse_command_line() -> Namespace:
     parser = ArgumentParser(
-        description="Analyze a set of (handcrafted) mypy stubs "
-        + "by comparing them to (generated) reference stubs"
+        description=dedent(
+            """\
+        Analyze a set of (handcrafted) mypy stubs by comparing them to (generated)
+        reference stubs
+        """
+        ),
+        formatter_class=RawTextHelpFormatter,
     )
     required_group = parser.add_argument_group("required arguments")
     required_group.add_argument(
@@ -69,19 +75,36 @@ def parse_command_line() -> Namespace:
         "--expected-mismatches",
         required=False,
         default=None,
-        help="""Directory of JSON file, which defines expected mismatching symbols
-        and their match results.
-        
-        Example expected mismatches JSON file content:
+        help=dedent(
+            """\
+        A JSON file, which defines expected mismatching
+        symbols and their match results. If any symbol is
+        declared in an expected_mismatches JSON file,
+        %(prog)s will count it as an expected failure, and
+        ignore this inconsistency.
+
+        Example contents:
         {
             "my.module.function: "mismatch",
             "another.module.Class: "not_found"
-        }""",
+        }
+
+        According to the example above, we expect the signature
+        of my.module.function to mismatch, and module.Class to
+        be missing in the generated stubs. %(prog)s will
+        ignore these inconsistencies.
+        """
+        ),
     )
     parser.add_argument(
         dest="stubs_handwritten",
         metavar="STUBS_HANDWRITTEN",
-        help="Directory of handwritten stubs that need to be analyzed",
+        help=dedent(
+            """\
+        Directory of handwritten stubs that need to be
+        analyzed
+        """
+        ),
     )
     parser.add_argument(
         "-r",
@@ -89,8 +112,13 @@ def parse_command_line() -> Namespace:
         required=False,
         default=None,
         metavar="REFERENCE_STUBS",
-        help="Directory of reference stubs to compare against."
-        "If not specified stubgen will be used to generate the reference stubs.",
+        help=dedent(
+            """
+        Directory of reference stubs to compare against. If
+        not specified stubgen will be used to generate the
+        reference stubs.
+        """
+        ),
     )
     return parser.parse_args()
 
