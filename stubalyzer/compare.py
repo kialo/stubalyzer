@@ -484,7 +484,7 @@ def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonRes
     """
     Check if Decorator symbol matches the reference
 
-    Returns a successful comparision if:
+    Returns a successful comparison if:
         - all decorators are the same and applied in the same order,
         - the function these decorators are applied to match
 
@@ -498,13 +498,13 @@ def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonRes
     )
 
     if symbol_decorators == reference_decorators:
-        function_comparision = compare_symbols(symbol.func, reference.func)
+        function_comparison = compare_symbols(symbol.func, reference.func)
         return ComparisonResult.create(
-            match_result=function_comparision.match_result,
+            match_result=function_comparison.match_result,
             symbol=symbol,
             reference=reference,
-            data=function_comparision.data,
-            message=function_comparision.message,
+            data=function_comparison.data,
+            message=function_comparison.message,
         )
     else:
         return ComparisonResult.create_mismatch(
