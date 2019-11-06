@@ -269,7 +269,7 @@ def _check_arguments_compatible(
 
     :param callable_type_or_func_def: CallableType or FuncDef to check arg_kinds and
         arg_names on
-    :param reference: referent to check against
+    :param reference: reference CallableType or FuncDef to check against
     """
     a = list(
         zip(callable_type_or_func_def.arg_kinds, callable_type_or_func_def.arg_names)
