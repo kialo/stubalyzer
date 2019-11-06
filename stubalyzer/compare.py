@@ -363,7 +363,7 @@ def compare_mypy_types(
                 return ComparisonResult.create_match(
                     symbol=symbol,
                     reference=reference,
-                    message="Matched FunctionLike without reference type.",
+                    message="Matched function definition without reference type.",
                 )
             else:
                 return ComparisonResult.create_mismatch(
