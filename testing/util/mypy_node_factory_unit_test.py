@@ -14,7 +14,7 @@ class TestMypyNodeFactory:
         assert node.fullname() == requested_node_fullname
 
     def test_get_throws_handwritten_stub_not_found_error_if_handwritten_missing(
-        self
+        self,
     ) -> None:
         mypy_node_fullname = "mypy_node_factory_test_nodes.not_in_handwritten"
 
@@ -25,7 +25,7 @@ class TestMypyNodeFactory:
             mypy_node_factory.get(mypy_node_fullname, Node)
 
     def test_get_throws_generated_stub_not_found_error_if_generated_missing(
-        self
+        self,
     ) -> None:
         mypy_node_fullname = "mypy_node_factory_test_nodes.not_in_generated"
 

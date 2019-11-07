@@ -30,7 +30,7 @@ class TestUtils:
         assert get_expression_fullname(expression) is expected_fullname
 
     def test_get_expression_fullname_when_attr_is_function_and_do_not_return_str(
-        self
+        self,
     ) -> None:
         fullname_mock = Mock(return_value=13245)
         expression = Mock(fullname=fullname_mock, spec=Expression)

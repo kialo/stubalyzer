@@ -271,24 +271,28 @@ def _check_arguments_compatible(
         arg_names on
     :param reference: reference CallableType or FuncDef to check against
     """
-    a = list(
+    callable_args = list(
         zip(callable_type_or_func_def.arg_kinds, callable_type_or_func_def.arg_names)
     )
-    b = list(zip(reference.arg_kinds, reference.arg_names))
+    reference_args = list(zip(reference.arg_kinds, reference.arg_names))
 
     positional_required_identical = [
-        (kind, name) for (kind, name) in a if kind == ARG_POS
-    ] == [(kind, name) for (kind, name) in b if kind == ARG_POS]
+        (kind, name) for (kind, name) in callable_args if kind == ARG_POS
+    ] == [(kind, name) for (kind, name) in reference_args if kind == ARG_POS]
 
     keyword_required_equal = {
-        (kind, name) for (kind, name) in a if kind == ARG_NAMED
-    } == {(kind, name) for (kind, name) in b if kind == ARG_NAMED}
+        (kind, name) for (kind, name) in callable_args if kind == ARG_NAMED
+    } == {(kind, name) for (kind, name) in reference_args if kind == ARG_NAMED}
 
     optional_args = {
-        (kind, name) for (kind, name) in a if kind not in {ARG_POS, ARG_NAMED}
+        (kind, name)
+        for (kind, name) in callable_args
+        if kind not in {ARG_POS, ARG_NAMED}
     }
     optional_reference_args = {
-        (kind, name) for (kind, name) in b if kind not in {ARG_POS, ARG_NAMED}
+        (kind, name)
+        for (kind, name) in reference_args
+        if kind not in {ARG_POS, ARG_NAMED}
     }
     optional_compatible = optional_args.issubset(optional_reference_args)
 
@@ -356,6 +360,7 @@ def compare_mypy_types(
     :param reference_type: type of the symbol to validate against
     """
     if reference_type is None:
+        # The reference type will never be None for overloaded functions.
         if isinstance(symbol, FuncDef):
             assert isinstance(reference, FuncDef)
             arguments_compatible = _check_arguments_compatible(symbol, reference)
