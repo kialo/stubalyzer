@@ -47,9 +47,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        # TODO: Check if we support 3.5 & 3.6
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
@@ -59,8 +57,7 @@ setup(
     # Note that this is a string of words separated by whitespace, not a list.
     keywords="mypy analysis stubgen stubs",
     packages=["stubalyzer"],
-    # TODO: Check if we support 3.5 & 3.6
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
