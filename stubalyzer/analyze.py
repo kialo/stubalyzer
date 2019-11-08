@@ -43,8 +43,8 @@ FILE_NOT_FOUND_WARNING = (
 SUCCESS_MESSAGE = "Successfully validated {total} stubs."
 FAIL_MESSAGE = "Failure: {failed} of {total} stubs seem not to be valid."
 IGNORE_MESSAGE = (
-    "{ignored} more fail(s) were ignored, "
-    "because they were defined in expected mismatches."
+    "{ignored} fail(s) were ignored, "
+    "because they were defined to be expected mismatches."
 )
 
 
