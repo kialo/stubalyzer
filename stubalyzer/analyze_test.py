@@ -33,7 +33,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
         assert (
-            "1 more fail(s) were ignored, because they were defined in expected mismatches."
+            "1 more fail(s) were ignored, because they were \
+                defined in expected mismatches."
             in err
         )
 
@@ -69,7 +70,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
         assert (
-            "2 more fail(s) were ignored, because they were defined in expected mismatches."
+            "2 more fail(s) were ignored, \
+                because they were defined in expected mismatches."
             in err
         )
 

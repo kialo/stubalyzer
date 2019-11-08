@@ -271,7 +271,8 @@ class TestAnalyzeStubs:
         std, err = capsys.readouterr()
         assert "Failure: 2 of 10 stubs seem not to be valid." in err
         assert (
-            "4 more fail(s) were ignored, because they were defined in expected mismatches."
+            "4 more fail(s) were ignored, \
+                because they were defined in expected mismatches."
             in err
         )
         assert "" == std
