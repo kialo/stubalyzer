@@ -32,7 +32,10 @@ class TestAnalyzeStubs(WithStubTestConfig):
             " - missing.missing_decorator" in err
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
-        assert "1 more fail(s) were ignored." in err
+        assert (
+            "1 more fail(s) were ignored, because they were defined in expected mismatches."
+            in err
+        )
 
     def test_ignore_missing_module_symbols(self, capsys: CaptureFixture) -> None:
         success = analyze_stubs(
@@ -65,7 +68,10 @@ class TestAnalyzeStubs(WithStubTestConfig):
             'but it was "mismatch"' in err
         )
         assert "Types for mismatching.mismatch_variable do not match" in err
-        assert "2 more fail(s) were ignored." in err
+        assert (
+            "2 more fail(s) were ignored, because they were defined in expected mismatches."
+            in err
+        )
 
     def test_analyze_matching(self, capsys: CaptureFixture) -> None:
         analyze_stubs(

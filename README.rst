@@ -85,17 +85,15 @@ ignore message.
 
 The ignore message includes the number of failures ignored, which are
 declared as expected in the file for expected mismatches. If this file
-is not provided, the ignore message will list 0 ignored stubs.
+is not provided, the ignore message will not be printed.
 
 .. code:: shell-session
 
    Successfully validated 68 stubs.
 
-   0 fail(s) were ignored.
-
 If there are mismatches in the given types, stubalyzer will print a list
 of all inconsistencies with a result message, alongside with an ignore
-message similar to the following:
+message -if there is any, similar to the following:
 
 .. code:: shell-session
 
@@ -103,14 +101,14 @@ message similar to the following:
 
    Types for functions.additional_args do not match:
 
-      def (foo: builtins.int, bar: builtins.int) -> builtins.str
+      Handwritten type: def (foo: builtins.int, bar: builtins.int) -> builtins.str
 
-      def (foo: builtins.int) -> builtins.str
+      Reference type  : def (foo: builtins.int) -> builtins.str
 
 
    Failure: 33 of 68 stubs seem not to be valid.
 
-   0 more fail(s) were ignored.
+   2 more fail(s) were ignored, because they were defined in expected mismatches.
 
 Development
 -----------

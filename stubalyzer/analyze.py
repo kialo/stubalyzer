@@ -42,7 +42,7 @@ FILE_NOT_FOUND_WARNING = (
 )
 SUCCESS_MESSAGE = "Successfully validated {total} stubs."
 FAIL_MESSAGE = "Failure: {failed} of {total} stubs seem not to be valid."
-IGNORE_MESSAGE = "{ignored} more fail(s) were ignored."
+IGNORE_MESSAGE = "{ignored} more fail(s) were ignored, because they were defined in expected mismatches."
 
 
 class EvaluationResult(Enum):
@@ -352,10 +352,12 @@ def analyze_stubs(
 
     if success:
         summary = SUCCESS_MESSAGE.format(total=total_count)
-        print("", summary, ignore_message, sep=linesep)
+        print("", summary, (ignore_message if expected_count > 0 else ""), sep=linesep)
     else:
         summary = FAIL_MESSAGE.format(total=total_count, failed=failed_count)
-        write_error("", summary, ignore_message, sep=linesep)
+        write_error(
+            "", summary, (ignore_message if expected_count > 0 else ""), sep=linesep
+        )
 
     return success
 

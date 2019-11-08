@@ -119,8 +119,8 @@ class ComparisonResult(NamedTuple):
             return "\n".join(
                 [
                     f"Types for {self.symbol_name} do not match:",
-                    f"    {self.symbol_type}",
-                    f"    {self.reference_type}",
+                    f"    Handwritten type: {self.symbol_type}",
+                    f"    Reference type  : {self.reference_type}",
                 ]
             )
         elif self.match_result is MatchResult.NOT_FOUND:
