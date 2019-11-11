@@ -330,7 +330,7 @@ class CheckStyleWriter:
         for filename in sorted(self.errors_by_file.keys()):
             errors = self.errors_by_file[filename]
             file = SubElement(root, "file", {"name": filename})
-            for error in errors:
+            for error in sorted(errors, key=lambda x: (x.symbol.line, x.symbol.column)):
                 SubElement(
                     file,
                     "error",
