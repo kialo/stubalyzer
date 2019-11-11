@@ -2,6 +2,7 @@ import os
 import re
 from pathlib import Path
 from unittest.mock import patch
+from xml.etree.ElementTree import fromstring
 
 import pytest
 from _pytest.capture import CaptureFixture
@@ -128,9 +129,20 @@ class TestAnalyzeStubs(WithStubTestConfig):
             )
             expected_report_path = base_path / "testing" / "test_report.xml"
             expected_report = open(expected_report_path)
-            assert written_report.read() == expected_report.read().format(
-                path=str(base_path)
+            written_tree = fromstring(written_report.read())
+            expected_tree = fromstring(
+                expected_report.read().format(path=str(base_path))
             )
+            assert written_tree.tag == expected_tree.tag
+            assert written_tree.attrib == expected_tree.attrib
+            assert len(written_tree) == len(expected_tree)
+            for (written_file, expected_file) in zip(written_tree, expected_tree):
+                assert written_file.tag == expected_file.tag
+                assert written_file.attrib == expected_file.attrib
+                assert len(written_file) == len(expected_file)
+                for (written_error, expected_error) in zip(written_file, expected_file):
+                    assert written_error.tag == expected_error.tag
+                    assert written_error.attrib == expected_error.attrib
         finally:
             os.unlink(report_path)
 

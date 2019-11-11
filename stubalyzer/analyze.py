@@ -1,7 +1,7 @@
 import re
 import sys
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from enum import Enum
 from importlib.util import find_spec
 from json import loads as json_loads
@@ -334,14 +334,12 @@ class CheckStyleWriter:
                 SubElement(
                     file,
                     "error",
-                    OrderedDict(
-                        [
-                            ("line", str(error.symbol.line)),
-                            ("column", str(error.symbol.column)),
-                            ("severity", "error"),
-                            ("message", error.message),
-                        ]
-                    ),
+                    {
+                        "line": str(error.symbol.line),
+                        "column": str(error.symbol.column),
+                        "severity": "error",
+                        "message": error.message,
+                    },
                 )
         return ElementTree(root)
 
