@@ -121,16 +121,18 @@ class TestAnalyzeStubs(WithStubTestConfig):
             report_path,
         )
 
-        written_report = open(report_path)
-        expected_report_path = (
-            Path(os.path.dirname(os.path.abspath(__file__)))
-            / ".."
-            / "testing"
-            / "test_report.xml"
-        )
-        expected_report = open(expected_report_path)
-        assert written_report.read() == expected_report.read()
-        os.unlink(report_path)
+        try:
+            written_report = open(report_path)
+            base_path = Path.resolve(
+                Path(os.path.dirname(os.path.abspath(__file__))) / ".."
+            )
+            expected_report_path = base_path / "testing" / "test_report.xml"
+            expected_report = open(expected_report_path)
+            assert written_report.read() == expected_report.read().format(
+                path=str(base_path)
+            )
+        finally:
+            os.unlink(report_path)
 
 
 class TestCompareSymbols:
