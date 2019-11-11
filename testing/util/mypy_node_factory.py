@@ -33,10 +33,10 @@ class MypyNodeFactory(WithStubTestConfig):
         )
 
         self._handwritten_stubs_map = {
-            symbol.fullname(): symbol for symbol in handwritten_stubs
+            symbol.fullname(): symbol for symbol, _ in handwritten_stubs
         }
         self._generated_stubs_map = {
-            symbol.fullname(): symbol for symbol in generated_stubs
+            symbol.fullname(): symbol for symbol, _ in generated_stubs
         }
 
     def handwritten_stub_not_found(self, symbol_name: str) -> HandwrittenStubNotFound:

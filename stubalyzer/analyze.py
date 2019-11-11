@@ -1,6 +1,7 @@
 import re
 import sys
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
+from collections import defaultdict
 from enum import Enum
 from importlib.util import find_spec
 from json import loads as json_loads
@@ -10,7 +11,18 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from traceback import format_exception
-from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple
+from typing import (
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Set,
+    Tuple,
+)
+from xml.etree.ElementTree import Element, ElementTree, SubElement
 
 from mypy.nodes import TypeAlias, TypeVarExpr, Var
 from mypy.stubgen import generate_stubs, parse_options
@@ -54,7 +66,9 @@ class EvaluationResult(Enum):
     EXPECTED_FAILURE = "expected_failure"
 
 
-def write_error(*messages: str, sep: str = " ") -> None:
+def write_error(
+    *messages: str, sep: str = " ", symbol: Optional[RelevantSymbolNode] = None
+) -> None:
     sys.stderr.write(sep.join(messages))
     sys.stderr.write(linesep)
 
@@ -123,6 +137,17 @@ def parse_command_line() -> Namespace:
         """
         ),
     )
+    parser.add_argument(
+        "-x",
+        "--checkstyle_report",
+        required=False,
+        default=None,
+        help=dedent(
+            """
+        Write an xml report in checkstyle format to the given file.
+        """
+        ),
+    )
     return parser.parse_args()
 
 
@@ -180,43 +205,53 @@ def evaluate_compare_result(
     mismatches: Dict[str, MatchResult],
     mismatches_left: Set[str],
     expected_mismatches_path: Optional[str] = None,
+    *,
+    loggers: List[Callable[..., None]],
 ) -> EvaluationResult:
-    symbol = compare_result.symbol_name
+    symbol = compare_result.symbol
+    symbol_name = compare_result.symbol_name
     match_result = compare_result.match_result
     evaluation_result = EvaluationResult.SUCCESS
-    expected_mismatch = mismatches.get(symbol)
+    expected_mismatch = mismatches.get(symbol_name)
 
     if expected_mismatch is None:
         if match_result is not MatchResult.MATCH:
             evaluation_result = EvaluationResult.FAILURE
-            write_error(linesep, compare_result.message, sep="")
+            for logger in loggers:
+                logger(
+                    linesep, compare_result.message, sep="", symbol=symbol,
+                )
     else:
-        mismatches_left.remove(symbol)
+        mismatches_left.remove(symbol_name)
         if match_result is MatchResult.MATCH:
             evaluation_result = EvaluationResult.FAILURE
             assert expected_mismatches_path
-            write_error(
-                linesep,
-                MATCH_FOUND_ERROR.format(
+            for logger in loggers:
+                logger(
+                    linesep,
+                    MATCH_FOUND_ERROR.format(
+                        symbol=symbol_name,
+                        mismatch_type=mismatches[symbol_name].value,
+                        file_path=expected_mismatches_path,
+                    ),
+                    sep="",
                     symbol=symbol,
-                    mismatch_type=mismatches[symbol].value,
-                    file_path=expected_mismatches_path,
-                ),
-                sep="",
-            )
+                )
         elif match_result is not expected_mismatch:
             evaluation_result = EvaluationResult.FAILURE
             assert expected_mismatches_path
-            write_error(
-                linesep,
-                WRONG_MISMATCH_ERROR.format(
+            for logger in loggers:
+                logger(
+                    linesep,
+                    WRONG_MISMATCH_ERROR.format(
+                        symbol=symbol_name,
+                        expected=expected_mismatch.value,
+                        received=match_result.value,
+                        file_path=expected_mismatches_path,
+                    ),
+                    sep="",
                     symbol=symbol,
-                    expected=expected_mismatch.value,
-                    received=match_result.value,
-                    file_path=expected_mismatches_path,
-                ),
-                sep="",
-            )
+                )
         else:
             evaluation_result = EvaluationResult.EXPECTED_FAILURE
     return evaluation_result
@@ -234,7 +269,7 @@ def call_stubgen(command_line_args: List[str]) -> None:
 
 def generate_stub_types(
     base_stubs_path: str, mypy_conf_path: str
-) -> Iterable[RelevantSymbolNode]:
+) -> Iterable[Tuple[RelevantSymbolNode, str]]:
     """
     Use stubgen to generate reference stub types of the modules stubbed in
     base_stubs_path. For this to work the modules need to be installed.
@@ -273,11 +308,48 @@ def generate_stub_types(
         return list(get_stub_types(reference_stubs_path, mypy_conf_path))
 
 
+class ErrorEntry(NamedTuple):
+    symbol: RelevantSymbolNode
+    message: str
+
+
+class CheckStyleWriter:
+    def __init__(self, path_map: Dict[RelevantSymbolNode, str]):
+        self.path_map = path_map
+        self.errors_by_file: Dict[str, List[ErrorEntry]] = defaultdict(list)
+
+    def collect_error(
+        self, *messages: str, sep: str = " ", symbol: RelevantSymbolNode
+    ) -> None:
+        message = sep.join(messages)
+        path = self.path_map[symbol]
+        self.errors_by_file[path].append(ErrorEntry(symbol=symbol, message=message))
+
+    def build_tree(self) -> ElementTree:
+        root = Element("checkstyle", {"version": "4.3"})
+        for filename in sorted(self.errors_by_file.keys()):
+            errors = self.errors_by_file[filename]
+            file = SubElement(root, "file", {"name": filename})
+            for error in errors:
+                SubElement(
+                    file,
+                    "error",
+                    {
+                        "line": str(error.symbol.line),
+                        "column": str(error.symbol.column),
+                        "severity": "error",
+                        "message": error.message,
+                    },
+                )
+        return ElementTree(root)
+
+
 def analyze_stubs(
     mypy_conf_path: str,
     base_stubs_path: str,
     reference_stubs_path: Optional[str] = None,
     expected_mismatches_path: Optional[str] = None,
+    checkstyle_report: Optional[str] = None,
 ) -> bool:
     """
     Determine if the (presumably) handwritten stubs in base_stubs_path are correct;
@@ -301,6 +373,8 @@ def analyze_stubs(
                 "my.module.function": "mismatch",
                 "another.module.Class": "not_found"
             }
+    :param checkstyle_report: if this path is given, a xml report in checkstyle format
+        will be written.
     :return: True if the stubs in base_stubs_path are considered correct
     """
     success = True
@@ -322,23 +396,40 @@ def analyze_stubs(
         success = False
 
     if success:
-        # Make a set since overloaded function definitions appear multiple times
-        stub_types_base = set(get_stub_types(base_stubs_path, mypy_conf_path))
+        # Prevent overloaded function definitions from appearing multiple times
+        stub_types_base_map = {
+            symbol: path
+            for (symbol, path) in get_stub_types(base_stubs_path, mypy_conf_path)
+        }
         if reference_stubs_path:
-            stub_types_reference = get_stub_types(reference_stubs_path, mypy_conf_path)
+            stub_types_reference = set(
+                stub for stub, _ in get_stub_types(reference_stubs_path, mypy_conf_path)
+            )
         else:
-            stub_types_reference = generate_stub_types(base_stubs_path, mypy_conf_path)
-
-        for res in compare(stub_types_base, stub_types_reference):
+            stub_types_reference = set(
+                stub for stub, _ in generate_stub_types(base_stubs_path, mypy_conf_path)
+            )
+        checkstyle_writer = CheckStyleWriter(stub_types_base_map)
+        for res in compare(stub_types_base_map.keys(), stub_types_reference):
             total_count += 1
             evaluation_result = evaluate_compare_result(
-                res, mismatches, unused_mismatches, expected_mismatches_path
+                res,
+                mismatches,
+                unused_mismatches,
+                expected_mismatches_path,
+                loggers=[write_error, checkstyle_writer.collect_error],
             )
             if evaluation_result is EvaluationResult.FAILURE:
                 failed_count += 1
             elif evaluation_result is EvaluationResult.EXPECTED_FAILURE:
                 expected_count += 1
         success = failed_count == 0
+
+        if checkstyle_report:
+            checkstyle_tree = checkstyle_writer.build_tree()
+            checkstyle_tree.write(
+                checkstyle_report, encoding="UTF-8", xml_declaration=True
+            )
 
         if unused_mismatches:
             success = False
@@ -361,14 +452,17 @@ def analyze_stubs(
         write_error(
             "", summary, (ignore_message if expected_count > 0 else ""), sep=linesep
         )
-
     return success
 
 
 def main() -> None:
     args = parse_command_line()
     success = analyze_stubs(
-        args.config, args.stubs_handwritten, args.reference, args.expected_mismatches
+        args.config,
+        args.stubs_handwritten,
+        args.reference,
+        args.expected_mismatches,
+        args.checkstyle_report,
     )
     sys.exit(0 if success else 1)
 

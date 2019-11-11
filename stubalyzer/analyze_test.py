@@ -1,4 +1,6 @@
+import os
 import re
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -108,6 +110,27 @@ class TestAnalyzeStubs(WithStubTestConfig):
             'Expected "functions.matching_function" to be "mismatch" but it matched'
             in err
         )
+
+    def test_analyze_checkstyle_report(self) -> None:
+        report_path = "checkstyle_report.xml"
+        analyze_stubs(
+            self.mypy_config_path,
+            self.handwritten_stubs_path,
+            self.generated_stubs_path,
+            None,
+            report_path,
+        )
+
+        written_report = open(report_path)
+        expected_report_path = (
+            Path(os.path.dirname(os.path.abspath(__file__)))
+            / ".."
+            / "testing"
+            / "test_report.xml"
+        )
+        expected_report = open(expected_report_path)
+        assert written_report.read() == expected_report.read()
+        os.unlink(report_path)
 
 
 class TestCompareSymbols:

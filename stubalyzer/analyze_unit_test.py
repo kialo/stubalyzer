@@ -12,6 +12,7 @@ from .analyze import (
     compare,
     evaluate_compare_result,
     setup_expected_mismatches,
+    write_error,
 )
 from .compare import ComparisonResult, MatchResult
 
@@ -106,7 +107,9 @@ class TestEvaluateCompareResult:
             match_result=MatchResult.MATCH, message="Alright", symbol_name="3"
         )
         assert (
-            evaluate_compare_result(compare_result, mismatches, mismatches_left)
+            evaluate_compare_result(
+                compare_result, mismatches, mismatches_left, loggers=[write_error]
+            )
             is EvaluationResult.SUCCESS
         )
         _, err = capsys.readouterr()
@@ -122,7 +125,9 @@ class TestEvaluateCompareResult:
             match_result=MatchResult.MISMATCH, symbol_name="3"
         )
         assert (
-            evaluate_compare_result(compare_result, mismatches, mismatches_left)
+            evaluate_compare_result(
+                compare_result, mismatches, mismatches_left, loggers=[write_error]
+            )
             is EvaluationResult.EXPECTED_FAILURE
         )
         _, err = capsys.readouterr()
@@ -138,7 +143,9 @@ class TestEvaluateCompareResult:
             symbol_name="3",
         )
         assert (
-            evaluate_compare_result(compare_result, {}, mismatches_left)
+            evaluate_compare_result(
+                compare_result, {}, mismatches_left, loggers=[write_error]
+            )
             is EvaluationResult.FAILURE
         )
         _, err = capsys.readouterr()
@@ -155,7 +162,11 @@ class TestEvaluateCompareResult:
         expected_mismatches_path = "the/mismatch/path.json"
         assert (
             evaluate_compare_result(
-                compare_result, mismatches, mismatches_left, expected_mismatches_path
+                compare_result,
+                mismatches,
+                mismatches_left,
+                expected_mismatches_path,
+                loggers=[write_error],
             )
             is EvaluationResult.FAILURE
         )
@@ -174,7 +185,11 @@ class TestEvaluateCompareResult:
 
         assert (
             evaluate_compare_result(
-                compare_result, mismatches, mismatches_left, expected_mismatches_path
+                compare_result,
+                mismatches,
+                mismatches_left,
+                expected_mismatches_path,
+                loggers=[write_error],
             )
             is EvaluationResult.FAILURE
         )
@@ -195,7 +210,11 @@ class TestEvaluateCompareResult:
 
         assert (
             evaluate_compare_result(
-                compare_result, mismatches, mismatches_left, expected_mismatches_path
+                compare_result,
+                mismatches,
+                mismatches_left,
+                expected_mismatches_path,
+                loggers=[write_error],
             )
             is EvaluationResult.FAILURE
         )

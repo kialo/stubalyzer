@@ -446,7 +446,7 @@ def _format_type_var(symbol: TypeVarExpr) -> str:
     if symbol.values:
         values = ", " + (", ".join(str(t) for t in symbol.values))
 
-    return f"{symbol.name} = TypeVar('{symbol.name()}'{values}{variance})"
+    return f"{symbol.name()} = TypeVar('{symbol.name()}'{values}{variance})"
 
 
 def _match_type_var_expr(symbol: TypeVarExpr, reference: TypeVarExpr) -> MatchResult:
