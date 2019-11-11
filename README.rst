@@ -75,6 +75,9 @@ Run stubalyzer with the following command:
                            Directory of reference stubs to compare against. If
                            not specified stubgen will be used to generate the
                            reference stubs.
+     -x CHECKSTYLE_REPORT, --checkstyle_report CHECKSTYLE_REPORT
+
+                           Write an xml report in checkstyle format to the given file.
 
 Output
 ~~~~~~
