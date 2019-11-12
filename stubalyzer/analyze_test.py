@@ -1,8 +1,8 @@
 import os
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
-from xml.etree.ElementTree import fromstring
 
 import pytest
 from _pytest.capture import CaptureFixture
@@ -129,8 +129,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
             )
             expected_report_path = base_path / "testing" / "test_report.xml"
             expected_report = open(expected_report_path)
-            written_tree = fromstring(written_report.read())
-            expected_tree = fromstring(
+            written_tree = ET.fromstring(written_report.read())
+            expected_tree = ET.fromstring(
                 expected_report.read().format(path=str(base_path))
             )
             assert written_tree.tag == expected_tree.tag

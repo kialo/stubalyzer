@@ -67,7 +67,7 @@ class EvaluationResult(Enum):
 
 
 def write_error(
-    *messages: str, sep: str = " ", symbol: Optional[RelevantSymbolNode] = None
+    *messages: str, sep: str = "", symbol: Optional[RelevantSymbolNode] = None
 ) -> None:
     sys.stderr.write(sep.join(messages))
     sys.stderr.write(linesep)
@@ -139,7 +139,7 @@ def parse_command_line() -> Namespace:
     )
     parser.add_argument(
         "-x",
-        "--checkstyle_report",
+        "--checkstyle-report",
         required=False,
         default=None,
         help=dedent(
@@ -219,7 +219,7 @@ def evaluate_compare_result(
             evaluation_result = EvaluationResult.FAILURE
             for logger in loggers:
                 logger(
-                    linesep, compare_result.message, sep="", symbol=symbol,
+                    linesep, compare_result.message, symbol=symbol,
                 )
     else:
         mismatches_left.remove(symbol_name)
@@ -234,7 +234,6 @@ def evaluate_compare_result(
                         mismatch_type=mismatches[symbol_name].value,
                         file_path=expected_mismatches_path,
                     ),
-                    sep="",
                     symbol=symbol,
                 )
         elif match_result is not expected_mismatch:
@@ -249,7 +248,6 @@ def evaluate_compare_result(
                         received=match_result.value,
                         file_path=expected_mismatches_path,
                     ),
-                    sep="",
                     symbol=symbol,
                 )
         else:
@@ -302,7 +300,6 @@ def generate_stub_types(
                     f'Error: Generating stubs for the package "{package}" failed:',
                     linesep,
                     *format_exception(type(ex), ex, ex.__traceback__),
-                    sep="",
                 )
 
         return list(get_stub_types(reference_stubs_path, mypy_conf_path))
@@ -319,7 +316,7 @@ class CheckStyleWriter:
         self.errors_by_file: Dict[str, List[ErrorEntry]] = defaultdict(list)
 
     def collect_error(
-        self, *messages: str, sep: str = " ", symbol: RelevantSymbolNode
+        self, *messages: str, sep: str = "", symbol: RelevantSymbolNode
     ) -> None:
         message = sep.join(messages)
         path = self.path_map[symbol]
@@ -391,7 +388,6 @@ def analyze_stubs(
             str(ex),
             linesep,
             CHECK_FILE_ERROR.format(file_path=expected_mismatches_path),
-            sep="",
         )
         success = False
 
@@ -439,7 +435,6 @@ def analyze_stubs(
                 UNUSED_DEFINITION_ERROR.format(
                     symbols=symbols, file_path=expected_mismatches_path
                 ),
-                sep="",
             )
 
     ignore_message = IGNORE_MESSAGE.format(ignored=expected_count)
