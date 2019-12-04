@@ -20,11 +20,11 @@ from .compare import ComparisonResult, MatchResult
 class TestCompare:
     def test_skip_private_symbols(self) -> None:
         handwritten = [
-            Mock(fullname=Mock(return_value="_private0"), spec=TypeAlias),
-            Mock(fullname=Mock(return_value="_private1"), spec=TypeVarExpr),
-            Mock(fullname=Mock(return_value="_private2"), spec=Var),
-            Mock(fullname=Mock(return_value="public0")),
-            Mock(fullname=Mock(return_value="__public1")),
+            Mock(fullname="_private0", spec=TypeAlias),
+            Mock(fullname="_private1", spec=TypeVarExpr),
+            Mock(fullname="_private2", spec=Var),
+            Mock(fullname="public0"),
+            Mock(fullname="__public1"),
         ]
         assert len(list(compare(handwritten, []))) == 2
 
@@ -34,10 +34,10 @@ class TestCompare:
     )
     def test_match_to_generated_symbols(self, compare_mock: Mock) -> None:
         handwritten = [
-            Mock(fullname=Mock(return_value="found_in_generated")),
-            Mock(fullname=Mock(return_value="not_found_in_generated")),
+            Mock(fullname="found_in_generated"),
+            Mock(fullname="not_found_in_generated"),
         ]
-        generated = [Mock(fullname=Mock(return_value="found_in_generated"))]
+        generated = [Mock(fullname="found_in_generated")]
         result = list(compare(handwritten, generated))
         assert len(result) == 2
         assert result[0].match_result == MatchResult.MATCH
