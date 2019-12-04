@@ -11,7 +11,7 @@ class TestMypyNodeFactory:
 
         assert type(node) == type(node_ref)
         assert node != node_ref
-        assert node.fullname() == requested_node_fullname
+        assert node.fullname == requested_node_fullname
 
     def test_get_throws_handwritten_stub_not_found_error_if_handwritten_missing(
         self,

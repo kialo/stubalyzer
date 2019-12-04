@@ -1,5 +1,4 @@
-# Note: 0.740 stubgen breaks on passlib
-mypy==0.740
+mypy==0.750
 
 black
 flake8

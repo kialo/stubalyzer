@@ -39,7 +39,7 @@ class TestLookupOfMislocatedSymbols:
         mislocated_handwritten = mypy_nodes.get_mislocated_method_handwritten()
         gen_map = copy(mypy_nodes.get_generated_stubs_map())
 
-        del gen_map[mislocated_handwritten.info.fullname()]
+        del gen_map[mislocated_handwritten.info.fullname]
         result = lookup_symbol(gen_map, mislocated_handwritten)
         assert result == LookupResult(symbol=None, containing_class=None)
 
