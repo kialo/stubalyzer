@@ -17,8 +17,7 @@ class WithStubSymbols(WithStubTestConfig):
         conf_path = cls.get_mypy_config_path()
 
         cls._symbols = {
-            s.fullname: s
-            for (s, _) in get_stub_types(str(stubs_path), str(conf_path))
+            s.fullname: s for (s, _) in get_stub_types(str(stubs_path), str(conf_path))
         }
 
     @property
