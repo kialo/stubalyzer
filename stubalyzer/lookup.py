@@ -46,7 +46,7 @@ def lookup_symbol(
     """
     fail = LookupResult(None, None)
 
-    symbol = symbol_map.get(symbol_to_lookup.fullname())
+    symbol = symbol_map.get(symbol_to_lookup.fullname)
     if symbol:
         return LookupResult(symbol, get_symbol_class(symbol))
 
@@ -55,12 +55,12 @@ def lookup_symbol(
     if not cls_to_lookup or cls_to_lookup == FUNC_NO_INFO:
         return fail
 
-    symbol_cls = symbol_map.get(cls_to_lookup.fullname())
+    symbol_cls = symbol_map.get(cls_to_lookup.fullname)
 
     if not symbol_cls or not isinstance(symbol_cls, TypeInfo):
         return fail
 
-    found_symbol_table_node = symbol_cls.get(symbol_to_lookup.name())
+    found_symbol_table_node = symbol_cls.get(symbol_to_lookup.name)
     if not found_symbol_table_node or not found_symbol_table_node.node:
         return fail
 

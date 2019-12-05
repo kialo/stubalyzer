@@ -17,8 +17,7 @@ class WithStubSymbols(WithStubTestConfig):
         conf_path = cls.get_mypy_config_path()
 
         cls._symbols = {
-            s.fullname(): s
-            for (s, _) in get_stub_types(str(stubs_path), str(conf_path))
+            s.fullname: s for (s, _) in get_stub_types(str(stubs_path), str(conf_path))
         }
 
     @property
@@ -46,12 +45,12 @@ class TestGetStubTypes(WithStubSymbols):
         # function return value
         assert isinstance(method.type, CallableType)
         assert isinstance(method.type.ret_type, Instance)
-        assert method.type.ret_type.type.name() == "bool"
+        assert method.type.ret_type.type.name == "bool"
 
     def test_type_alias(self) -> None:
         type_alias = cast(TypeAlias, self.symbols["type_aliases.Strint"])
         assert isinstance(type_alias, TypeAlias)
-        assert type_alias.name() == "Strint"
+        assert type_alias.name == "Strint"
         assert isinstance(type_alias.target, UnionType)
 
         assert str(type_alias.target.items[0]) == "builtins.str"
@@ -61,7 +60,7 @@ class TestGetStubTypes(WithStubSymbols):
         subclass = self.symbols["classes.SubClassOfAClass"]
         assert subclass
         assert isinstance(subclass, TypeInfo)
-        assert {b.type.fullname() for b in subclass.bases} == {"classes.AClass"}
+        assert {b.type.fullname for b in subclass.bases} == {"classes.AClass"}
 
     def test_inherited_definitions(self) -> None:
         another_class = self.symbols.get("classes.SubClassOfAClass")
@@ -78,8 +77,8 @@ class TestGetStubTypes(WithStubSymbols):
     def test_base_classes(self) -> None:
         subClassOfAClass = self.symbols.get("classes.SubClassOfAClass")
         assert isinstance(subClassOfAClass, TypeInfo)
-        assert {b.type.fullname() for b in subClassOfAClass.bases} == {"classes.AClass"}
+        assert {b.type.fullname for b in subClassOfAClass.bases} == {"classes.AClass"}
 
         aClass = self.symbols.get("classes.AClass")
         assert isinstance(aClass, TypeInfo)
-        assert {b.type.fullname() for b in aClass.bases} == {"builtins.object"}
+        assert {b.type.fullname for b in aClass.bases} == {"builtins.object"}

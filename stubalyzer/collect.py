@@ -85,13 +85,13 @@ def collect_types(
         collected_types = set()
 
     # ignore builtins because we don't provide stubs for them
-    if "builtins" in symbol_node.fullname():
+    if "builtins" in symbol_node.fullname:
         return
 
     # do not collect types twice
-    if symbol_node.fullname() in collected_types:
+    if symbol_node.fullname in collected_types:
         return
-    collected_types.add(symbol_node.fullname())
+    collected_types.add(symbol_node.fullname)
 
     if isinstance(symbol_node, MypyFile):
         # the symbol node represents a Python module
@@ -100,7 +100,7 @@ def collect_types(
             if symbol.kind not in [GDEF, MDEF]:
                 continue
 
-            if symbol.node and symbol.node.name() in IGNORED_MODULE_SYMBOLS:
+            if symbol.node and symbol.node.name in IGNORED_MODULE_SYMBOLS:
                 continue
 
             if symbol.node and symbol.module_public:

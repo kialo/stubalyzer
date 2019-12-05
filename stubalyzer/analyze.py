@@ -156,11 +156,11 @@ def compare(
 ) -> Generator[ComparisonResult, None, None]:
     """Compare hand written to generated stubs."""
     gen_map: Dict[str, RelevantSymbolNode] = {
-        symbol.fullname(): symbol for symbol in generated
+        symbol.fullname: symbol for symbol in generated
     }
 
     for symbol in hand_written:
-        name = symbol.fullname()
+        name = symbol.fullname
         if name in gen_map:
             yield compare_symbols(symbol, gen_map[name])
         elif isinstance(symbol, (TypeAlias, TypeVarExpr, Var)) and re.match(
@@ -262,7 +262,7 @@ def call_stubgen(command_line_args: List[str]) -> None:
     :param command_line_args: list of command line args
     """
 
-    generate_stubs(parse_options(command_line_args), quiet=True)
+    generate_stubs(parse_options(command_line_args))
 
 
 def generate_stub_types(

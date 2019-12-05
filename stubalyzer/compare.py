@@ -64,7 +64,7 @@ def _get_symbol_type_info(symbol: SymbolNode) -> str:
     if isinstance(symbol, TypeVarExpr):
         return _format_type_var(symbol)
     if isinstance(symbol, TypeInfo):
-        return f"Class({symbol.fullname()})"
+        return f"Class({symbol.fullname})"
 
     return repr(getattr(symbol, "type", None))
 
@@ -155,9 +155,9 @@ class ComparisonResult(NamedTuple):
             reference=reference,
             data=data,
             message_val=message,
-            symbol_name=symbol.fullname(),
+            symbol_name=symbol.fullname,
             symbol_type=_get_symbol_type_info(symbol),
-            reference_name=reference.fullname() if reference else None,
+            reference_name=reference.fullname if reference else None,
             reference_type=_get_symbol_type_info(reference) if reference else None,
         )
 
@@ -411,7 +411,7 @@ def _type_infos_are_same_class(
     :param symbol: type info symbol to validate
     :param reference: type info symbol to validate against
     """
-    if symbol.fullname() == reference.fullname():
+    if symbol.fullname == reference.fullname:
         return ComparisonResult.create_match(symbol=symbol, reference=reference)
     else:
         return ComparisonResult.create_mismatch(symbol=symbol, reference=reference)
@@ -446,7 +446,7 @@ def _format_type_var(symbol: TypeVarExpr) -> str:
     if symbol.values:
         values = ", " + (", ".join(str(t) for t in symbol.values))
 
-    return f"{symbol.name()} = TypeVar('{symbol.name()}'{values}{variance})"
+    return f"{symbol.name} = TypeVar('{symbol.name}'{values}{variance})"
 
 
 def _match_type_var_expr(symbol: TypeVarExpr, reference: TypeVarExpr) -> MatchResult:
@@ -520,7 +520,7 @@ def _compare_decorator(symbol: Decorator, reference: Decorator) -> ComparisonRes
                 "Reference decorators": reference_decorators,
             },
             message=(
-                f"Function {symbol.func.fullname()} stubs have different decorators."
+                f"Function {symbol.func.fullname} stubs have different decorators."
             ),
         )
 
