@@ -78,6 +78,8 @@ Run stubalyzer with the following command:
      -x CHECKSTYLE_REPORT, --checkstyle-report CHECKSTYLE_REPORT
 
                            Write an xml report in checkstyle format to the given file.
+     -s, --silent
+                           Suppress all non-error output.
 
 Output
 ~~~~~~

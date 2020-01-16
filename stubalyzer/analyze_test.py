@@ -15,12 +15,14 @@ from .compare import ComparisonResult, MatchResult
 
 
 class TestAnalyzeStubs(WithStubTestConfig):
-    def test_analyze_missing(self, capsys: CaptureFixture) -> None:
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
+    def test_analyze_missing(self, silent: bool, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
             self.generated_stubs_path,
             self.get_expectations_path("missing.json"),
+            silent=silent,  # Does not afffect error output
         )
 
         _, err = capsys.readouterr()
@@ -40,10 +42,14 @@ class TestAnalyzeStubs(WithStubTestConfig):
             f"because they were defined to be expected mismatches." in err
         )
 
-    def test_ignore_missing_module_symbols(self, capsys: CaptureFixture) -> None:
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
+    def test_ignore_missing_module_symbols(
+        self, silent: bool, capsys: CaptureFixture
+    ) -> None:
         success = analyze_stubs(
             self.mypy_config_path,
             self.get_test_stub_path("test_ignore_missing_module_symbols"),
+            silent=silent,  # Does not afffect error output
         )
 
         _, err = capsys.readouterr()
@@ -55,12 +61,14 @@ class TestAnalyzeStubs(WithStubTestConfig):
 
         assert success
 
-    def test_analyze_mismatching(self, capsys: CaptureFixture) -> None:
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
+    def test_analyze_mismatching(self, silent: bool, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
             self.generated_stubs_path,
             self.get_expectations_path("mismatching.json"),
+            silent=silent,  # Does not afffect error output
         )
 
         _, err = capsys.readouterr()
@@ -76,12 +84,14 @@ class TestAnalyzeStubs(WithStubTestConfig):
             "because they were defined to be expected mismatches." in err
         )
 
-    def test_analyze_matching(self, capsys: CaptureFixture) -> None:
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
+    def test_analyze_matching(self, silent: bool, capsys: CaptureFixture) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
             self.generated_stubs_path,
             self.get_expectations_path("matching.json"),
+            silent=silent,  # Does not afffect error output
         )
 
         _, err = capsys.readouterr()
@@ -96,12 +106,16 @@ class TestAnalyzeStubs(WithStubTestConfig):
             in err
         )
 
-    def test_analyze_additional_params(self, capsys: CaptureFixture) -> None:
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
+    def test_analyze_additional_params(
+        self, silent: bool, capsys: CaptureFixture
+    ) -> None:
         analyze_stubs(
             self.mypy_config_path,
             self.handwritten_stubs_path,
             self.generated_stubs_path,
             self.get_expectations_path("additional_function_params.json"),
+            silent=silent,  # Does not afffect error output
         )
 
         _, err = capsys.readouterr()

@@ -4,6 +4,7 @@ from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from collections import defaultdict
 from enum import Enum
 from importlib.util import find_spec
+from io import StringIO
 from json import loads as json_loads
 from json.decoder import JSONDecodeError
 from os import linesep, scandir
@@ -148,6 +149,18 @@ def parse_command_line() -> Namespace:
         """
         ),
     )
+    parser.add_argument(
+        "-s",
+        "--silent",
+        required=False,
+        default=False,
+        action="store_true",
+        help=dedent(
+            """
+        Suppress all non-error output.
+        """
+        ),
+    )
     return parser.parse_args()
 
 
@@ -265,8 +278,21 @@ def call_stubgen(command_line_args: List[str]) -> None:
     generate_stubs(parse_options(command_line_args))
 
 
+def silence_output() -> Tuple[StringIO, StringIO]:
+    """Redirect all output to in-memory buffers instead of stdout and stderr."""
+    sys.stdout = StringIO()
+    sys.stderr = StringIO()
+    return (sys.stdout, sys.stderr)
+
+
+def restore_output() -> None:
+    """Restore output of stdout and stderr to defaults."""
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
+
+
 def generate_stub_types(
-    base_stubs_path: str, mypy_conf_path: str
+    base_stubs_path: str, mypy_conf_path: str, silent: bool = False
 ) -> Iterable[Tuple[RelevantSymbolNode, str]]:
     """
     Use stubgen to generate reference stub types of the modules stubbed in
@@ -292,10 +318,15 @@ def generate_stub_types(
                 )
                 sys.exit(1)
             try:
+                if silent:
+                    silence_output()
                 call_stubgen(
-                    ["--ignore-errors", "-p", package, "-o", reference_stubs_path]
+                    ["--ignore-errors", "-q", "-p", package, "-o", reference_stubs_path]
                 )
+                if silent:
+                    restore_output()
             except Exception as ex:
+                restore_output()
                 write_error(
                     f'Error: Generating stubs for the package "{package}" failed:',
                     linesep,
@@ -347,6 +378,7 @@ def analyze_stubs(
     reference_stubs_path: Optional[str] = None,
     expected_mismatches_path: Optional[str] = None,
     checkstyle_report: Optional[str] = None,
+    silent: bool = False,
 ) -> bool:
     """
     Determine if the (presumably) handwritten stubs in base_stubs_path are correct;
@@ -403,7 +435,10 @@ def analyze_stubs(
             )
         else:
             stub_types_reference = set(
-                stub for stub, _ in generate_stub_types(base_stubs_path, mypy_conf_path)
+                stub
+                for stub, _ in generate_stub_types(
+                    base_stubs_path, mypy_conf_path, silent
+                )
             )
         checkstyle_writer = CheckStyleWriter(stub_types_base_map)
         for res in compare(stub_types_base_map.keys(), stub_types_reference):
@@ -441,7 +476,10 @@ def analyze_stubs(
 
     if success:
         summary = SUCCESS_MESSAGE.format(total=total_count)
-        print("", summary, (ignore_message if expected_count > 0 else ""), sep=linesep)
+        if not silent:
+            print(
+                "", summary, (ignore_message if expected_count > 0 else ""), sep=linesep
+            )
     else:
         summary = FAIL_MESSAGE.format(total=total_count, failed=failed_count)
         write_error(
@@ -458,6 +496,7 @@ def main() -> None:
         args.reference,
         args.expected_mismatches,
         args.checkstyle_report,
+        args.silent,
     )
     sys.exit(0 if success else 1)
 

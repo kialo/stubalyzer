@@ -232,21 +232,26 @@ class TestAnalyzeStubs:
     @patch("stubalyzer.analyze.compare", return_value=range(10))
     @patch("stubalyzer.analyze.generate_stub_types")
     @patch("stubalyzer.analyze.get_stub_types", return_value=[])
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
     def test_everything_ok(
         self,
         generate_mock: Mock,
         compare_mock: Mock,
         result_mock: Mock,
         get_stub_types_mock: Mock,
+        silent: bool,
         capsys: CaptureFixture,
     ) -> None:
-        assert analyze_stubs("mypy_conf_path", "base_stubs_path")
+        assert analyze_stubs("mypy_conf_path", "base_stubs_path", silent=silent)
         std, err = capsys.readouterr()
-        assert "Successfully validated 10 stubs." in std
-        assert (
-            "0 fail(s) were ignored, "
-            "because they were defined to be expected mismatches." not in std
-        )
+        if silent:
+            assert "" == std
+        else:
+            assert "Successfully validated 10 stubs." in std
+            assert (
+                "0 fail(s) were ignored, "
+                "because they were defined to be expected mismatches." not in std
+            )
         assert "" == err
 
     @patch(
@@ -276,7 +281,42 @@ class TestAnalyzeStubs:
     @patch("stubalyzer.analyze.compare", return_value=range(10))
     @patch("stubalyzer.analyze.generate_stub_types")
     @patch("stubalyzer.analyze.get_stub_types", return_value=[])
+    @pytest.mark.parametrize("silent", [False, True])  # type: ignore
     def test_some_results_fail_ok(
+        self,
+        generate_mock: Mock,
+        compare_mock: Mock,
+        result_mock: Mock,
+        setup_mock: Mock,
+        get_stub_types_mock: Mock,
+        silent: bool,
+        capsys: CaptureFixture,
+    ) -> None:
+        assert not analyze_stubs(
+            "mypy_conf_path",
+            "base_stubs_path",
+            expected_mismatches_path="a/proper/mismatch_path",
+            silent=silent,  # Does not affect error output
+        )
+        std, err = capsys.readouterr()
+        assert "Failure: 2 of 10 stubs seem not to be valid." in err
+        assert (
+            "4 fail(s) were ignored, "
+            "because they were defined to be expected mismatches." in err
+        )
+        assert "" == std
+
+    @patch("stubalyzer.analyze.setup_expected_mismatches", return_value=({}, set()))
+    @patch(
+        "stubalyzer.analyze.evaluate_compare_result",
+        side_effect=[EvaluationResult.FAILURE] * 2
+        + [EvaluationResult.SUCCESS] * 4
+        + [EvaluationResult.EXPECTED_FAILURE] * 4,
+    )
+    @patch("stubalyzer.analyze.compare", return_value=range(10))
+    @patch("stubalyzer.analyze.generate_stub_types")
+    @patch("stubalyzer.analyze.get_stub_types", return_value=[])
+    def test_does_not_suppress_error_on_silent(
         self,
         generate_mock: Mock,
         compare_mock: Mock,
@@ -289,6 +329,7 @@ class TestAnalyzeStubs:
             "mypy_conf_path",
             "base_stubs_path",
             expected_mismatches_path="a/proper/mismatch_path",
+            silent=True,
         )
         std, err = capsys.readouterr()
         assert "Failure: 2 of 10 stubs seem not to be valid." in err
