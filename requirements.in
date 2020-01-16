@@ -8,3 +8,4 @@ pip-tools
 pytest
 schema
 Pygments
+bumpversion

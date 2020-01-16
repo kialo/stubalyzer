@@ -215,3 +215,15 @@ You can update the API documentation using the following:
 .. code:: shell-session
 
    $ ./dev/update-apidoc.sh
+
+Releases
+~~~~~~~~
+
+Stubalyzer has no fixed release schedule.
+Instead releases are made when needed.
+
+To prepare a new release, run the following and follow the instructions in the output:
+
+.. code:: shell-session
+
+   $ ./dev/release.sh <patch|minor|major>

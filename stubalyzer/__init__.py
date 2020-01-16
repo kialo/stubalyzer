@@ -3,6 +3,8 @@ from .compare import ComparisonResult, MatchResult, compare_symbols
 from .lookup import lookup_symbol
 from .types import RelevantSymbolNode
 
+__version__ = "0.2.0"
+
 __all__ = [
     "compare_symbols",
     "ComparisonResult",
