@@ -50,7 +50,7 @@ echo "$heading_line"
 echo ""
 echo "\`Commits <https://github.com/kialo/stubalyzer/compare/${old_version}...${new_version}>\`__"
 echo ""
-git log --abbrev-commit --format='-  %s - %h' ${old_version}..HEAD
+git log --abbrev-commit --format='-  %s - %h' ${old_version}..HEAD | cat
 echo ""
 tput smso
 echo ">>>>>>>>>>>>>>>>"

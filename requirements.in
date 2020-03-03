@@ -9,3 +9,4 @@ pytest
 schema
 Pygments
 bumpversion
+wheel
