@@ -57,7 +57,7 @@ Run stubalyzer with the following command:
                            A JSON file, which defines expected mismatching
                            symbols and their match results. If any symbol is
                            declared in an expected_mismatches JSON file,
-                           __main__.py will count it as an expected failure, and
+                           stubalyzer will count it as an expected failure, and
                            ignore this inconsistency.
 
                            Example contents:
@@ -68,7 +68,7 @@ Run stubalyzer with the following command:
 
                            According to the example above, we expect the signature
                            of my.module.function to mismatch, and module.Class to
-                           be missing in the generated stubs. __main__.py will
+                           be missing in the generated stubs. stubalyzer will
                            ignore these inconsistencies.
      -r REFERENCE_STUBS, --reference REFERENCE_STUBS
 
