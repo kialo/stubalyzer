@@ -161,6 +161,20 @@ def parse_command_line() -> Namespace:
         """
         ),
     )
+    parser.add_argument(
+        "-p",
+        "--include-private",
+        required=False,
+        default=False,
+        action="store_true",
+        help=dedent(
+            """
+        Include definitions stubgen would otherwise consider
+        private, when generating the reference stubs. (e.g.
+        names with a single leading underscore, like "_foo")
+        """
+        ),
+    )
     return parser.parse_args()
 
 
@@ -292,7 +306,10 @@ def restore_output() -> None:
 
 
 def generate_stub_types(
-    base_stubs_path: str, mypy_conf_path: str, silent: bool = False
+    base_stubs_path: str,
+    mypy_conf_path: str,
+    silent: bool = False,
+    include_private: bool = False,
 ) -> Iterable[Tuple[RelevantSymbolNode, str]]:
     """
     Use stubgen to generate reference stub types of the modules stubbed in
@@ -320,8 +337,18 @@ def generate_stub_types(
             try:
                 if silent:
                     silence_output()
+                default_parameters = [
+                    "--ignore-errors",
+                    "-q",
+                    "-p",
+                    package,
+                    "-o",
+                    reference_stubs_path,
+                ]
                 call_stubgen(
-                    ["--ignore-errors", "-q", "-p", package, "-o", reference_stubs_path]
+                    ["--include-private"] + default_parameters
+                    if include_private
+                    else default_parameters
                 )
                 if silent:
                     restore_output()
@@ -379,6 +406,7 @@ def analyze_stubs(
     expected_mismatches_path: Optional[str] = None,
     checkstyle_report: Optional[str] = None,
     silent: bool = False,
+    include_private: bool = False,
 ) -> bool:
     """
     Determine if the (presumably) handwritten stubs in base_stubs_path are correct;
@@ -404,6 +432,8 @@ def analyze_stubs(
             }
     :param checkstyle_report: if this path is given, a xml report in checkstyle format
         will be written.
+    :param silent: Suppress all non-error output.
+    :param include_private: Call stubgen with --include-private.
     :return: True if the stubs in base_stubs_path are considered correct
     """
     success = True
@@ -437,7 +467,7 @@ def analyze_stubs(
             stub_types_reference = set(
                 stub
                 for stub, _ in generate_stub_types(
-                    base_stubs_path, mypy_conf_path, silent
+                    base_stubs_path, mypy_conf_path, silent, include_private
                 )
             )
         checkstyle_writer = CheckStyleWriter(stub_types_base_map)
@@ -497,6 +527,7 @@ def main() -> None:
         args.expected_mismatches,
         args.checkstyle_report,
         args.silent,
+        args.include_private,
     )
     sys.exit(0 if success else 1)
 

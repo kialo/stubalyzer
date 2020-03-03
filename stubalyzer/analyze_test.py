@@ -296,3 +296,18 @@ class TestCompileError(WithStubTestConfig):
             )
 
         assert "poolmanager.pyi:7: error: invalid syntax" in ex.value.messages[0]
+
+
+class TestIncludePrivate(WithStubTestConfig):
+    def test_include_private_flag_forwarded_to_stubgen(
+        self, capsys: CaptureFixture
+    ) -> None:
+        analyze_stubs(
+            self.mypy_config_path,
+            self.get_test_stub_path("test_include_private"),
+            include_private=True,
+        )
+
+        _, err = capsys.readouterr()
+
+        assert err == ""

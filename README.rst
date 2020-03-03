@@ -37,7 +37,7 @@ Run stubalyzer with the following command:
 .. code:: shell-session
 
    $ stubalyzer -h
-   usage: stubalyzer [-h] -c CONFIG [-e EXPECTED_MISMATCHES] [-r REFERENCE_STUBS]
+   usage: stubalyzer [-h] -c CONFIG [-e EXPECTED_MISMATCHES] [-r REFERENCE_STUBS] [-x CHECKSTYLE_REPORT] [-s] [-p]
                      STUBS_HANDWRITTEN
 
    Analyze a set of (handcrafted) mypy stubs by comparing them to (generated)
@@ -48,7 +48,7 @@ Run stubalyzer with the following command:
                            Mypy config file
 
    positional arguments:
-   STUBS_HANDWRITTEN       Directory of handwritten stubs that need to be
+     STUBS_HANDWRITTEN     Directory of handwritten stubs that need to be
                            analyzed
 
    optional arguments:
@@ -57,18 +57,18 @@ Run stubalyzer with the following command:
                            A JSON file, which defines expected mismatching
                            symbols and their match results. If any symbol is
                            declared in an expected_mismatches JSON file,
-                           stubalyzer will count it as an expected failure, and
+                           __main__.py will count it as an expected failure, and
                            ignore this inconsistency.
 
                            Example contents:
                            {
-                              "my.module.function: "mismatch",
-                              "another.module.Class: "not_found"
+                               "my.module.function: "mismatch",
+                               "another.module.Class: "not_found"
                            }
 
                            According to the example above, we expect the signature
                            of my.module.function to mismatch, and module.Class to
-                           be missing in the generated stubs. stubalyzer will
+                           be missing in the generated stubs. __main__.py will
                            ignore these inconsistencies.
      -r REFERENCE_STUBS, --reference REFERENCE_STUBS
 
@@ -80,6 +80,11 @@ Run stubalyzer with the following command:
                            Write an xml report in checkstyle format to the given file.
      -s, --silent
                            Suppress all non-error output.
+     -p, --include-private
+
+                           Include definitions stubgen would otherwise consider
+                           private, when generating the reference stubs. (e.g.
+                           names with a single leading underscore, like "_foo")
 
 Output
 ~~~~~~
