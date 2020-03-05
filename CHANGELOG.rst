@@ -11,7 +11,7 @@ v0.3.0 - March 3rd 2020
 
 `Commits <https://github.com/kialo/stubalyzer/compare/v0.2.0...v0.3.0>`__
 
--  Bump version: 0.2.0 → 0.3.0 - 5056c01
+-  Bump version: 0.2.0 → 0.3.0 - 2c5d33c
 -  Fix release script and add wheel to dependencies - 87117a5
 -  Fix docs. - 2751ff4
 -  Enable pass through of "--include-private" to stubgen. - 7bb406a
