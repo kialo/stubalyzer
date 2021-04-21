@@ -7,6 +7,7 @@ isort
 pip-tools
 pytest
 schema
-Pygments
+py>=1.10.0
+Pygments>=2.7.4
 bumpversion
 wheel
