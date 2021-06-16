@@ -25,7 +25,8 @@ class MypyNodeFactory(WithStubTestConfig):
 
     def __init__(self) -> None:
         handwritten_stubs = get_stub_types(
-            self.handwritten_stubs_path, mypy_conf_path=self.mypy_config_path,
+            self.handwritten_stubs_path,
+            mypy_conf_path=self.mypy_config_path,
         )
 
         generated_stubs = get_stub_types(

@@ -38,8 +38,8 @@ class TestAnalyzeStubs(WithStubTestConfig):
         )
         assert 'Symbol "missing.MissingClass" not found in generated stubs' in err
         assert (
-            f"1 fail(s) were ignored, "
-            f"because they were defined to be expected mismatches." in err
+            "1 fail(s) were ignored, "
+            "because they were defined to be expected mismatches." in err
         )
 
     @pytest.mark.parametrize("silent", [False, True])  # type: ignore
@@ -231,8 +231,10 @@ class TestCommandLineTool:
         output = capsys.readouterr().err
 
         # incorrectly stubbed
-        assert re.search(r"Types for black.DEFAULT_LINE_LENGTH do not match", output)
-        assert re.search(r"Types for black.shutdown do not match", output)
+        assert re.search(
+            r"Types for black.const.DEFAULT_LINE_LENGTH do not match", output
+        )
+        assert re.search(r"Types for black.concurrency.shutdown do not match", output)
         assert re.search(
             r"Symbol \"black.NotFound\" not found in generated stubs", output
         )
@@ -274,7 +276,7 @@ class TestMislocatedSymbol(WithStubTestConfig):
 
 class TestCompileError(WithStubTestConfig):
     def test_compile_error_invalid_syntax_in_base_stubs(self) -> None:
-        """ Invalid stubs written by the user should cause a CompileError """
+        """Invalid stubs written by the user should cause a CompileError"""
         with pytest.raises(CompileError) as ex:
             analyze_stubs(
                 self.mypy_config_path,

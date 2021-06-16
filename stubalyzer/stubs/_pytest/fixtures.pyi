@@ -1,6 +1,7 @@
 from typing import Any, Callable, Optional, TypeVar, overload
 
 _C = TypeVar("_C", bound=Callable[..., Any])
+
 @overload
 def fixture(callable_or_scope: _C) -> _C: ...
 @overload

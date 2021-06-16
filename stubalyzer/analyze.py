@@ -246,7 +246,9 @@ def evaluate_compare_result(
             evaluation_result = EvaluationResult.FAILURE
             for logger in loggers:
                 logger(
-                    linesep, compare_result.message, symbol=symbol,
+                    linesep,
+                    compare_result.message,
+                    symbol=symbol,
                 )
     else:
         mismatches_left.remove(symbol_name)
