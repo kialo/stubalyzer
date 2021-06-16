@@ -4,7 +4,22 @@ Stubalyzer Changelog
 Development
 -----------
 
-`Commits <https://github.com/kialo/stubalyzer/compare/v0.3.0...master>`__
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.4.0...master>`__
+
+v0.4.0 - June 16th 2021
+-----------------------
+
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.3.0...v0.4.0>`__
+
+-  Bump version: 0.3.0 → 0.4.0 - 4e5d941
+-  Fix dependency on bumpversion and update release script - 3f4b6ec
+-  Store test results - 4e33840
+-  Upgrade dependencies - 22accc2
+-  Use newer python orb - befde4d
+-  Simplify requirements - 5e47adc
+-  Upgrade py and pygments - 32f1d5c
+-  Fix commit hash in changelog - fcfbca9
+-  Update CHANGELOG.rst - 11d2d2b
 
 v0.3.0 - March 3rd 2020
 -----------------------

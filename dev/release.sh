@@ -57,11 +57,11 @@ echo ">>>>>>>>>>>>>>>>"
 tput rmso
 
 tput smso
-echo "Once updated, amend the version bump commit, tag, push and upload to PyPI:"
+echo "Once updated, commit the changes, tag, push and upload to PyPI:"
 echo "<<<<<<<<<<<<<<<<"
 tput rmso
 echo ""
-echo "git commit --amend --no-edit"
+echo "git commit -a -m 'Update changelog'"
 echo "git tag -s ${new_version}"
 echo "git push"
 # Is this necessary?
