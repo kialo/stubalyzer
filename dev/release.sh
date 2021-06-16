@@ -14,9 +14,6 @@ fi
 echo "Cleaning up build and dist output..."
 rm -rf build dist
 
-echo "Building package..."
-python setup.py -q sdist bdist_wheel
-
 old_version="v$(get_version)"
 
 echo "Bumping $1 version..."
@@ -66,6 +63,7 @@ echo "git tag -s ${new_version}"
 echo "git push"
 # Is this necessary?
 echo "git push --tags"
+echo "python setup.py -q sdist bdist_wheel"
 echo "twine upload dist/*"
 echo ""
 tput smso
