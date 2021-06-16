@@ -10,3 +10,4 @@ schema
 Pygments
 bumpversion
 wheel
+lxml

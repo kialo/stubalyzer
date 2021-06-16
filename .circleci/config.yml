@@ -9,11 +9,15 @@ jobs:
           command: python -m flake8 stubalyzer testing
           name: Lint
       - run:
-          command: python -m mypy stubalyzer testing --exclude 'testing/(stubs-generated|test-stubs/test_compile_error_invalid_syntax|test-stubs/test_include_private/attr|stubs-handwritten)'
+          command: python -m mypy stubalyzer testing --junit-xml "reports/mypy/result.xml" --exclude 'testing/(stubs-generated|test-stubs/test_compile_error_invalid_syntax|test-stubs/test_include_private/attr|stubs-handwritten)'
           name: Typecheck
       - run:
-          command: python -m pytest
+          command: python -m pytest --junitxml="reports/pytest/result.xml"
           name: Test
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: reports
 orbs:
   python: circleci/python@1.3.5
 version: 2.1
