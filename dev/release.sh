@@ -20,7 +20,7 @@ python setup.py -q sdist bdist_wheel
 old_version="v$(get_version)"
 
 echo "Bumping $1 version..."
-bumpversion $@
+bump2version $@
 
 new_version="v$(get_version)"
 

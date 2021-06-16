@@ -19,10 +19,6 @@ black==21.6b0 \
 bump2version==1.0.1 \
     --hash=sha256:37f927ea17cde7ae2d7baf832f8e80ce3777624554a653006c9144f8017fe410 \
     --hash=sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6
-    # via bumpversion
-bumpversion==0.6.0 \
-    --hash=sha256:4ba55e4080d373f80177b4dabef146c07ce73c7d1377aabf9d3c3ae1f94584a6 \
-    --hash=sha256:4eb3267a38194d09f048a2179980bb4803701969bff2c85fa8f6d1ce050be15e
     # via -r requirements.in
 click==8.0.1 \
     --hash=sha256:8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a \

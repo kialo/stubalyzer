@@ -76,10 +76,12 @@ setup(
     extras_require={
         "dev": [
             "black",
+            "bump2version",
             "flake8-rst-docstrings",
             "flake8",
             "ipython",
             "isort",
+            "lxml",
             "pip-tools",
             "pytest",
         ]

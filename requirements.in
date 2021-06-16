@@ -8,6 +8,6 @@ pip-tools
 pytest
 schema
 Pygments
-bumpversion
+bump2version
 wheel
 lxml
