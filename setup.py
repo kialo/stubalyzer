@@ -3,7 +3,7 @@ from os import path
 # Always prefer setuptools over distutils
 from setuptools import setup
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 # This is the name of the GitHub repo and the package name on pypi
 PACKAGE_NAME = "stubalyzer"
 

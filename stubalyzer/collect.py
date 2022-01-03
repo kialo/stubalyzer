@@ -30,6 +30,7 @@ IGNORED_MODULE_SYMBOLS = [
     "__name__",
     "__package__",
     "__file__",
+    "__path__",
 ]
 """
 Module level definitions that will not be collected by collect_types.
