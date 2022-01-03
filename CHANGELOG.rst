@@ -4,7 +4,17 @@ Stubalyzer Changelog
 Development
 -----------
 
-`Commits <https://github.com/kialo/stubalyzer/compare/v0.4.0...master>`__
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.5.0...master>`__
+
+v0.5.0 - January 3rd 2022
+-------------------------
+
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.4.0...v0.5.0>`__
+
+-  Bump version: 0.4.0 → 0.5.0 - ???????
+-  Ignore __path__ module symbol - ea19b5d
+-  Upgrade mypy to 0.930 - c10f382
+-  Fix release script to not build before version bump - 5e93f29
 
 v0.4.0 - June 16th 2021
 -----------------------
