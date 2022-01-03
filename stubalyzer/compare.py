@@ -328,10 +328,10 @@ def _overloaded_types_match(
     :param overloaded: overloaded type to check
     :param reference_overloaded: overloaded type to check against
     """
-    if len(overloaded.items()) != len(reference_overloaded.items()):
+    if len(overloaded.items) != len(reference_overloaded.items):
         return MatchResult.MISMATCH
 
-    for ovl, ref in zip(overloaded.items(), reference_overloaded.items()):
+    for ovl, ref in zip(overloaded.items, reference_overloaded.items):
         if _callable_types_match(ovl, ref) != MatchResult.MATCH:
             return MatchResult.MISMATCH
 

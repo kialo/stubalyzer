@@ -3,4 +3,3 @@ from black.const import DEFAULT_LINE_LENGTH
 
 class NotFound:
     pass
-
