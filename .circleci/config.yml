@@ -8,12 +8,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:  # ensure this step occurs *before* installing dependencies
-          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}
+          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Dependencies
           command: ./dev/setup.sh
       - save_cache:
-          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}
+          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}-{{ checksum ".circleci/config.yml" }}
           paths:
             - venv
             - ~/.pyenv/versions/3.9.9/bin
