@@ -1,27 +1,39 @@
+version: 2
+
 jobs:
   build:
-    executor: python/default
+    working_directory: ~/stubalyzer
+    docker:
+      - image: cimg/python:3.9
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}
       - run:
-          command: python -m flake8 stubalyzer testing
+          name: Install Dependencies
+          command: ./dev/setup.sh
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "pyproject.toml" }}
+          paths:
+            - venv
+            - ~/.pyenv/versions/3.9.9/bin
+            - ~/.pyenv/versions/3.9.9/lib/python3.9/site-packages
+      - run:
+          command: |
+            source ./venv/bin/activate
+            python -m flake8 stubalyzer testing
           name: Lint
       - run:
-          command: python -m mypy stubalyzer testing --junit-xml "reports/mypy/result.xml" --exclude 'testing/(stubs-generated|test-stubs/test_compile_error_invalid_syntax|test-stubs/test_include_private/attr|stubs-handwritten)'
+          command: |
+            source ./venv/bin/activate
+            python -m mypy stubalyzer testing --junit-xml "reports/mypy/result.xml" --exclude 'testing/(stubs-generated|test-stubs/test_compile_error_invalid_syntax|test-stubs/test_include_private/attr|stubs-handwritten)'
           name: Typecheck
       - run:
-          command: python -m pytest --junitxml="reports/pytest/result.xml"
+          command: |
+            source ./venv/bin/activate
+            python -m pytest --junitxml="reports/pytest/result.xml"
           name: Test
       - store_test_results:
           path: reports
       - store_artifacts:
           path: reports
-orbs:
-  python: circleci/python@1.3.5
-version: 2.1
-workflows:
-  main:
-    jobs:
-      - build

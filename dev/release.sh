@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+
+source "$(dirname $0)/ensure_venv.sh"
 source "$(dirname $0)/util.sh"
 
 function get_version {
@@ -61,10 +63,8 @@ echo ""
 echo "git commit -a -m 'Update changelog'"
 echo "git tag -s ${new_version}"
 echo "git push"
-# Is this necessary?
 echo "git push --tags"
-echo "python setup.py -q sdist bdist_wheel"
-echo "twine upload dist/*"
+echo "flit publish"
 echo ""
 tput smso
 echo ">>>>>>>>>>>>>>>>"

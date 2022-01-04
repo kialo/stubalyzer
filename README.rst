@@ -131,8 +131,7 @@ Development Setup
 
 Requirements for development:
 
--  A recent Python version (we currently use 3.7)
--  ``virtualenv`` and ``virtualenvwrapper``
+-  A recent Python version (we currently use 3.9)
 
 For a development setup, run the following shell script:
 
@@ -140,10 +139,10 @@ For a development setup, run the following shell script:
 
    $ ./dev/setup.sh
 
-This will create a virtual environment called ``stubalyzer`` and install
-the projects dependencies. The setup script also creates a ``.venv``
-file so the environment activates automatically if you use
-auto-activation with virtualenv.
+This will create a virtual environment in the directory ``venv`` and install the
+project's dependencies.
+To activate the virtual environment, run ``source ./venv/bin/activate`` from the project
+directory.
 
 Tests
 ~~~~~
@@ -166,19 +165,18 @@ Type checking is done with Mypy:
 Code Formatting
 ~~~~~~~~~~~~~~~
 
-To set up the pre-commit hook to automatically format files, create the
-following link:
+To set up the pre-commit hook to automatically format files, run:
 
 .. code:: shell-session
 
-   $ ln -sf ../../dev/pre-commit.sh .git/hooks/pre-commit
+   $ pre-commit install
 
 The source code is formatted using ``black`` and ``isort``. The
 following will format all files in the project:
 
 .. code:: shell-session
 
-   $ ./dev/fmt.sh
+   $ pre-commit run -a
 
 Linting
 ~~~~~~~
@@ -189,25 +187,18 @@ Linting is done using ``flake8``, in the root directory run:
 
    $ flake8
 
+On commit, ``pre-commit`` automtically runs ``flake8`` on changed files.
+
 Dependency Management
 ~~~~~~~~~~~~~~~~~~~~~
 
-If you need new dependencies, add them in ``requirements.in`` and
-``setup.py``, then run the ``pip-compile`` command specified at the top
-of ``requirements.txt``.
+If you need new dependencies, add them in ``pyproject.toml``.
 
 Documentation
 ~~~~~~~~~~~~~
 
 The documentation is written using Sphinx.
-
-First install the requirements:
-
-.. code:: shell-session
-
-   $ pip install -r docs/requirements.txt
-
-Then build the documentation using:
+Build the documentation using:
 
 .. code:: shell-session
 
