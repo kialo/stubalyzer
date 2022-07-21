@@ -39,7 +39,6 @@ dev = [
 ]
 test = [
     "pytest>=6.2.5",
-    "lxml>=4.9.1",  # for storing test results
     "attrs==19.3.0",  # for stub testing
 ]
 # When changing these, please also update docs/requriements.txt
