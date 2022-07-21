@@ -30,16 +30,16 @@ stubalyzer = "stubalyzer.analyze:main"
 [project.optional-dependencies]
 dev = [
     "bump2version>=1.0.1",
-    "pre-commit>=2.16.0",
+    "pre-commit>=2.20.0",
     # Linters, keep versions in sync with .pre-commit-config.yaml
-    "black==21.12b0",
+    "black==22.6.0",
     "flake8==4.0.1",
-    "flake8-rst-docstrings==0.2.5",
+    "flake8-rst-docstrings==0.2.7",
     "isort==5.10.1",
 ]
 test = [
     "pytest>=6.2.5",
-    "lxml>=4.7.1",  # for storing test results
+    "lxml>=4.9.1",  # for storing test results
     "attrs==19.3.0",  # for stub testing
 ]
 # When changing these, please also update docs/requriements.txt

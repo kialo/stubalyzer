@@ -15,7 +15,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 21.12b0
+  rev: 22.6.0
   hooks:
   - id: black
     exclude: ^(testing/test-stubs/).*
@@ -26,4 +26,4 @@ repos:
   - id: flake8
     additional_dependencies:
       - pep8
-      - flake8-docstrings==0.2.5
+      - flake8-rst-docstrings==0.2.7
