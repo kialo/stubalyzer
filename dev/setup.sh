@@ -1,15 +1,7 @@
 #!/bin/bash
 
+source "$(dirname $0)/ensure_venv.sh"
 cd $(dirname $0)/..
 
-rm -rf ./venv
-python3 -m venv venv
-source ./venv/bin/activate
-pip install --upgrade pip
-pip install --upgrade -r requirements.txt
-pip install -e .
-
-if [ ! -f .venv ]
-then
-    echo "venv" > .venv
-fi
+pip install --upgrade pip wheel setuptools flit
+flit install --deps all

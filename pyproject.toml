@@ -1,0 +1,54 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "stubalyzer"
+authors = [{name = "Kialo GmbH", email = "open-source@kialo.com"}]
+description = "Analysis tool comparing hand written stubs to stubgen-generated ones, reporting inconsistencies"
+readme = "README.rst"
+license = {file = "LICENSE"}
+dynamic = ["version"]
+classifiers=[
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+]
+keywords = ["mypy", "analysis", "stubgen", "stubs"]
+requires-python=">=3.9"
+dependencies = [
+    "mypy==0.930",
+    "schema>=0.7.5",
+]
+
+[project.scripts]
+stubalyzer = "stubalyzer.analyze:main"
+
+[project.optional-dependencies]
+dev = [
+    "bump2version>=1.0.1",
+    "pre-commit>=2.20.0",
+    # Linters, keep versions in sync with .pre-commit-config.yaml
+    "black==22.6.0",
+    "flake8==4.0.1",
+    "flake8-rst-docstrings==0.2.7",
+    "isort==5.10.1",
+]
+test = [
+    "pytest>=6.2.5",
+    "attrs==19.3.0",  # for stub testing
+]
+# When changing these, please also update docs/requriements.txt
+doc = [
+    "Sphinx>=2.2.0",
+    "Pygments",
+    "sphinx-rtd-theme"
+]
+
+[project.urls]
+Home = "https://github.com/kialo/stubalyzer"
+"Bug Reports" = "https://github.com/kialo/stubalyzer/issues"
