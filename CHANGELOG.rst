@@ -4,7 +4,27 @@ Stubalyzer Changelog
 Development
 -----------
 
-`Commits <https://github.com/kialo/stubalyzer/compare/v0.5.0...master>`__
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.5.1...master>`__
+
+v0.5.1 - July 26th 2022
+-----------------------
+
+`Commits <https://github.com/kialo/stubalyzer/compare/v0.5.0...v0.5.1>`__
+
+-  Bump version: 0.5.0 → 0.5.1 - 77139e4
+-  Merge pull request #12 from kialo/dev-v0.5.1 - 5826f5c
+-  Inline description to mitigate pypa/pip#11294 - a348744
+-  Add keep-in-sync comment to pre-commit config - 1095e88
+-  Remove lxml dependency as we no longer need it for storing test results - 824bd49
+-  Merge remote-tracking branch 'origin/master' into dev-v0.5.1 - 3230167
+-  Update and fix dependencies - 214dd78
+-  Merge pull request #11 from kialo/dependabot/pip/lxml-4.9.1 - 80107ef
+-  Bump lxml from 4.7.1 to 4.9.1 - 85b61d1
+-  Clean up changelog generation - bf12101
+-  Use circleci config for cache key as well - ea8a6b2
+-  Adapt release script to auto tag, push and publish - 4759a25
+-  Migrate to flit - 64afb13
+-  Merge pull request #10 from kialo/dev-v0.5.0 - db702a2
 
 v0.5.0 - January 3rd 2022
 -------------------------
