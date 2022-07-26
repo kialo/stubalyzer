@@ -5,9 +5,10 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "stubalyzer"
 authors = [{name = "Kialo GmbH", email = "open-source@kialo.com"}]
+description = "Analysis tool comparing hand written stubs to stubgen-generated ones, reporting inconsistencies"
 readme = "README.rst"
 license = {file = "LICENSE"}
-dynamic = ["version", "description"]
+dynamic = ["version"]
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

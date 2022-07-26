@@ -1,5 +1,3 @@
-"""Analysis tool comparing hand written stubs to stubgen-generated ones, reporting inconsistencies"""  # noqa E501
-
 from .collect import get_stub_types
 from .compare import ComparisonResult, MatchResult, compare_symbols
 from .lookup import lookup_symbol
