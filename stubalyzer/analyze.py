@@ -12,6 +12,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from traceback import format_exception
+from importlib.machinery import NamespaceLoader
 from typing import (
     Callable,
     Dict,
@@ -328,7 +329,8 @@ def generate_stub_types(
             if entry.is_dir() or entry.name.endswith(".pyi")
         ]
         for package in packages:
-            if find_spec(package) is None:
+            package_spec = find_spec(package)
+            if package_spec is None:
                 print(
                     f'Error: The package "{package}" is not installed. Therefore no '
                     f"reference stubs can be generated for it automatically. Use the "
@@ -336,6 +338,9 @@ def generate_stub_types(
                     f"the package."
                 )
                 sys.exit(1)
+            if isinstance(package_spec.loader, NamespaceLoader):
+                # namespace packages are not supported
+                continue
             try:
                 if silent:
                     silence_output()
