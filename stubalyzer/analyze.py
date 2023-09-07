@@ -12,7 +12,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from traceback import format_exception
-from importlib.machinery import NamespaceLoader
 from typing import (
     Callable,
     Dict,
@@ -338,8 +337,11 @@ def generate_stub_types(
                     f"the package."
                 )
                 sys.exit(1)
-            if isinstance(package_spec.loader, NamespaceLoader):
-                # namespace packages are not supported
+            if (
+                "NamespacePath"
+                in type(package_spec.submodule_search_locations).__name__
+            ):
+                # namespace packages break stubgen
                 continue
             try:
                 if silent:

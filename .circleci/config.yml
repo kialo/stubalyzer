@@ -1,8 +1,6 @@
 jobs:
   build:
-    executor: 
-      name: python/default
-      tag: '3.10'
+    executor: python/default
     steps:
       - checkout
       - python/install-packages:
