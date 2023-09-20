@@ -1,5 +1,7 @@
-Stubalyzer
-==========
+[ARCHIVED] Stubalyzer
+=====================
+
+**This project is archived and no longer maintained.**
 
 .. image:: https://readthedocs.org/projects/stubalyzer/badge/?version=latest
     :target: https://stubalyzer.readthedocs.io/en/latest/?badge=latest
